@@ -28,13 +28,13 @@ class Kunjungan extends Model
     }
     public function Tujuan()
     {
-        return $this->belongsTo('App\Tujuan', 'kunjungan_tujuan', 'kode');
+        return $this->belongsTo('App\Tujuan', 'kunjungan_tujuan', 'tujuan_kode');
     }
     public function LayananPst(){
-    	return $this->belongsTo('App\LayananPst', 'kunjungan_pst', 'kode');
+    	return $this->belongsTo('App\LayananPst', 'kunjungan_layanan_pst', 'layanan_pst_kode');
     }
     public function LayananKantor(){
-    	return $this->belongsTo('App\LayananKantor', 'kunjungan_kantor', 'kode');
+    	return $this->belongsTo('App\LayananKantor', 'kunjungan_layanan_kantor', 'layanan_kantor_kode');
     }
     public function Petugas()
     {

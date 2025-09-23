@@ -3,11 +3,11 @@
     <div class="col-md-9" id="jenis_kunjungan">
         <div class="form-group col-md-12">
             <div class="custom-control custom-radio">
-                <input type="radio" id="perorangan" name="jenis_kunjungan" value="1" class="custom-control-input" required checked="checked">
+                <input type="radio" id="perorangan" name="jenis_kunjungan" value="perorangan" class="custom-control-input" required checked="checked">
                 <label class="custom-control-label radio-inline" for="perorangan">Perorangan</label>
             </div>
             <div class="custom-control custom-radio">
-                <input type="radio" id="kelompok" name="jenis_kunjungan" value="2" class="custom-control-input">
+                <input type="radio" id="kelompok" name="jenis_kunjungan" value="kelompok" class="custom-control-input">
                 <label class="custom-control-label radio-inline" for="kelompok">Kelompok</label>
             </div>
             <div class="input-group" id="jumlah_tamu_teks">

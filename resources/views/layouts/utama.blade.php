@@ -9,7 +9,7 @@
     <meta name="author" content="I Putu Dyatmika">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon.png">
-    <title>Bukutamu - {{ENV('APP_NAMA_SATKER')}}</title>
+    <title>Bukutamu - {{ENV('NAMA_SATKER')}}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Custom CSS -->
     <link href="{{asset('dist/css/style.min.css')}}" rel="stylesheet">
@@ -52,7 +52,7 @@
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
-            <p class="loader__label">Bukutamu - {{ENV('APP_NAMA_SATKER')}}</p>
+            <p class="loader__label">Bukutamu - {{ENV('NAMA_SATKER')}}</p>
         </div>
     </div>
     <!-- ============================================================== -->

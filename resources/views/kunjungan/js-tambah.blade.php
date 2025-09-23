@@ -84,7 +84,7 @@ success: function(d){
         $('#pengunjung_id').val(d.data.pengunjung_id);
         $('#pengunjung_uid').val(d.data.pengunjung_uid);
         $('#pengunjung_nama').val(d.data.pengunjung_nama);
-        $('#pengunjung_jk').val(d.data.pengunjung_jk);
+        $('#pengunjung_jk').val(d.data.pengunjung_jenis_kelamin);
         $('#pengunjung_tahun_lahir').val(d.data.pengunjung_tahun_lahir);
         $('#pengunjung_pekerjaan').val(d.data.pengunjung_pekerjaan);
         $('#pengunjung_pendidikan').val(d.data.pengunjung_pendidikan);
@@ -250,7 +250,7 @@ $('#edit_hp').click(function(){
                 return false;
             }
         var jenis_kunjungan = $('input[name="jenis_kunjungan"]:checked').val();
-        if (jenis_kunjungan == 2)
+        if (jenis_kunjungan == "kelompok")
         {
             var jumlah_tamu = $('#jumlah_tamu').val();
             var tamu_laki = $('#tamu_laki').val();

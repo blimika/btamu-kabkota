@@ -1,0 +1,27 @@
+@component('mail::message')
+
+# Hai {{ $body->pengunjung_nama }}
+Terimakasih, telah berkunjung ke {{$body->nama_satker}}.
+Berikut nomor antrian Anda!
+
+
+# Detil Kunjungan <br>
+UID : {{ $body->kunjungan_uid }} <br>
+Nama : {{ $body->pengunjung_nama }} <br>
+Email : {{ $body->pengunjung_email }} <br>
+Nomor HP : {{ $body->pengunjung_nomor_hp }} <br>
+Tanggal Kunjungan : {{ $body->kunjungan_tanggal }} <br>
+
+
+@component('mail::panel')
+Layanan : {{ $body->layanan }} <br>
+# Nomor Antrian : {{ $body->nomor_antrian }} <br />
+@endcomponent
+
+
+Terimakasih,<br>
+{{$body->nama_aplikasi}} <br>
+{{$body->nama_satker}}<br>
+{{$body->alamat_satker}}
+
+@endcomponent
