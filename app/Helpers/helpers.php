@@ -97,7 +97,7 @@ class Generate {
     }
     public static function CekAkses($ip)
     {
-        $count = \App\MAkses::where('ip',$ip)->count();
+        $count = \App\Akses::where('akses_ip',$ip)->count();
         return $count;
     }
     public static function Kode($length) {
