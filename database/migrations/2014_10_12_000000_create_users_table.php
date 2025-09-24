@@ -29,7 +29,7 @@ class CreateUsersTable extends Migration
             $table->enum('user_level',['operator','admin'])->default('operator');
             $table->dateTime('user_last_login')->nullable();
             $table->string('user_last_ip', 20)->nullable();
-            $table->enum('user_flag',['tidak aktif','aktif'])->default('tidak aktif');
+            $table->enum('user_flag',['tidak_aktif','aktif'])->default('tidak_aktif');
             $table->rememberToken();
             $table->timestamps();
         });

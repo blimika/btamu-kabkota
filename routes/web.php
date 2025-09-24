@@ -56,5 +56,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/petugas/pagelist', 'PetugasController@PageListPetugas')->name('petugas.pagelist');
     Route::post('/petugas/ubahflag', 'PetugasController@UbahFlagMember')->name('petugas.ubahflag');
     Route::post('/petugas/admgantipasswd', 'PetugasController@AdmGantiPasswd')->name('petugas.admgantipasswd');
-    Route::post('/petugas/updatedata', 'PetugasController@UpdateMemberData')->name('petugas.updatedata');
+    Route::post('/petugas/updatedata', 'PetugasController@UpdatePetugasData')->name('petugas.updatedata');
+    Route::get('/petugas/penilaian', 'PetugasController@Penilaian')->name('petugas.nilai');
+    //Tanggal dan jadwal
+    Route::get('/master/tanggal', 'MasterController@tanggal')->name('master.tanggal');
+    Route::get('/master/format/jadwal', 'MasterController@FormatJadwal')->name('master.formatjadwal');
+    Route::get('/master/listtanggal', 'MasterController@PageListTanggal')->name('master.listtanggal');
+    Route::post('/master/hapusakses', 'MasterController@HapusAkses')->name('master.hapusakses');
+    Route::post('/master/gen/tanggal', 'MasterController@GenerateTanggal')->name('master.gentanggal');
+    Route::post('/master/updatetgl', 'MasterController@UpdateTanggal')->name('master.updatetgl');
+    Route::post('/master/updatejadwal', 'MasterController@UpdateJadwal')->name('master.updatejadwal');
+    Route::post('/master/import/jadwal', 'MasterController@ImportJadwalPetugas')->name('master.importjadwal');
 });

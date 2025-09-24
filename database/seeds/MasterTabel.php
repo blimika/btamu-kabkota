@@ -6,7 +6,7 @@ use Carbon\Carbon;
 class MasterTabel extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the database seeds. Mall Pelayanan Publik
      *
      * @return void
      */
@@ -15,10 +15,11 @@ class MasterTabel extends Seeder
         DB::table('m_tujuan')->insert([
             ['id'=>1, 'tujuan_kode' => 1, 'tujuan_inisial'=>'KTR', 'tujuan_nama' => 'Kantor'],
             ['id'=>2, 'tujuan_kode' => 2, 'tujuan_inisial'=>'PST', 'tujuan_nama' => 'Pelayanan Statistik Terpadu'],
-            ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik'],
-            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail'],
-            ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp'],
-            ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya'],
+            ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'MPP', 'tujuan_nama' => 'Mall Pelayanan Publik'],
+            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik'],
+            ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail'],
+            ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp'],
+            ['id'=>7, 'tujuan_kode' => 7, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya'],
         ]);
         DB::table('m_pendidikan')->insert([
             ['id'=>1, 'pendidikan_kode' => 1, 'pendidikan_nama' => '<=SMA Sederajat'],
@@ -43,9 +44,8 @@ class MasterTabel extends Seeder
         DB::table('m_akses')->insert([
             ['id'=>1, 'akses_ip' => '127.0.0.1', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
             ['id'=>2, 'akses_ip' => '::1', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
-            ['id'=>3, 'akses_ip' => '10.52.6.31', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
-            ['id'=>4, 'akses_ip' => '36.95.114.173', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
-            ['id'=>5, 'akses_ip' => '36.95.114.170', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
+            ['id'=>3, 'akses_ip' => '36.95.114.173', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
+            ['id'=>4, 'akses_ip' => '36.95.114.170', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
         ]);
         DB::table('m_bulan')->insert([
             ['id' => 1, 'bulan_nama_pendek' => 'Jan', 'bulan_nama' => 'Januari'],
@@ -68,6 +68,7 @@ class MasterTabel extends Seeder
             'email' => 'admin@statsntb.id',
             'password' => bcrypt('1'),
             'user_level' => 'admin',
+            'user_telepon' => '081237802900',
             'user_flag' => 'aktif'
         ]);
     }

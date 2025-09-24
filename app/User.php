@@ -23,6 +23,7 @@ class User extends Authenticatable
         'ganti_email',
         'email_kodever',
         'user_foto',
+        'user_telepon',
         'password',
         'user_level',
         'user_last_login',

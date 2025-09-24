@@ -7,6 +7,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Helpers\Generate;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Mail\KirimAntrian;
+use App\Mail\KirimFeedback;
 
 class PetugasController extends Controller
 {
@@ -68,7 +80,34 @@ class PetugasController extends Controller
     }
     public function simpan(Request $request)
     {
-
+        $data = User::where('username',trim($request->username))->orWhere('email',trim($request->email))->orWhere('user_telepon',trim($request->telepon))->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Username ('.trim($request->username).'), E-Mail ('.trim($request->email).') atau Nomor HP ('.trim($request->telepon).') sudah digunakan'
+        );
+        if (!$data)
+        {
+            //$email_kodever = Str::random(10);
+            //simpan data member
+            $data = new User();
+            $data->user_uid = Generate::Kode(6);
+            $data->user_level = $request->level;
+            $data->name = trim($request->name);
+            $data->username = trim($request->username);
+            $data->email = trim($request->email);
+            $data->ganti_email = trim($request->email);
+            $data->user_telepon = trim($request->telepon);
+            $data->password = bcrypt($request->passwd);
+            $data->email_kodever = Str::random(10);
+            $data->user_flag = 'aktif';
+            $data->save();
+            $arr = array(
+                'status'=>true,
+                'hasil'=>'Data petugas an. '.$request->username.' berhasil ditambahkan'
+            );
+        }
+        #dd($request->all());
+        return Response()->json($arr);
     }
     public function PageListPetugas(Request $request)
     {
@@ -201,5 +240,36 @@ class PetugasController extends Controller
 
         echo json_encode($response);
         exit;
+    }
+    public function Penilaian()
+    {
+        $data_bulan = array(
+            1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        );
+        $data_bulan_pendek = array(
+            1 => 'JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGU', 'SEP', 'OKT', 'NOV', 'DES'
+        );
+        $data_tahun = DB::table('m_kunjungan')
+            ->selectRaw('year(kunjungan_tanggal) as tahun')
+            ->groupBy('tahun')
+            ->orderBy('tahun', 'asc')
+            ->get();
+        if (request('tahun') == NULL) {
+            $tahun_filter = date('Y');
+        }
+        elseif (request('tahun') == 0) {
+            $tahun_filter = date('Y');
+        }
+        else {
+            $tahun_filter = request('tahun');
+        }
+        $data = User::where('user_flag','aktif')->get();
+
+        return view('petugas.penilaian',[
+            'data'=>$data,
+            'tahun'=>$tahun_filter,
+            'data_tahun'=>$data_tahun,
+            'data_bulan'=>$data_bulan_pendek,
+        ]);
     }
 }

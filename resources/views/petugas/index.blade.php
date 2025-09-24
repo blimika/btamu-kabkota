@@ -10,8 +10,8 @@
                 <li class="breadcrumb-item"><a href="javascript:void(0)">Depan</a></li>
                 <li class="breadcrumb-item active">Petugas</li>
             </ol>
-            @if (Auth::User()->level > 10)
-                <a href="javascript:void(0)" class="btn btn-success d-lg-block m-l-15" data-toggle="modal" data-target="#TambahMember"><i class="fa fa-plus-circle"></i> Member</a>
+            @if (Auth::User()->user_level == 'admin')
+                <a href="javascript:void(0)" class="btn btn-success d-lg-block m-l-15" data-toggle="modal" data-target="#TambahMember"><i class="fa fa-plus-circle"></i> Petugas</a>
             @endif
         </div>
     </div>
@@ -22,13 +22,20 @@
 <!-- ============================================================== -->
 <!-- Start Page Content -->
 <!-- ============================================================== -->
+<!----pesan error--->
 <div class="row">
     <div class="col-lg-12 col-sm-12">
         @if (Session::has('message'))
-        <div class="alert alert-{{ Session::get('message_type') }}" id="waktu2" style="margin-top:10px;">{{ Session::get('message') }}</div>
+        <div class="alert alert-{{ Session::get('message_type') }}" id="waktu2" style="margin-top:10px;">
+            @if (Session::has('message_header'))
+            <h4 class="alert-heading">{!! Session::get('message_header') !!}</h4>
+            @endif
+            {!! Session::get('message') !!}
+        </div>
         @endif
     </div>
 </div>
+<!----batas pesan error-->
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -139,7 +146,7 @@
             buttons: [
                 'copy','excel','print'
             ],
-            responsive: false,
+            responsive: true,
             "fnDrawCallback": function () {
                 $('.image-popup').magnificPopup({
                 type: 'image',
