@@ -8,7 +8,7 @@
     <meta name="description" content="Aplikasi Bukutamu untuk Satker BPS Kabupaten Kota">
     <meta name="author" content="I Putu Dyatmika">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('assets/images/favicon.png')}}">
     <title>Bukutamu - {{ENV('NAMA_SATKER')}}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Custom CSS -->

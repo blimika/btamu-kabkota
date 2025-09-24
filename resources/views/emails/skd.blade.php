@@ -22,10 +22,10 @@ Kerahasiaan jawaban Anda dilindungi Undang-undang No.16 Tahun 1997 tentang Stati
 Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.
 <br />
 Hubungi kami di: <br />
-▶ Email : pst5200@bps.go.id <br />
-🗣 Chat dgn Customer Service: https://wa.me/6281999952002 <br />
+▶ Email : {{ENV('EMAIL_SATKER')}} <br />
+🗣 Chat dgn Customer Service: https://wa.me/{{ENV{'WA_SATKER'}}} <br />
 <br />
 Salam hangat,<br>
-BPS Provinsi Nusa Tenggara Barat<br>
-Jl. Dr. Soedjono No. 74 Mataram NTB 83116
+{{$body->nama_satker}}<br>
+{{$body->alamat_satker}}
 @endcomponent

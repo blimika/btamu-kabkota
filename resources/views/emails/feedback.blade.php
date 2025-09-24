@@ -1,7 +1,7 @@
 @component('mail::message')
 
 # Hai {{ $body->pengunjung_nama }}
-Kami mengucapkan terima kasih atas kunjungan Anda ke BPS Provinsi Nusa Tenggara Barat
+Kami mengucapkan terima kasih atas kunjungan Anda ke {{$body->nama_satker}}
 pada {{ $body->kunjungan_tanggal }}. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.
 
 # Detil Kunjungan <br>
@@ -26,7 +26,7 @@ Jika mengalami kendala dalam klik tombol feedback, silakan copy paste link dibaw
 Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.
 <br />
 Salam hangat,<br>
-Aplikasi Bukutamu <br>
-BPS Provinsi Nusa Tenggara Barat<br>
-Jl. Dr. Soedjono No. 74 Mataram NTB 83116
+{{$body->nama_aplikasi}} <br>
+{{$body->nama_satker}}<br>
+{{$body->alamat_satker}}
 @endcomponent

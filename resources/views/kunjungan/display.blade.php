@@ -11,7 +11,7 @@
     <meta http-equiv="refresh" content="60">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/images/favicon.png') }}">
-    <title>Display Antrian Pelayanan Statistik Terpadu</title>
+    <title>Display Antrian - {{ENV('NAMA_SATKER')}}</title>
 
     <!-- page css -->
     <link href="{{ asset('dist/css/pages/login-register-lock.css') }}" rel="stylesheet">
@@ -42,7 +42,7 @@
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
-            <p class="loader__label">Bukutamu</p>
+            <p class="loader__label">Bukutamu {{ENV('NAMA_SATKER')}}</p>
         </div>
     </div>
     <!-- ============================================================== -->
@@ -53,8 +53,8 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body text-center">
-                        <h1>Pelayanan Statistik Terpadu <br />
-                            Badan Pusat Statistik Provinsi Nusa Tenggara Barat</h1>
+                        <h1>Display Antrian Layanan Publik <br />
+                           {{ENV('NAMA_SATKER')}}</h1>
                         <h2>{{ Tanggal::HariPanjang(\Carbon\Carbon::now()) }}</h2>
                     </div>
                 </div>

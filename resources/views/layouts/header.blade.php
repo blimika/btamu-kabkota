@@ -49,7 +49,7 @@
                         <!-- text-->
                         <a href="javascript:void(0)" class="dropdown-item"><i class="ti-user"></i> My Profile</a>
                         <div class="dropdown-divider"></div>
-                        <a href="pages-login.html" class="dropdown-item"><i class="fa fa-power-off"></i> Logout</a>
+                        <a href="{{route('logout')}}" class="dropdown-item"><i class="fa fa-power-off"></i> Logout</a>
                         <!-- text-->
                     </div>
                 </li>

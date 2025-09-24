@@ -25,9 +25,38 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Mail\KirimAntrian;
+use App\Mail\KirimFeedback;
 
 class KunjunganController extends Controller
 {
+    protected $WhatsappService;
+    protected $cek_nomor_hp;
+    protected $link_skd;
+
+    public function __construct()
+    {
+       $this->link_skd = env('APP_LINK_SKD');
+    }
+    private function cek_nomor_hp($nomor)
+    {
+        // Mengecek apakah nomor diawali dengan '0'
+        if (substr($nomor, 0, 1) === '0') {
+            // Jika ya, kembalikan nomor tanpa awalan '0'
+            $nomorhp = "62".substr($nomor, 1);
+
+        }
+        // Mengecek apakah nomor diawali dengan '+'
+        elseif (substr($nomor, 0, 1) === '+') {
+            // Jika ya, abaikan nomor ini dengan mengembalikan null
+            // Anda bisa mengubahnya untuk menampilkan pesan error atau lainnya
+            $nomorhp = substr($nomor, 1);
+        }
+        // Jika tidak diawali '0' atau '+'
+        else {
+            $nomorhp = $nomor;
+        }
+        return $nomorhp;
+    }
     public function tambah()
     {
         $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
@@ -151,6 +180,7 @@ class KunjunganController extends Controller
         $cek_kunjungan = Kunjungan::where([['pengunjung_uid', $data->pengunjung_uid], ['kunjungan_tanggal', Carbon::today()->format('Y-m-d')], ['kunjungan_tujuan', $request->kunjungan_tujuan]])->count();
         if ($cek_kunjungan > 0) {
             //sudah ada kasih info kalo sudah mengisi
+            $header_error = '<strong>Error!</strong>';
             $pesan_error = 'Data pengunjung ' . $data->pengunjung_nama . ' sudah pernah mengisi bukutamu hari tanggal ' . Carbon::today()->isoFormat('dddd, D MMMM Y');
             $warna_error = 'danger';
         }
@@ -276,12 +306,682 @@ class KunjunganController extends Controller
             }
             //batasan email
             //notif whatsapp dilengkapi kemudian
-            Session::flash('message_header', "<strong>Terimakasih</strong>");
+            $header_error = "<strong>Terimakasih</strong>";
             $pesan_error = "Data kunjungan an. <strong><i>" . trim($request->pengunjung_nama) . "</i></strong> berhasil ditambahkan";
             $warna_error = "success";
         }
+        Session::flash('message_header', $header_error);
         Session::flash('message', $pesan_error);
         Session::flash('message_type', $warna_error);
         return redirect()->route('depan');
     }
+    public function FeedbackSave(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak di simpan'
+        );
+        if ($request->feedback_nilai == "")
+        {
+            //balikin nilai masih kosong
+            $arr = array(
+                'status'=>false,
+                'message'=>'Nilai rating belum diberikan, silakan ulangi lagi'
+            );
+        }
+        else
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
+            if ($data)
+            {
+                $data->kunjungan_flag_feedback = 'sudah';
+                $data->kunjungan_nilai_feedback = $request->feedback_nilai;
+                $data->kunjungan_komentar_feedback = $request->feedback_komentar;
+                $data->kunjungan_ip_feedback = $request->getClientIp();
+                $data->kunjungan_tanggal_feedback = now();
+                $data->update();
+
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Feedback an. '.$data->Pengunjung->pengunjung_nama.' sudah tersimpan',
+                    'data'=>true
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
+    public function DisplayAntrian()
+    {
+        $data_antrian = Kunjungan::where([['kunjungan_tanggal',Carbon::now()->format('Y-m-d')],['kunjungan_flag_antrian','dalam_layanan']])->orderBy('kunjungan_loket_petugas','asc')->take(2)->get();
+        //dd($data_antrian_terakhir);
+        if (count($data_antrian) > 0)
+        {
+            $data1 = array(
+                "loket_status" => true,
+                "loket_petugas" => $data_antrian[0]['kunjungan_loket_petugas'],
+                "nomor_antrian"=> $data_antrian[0]['kunjungan_teks_antrian'],
+            );
+            if (count($data_antrian) > 1)
+            {
+                $data2 = array(
+                    "loket_status" => true,
+                    "loket_petugas" => $data_antrian[1]['kunjungan_loket_petugas'],
+                    "nomor_antrian"=> $data_antrian[1]['kunjungan_teks_antrian'],
+                );
+            }
+            else
+            {
+                $data2 = array(
+                    "loket_status" => false,
+                    "loket_petugas" => '-',
+                    "nomor_antrian"=> '-',
+                );
+            }
+        }
+        else
+        {
+            $data1 = array(
+                "loket_status" => false,
+                "loket_petugas" => '-',
+                "nomor_antrian"=> '-',
+            );
+            $data2 = array(
+                "loket_status" => false,
+                "loket_petugas" => '-',
+                "nomor_antrian"=> '-',
+            );
+        }
+
+        //dd($data1, $data2);
+        return view('kunjungan.display',['data1'=>$data1,'data2'=>$data2]);
+    }
+    public function index()
+    {
+        $Tujuan = Tujuan::orderBy('tujuan_kode', 'asc')->get();
+        $LayananPst = LayananPst::orderBy('layanan_pst_kode', 'asc')->get();
+        $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
+        $flag_antrian = array(
+            array ('kode' => 'antrian', 'nama' => 'Antrian'),
+            array ('kode' => 'dalam_layanan', 'nama' => 'Dalam Layanan'),
+            array ('kode' => 'selesai', 'nama' => 'Selesai'),
+        );
+        $DataPetugas = User::where('user_flag','aktif')->get();
+        $PetugasJaga = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
+        return view('kunjungan.index',['master_flag_antrian'=>$flag_antrian,'MasterTujuan'=>$Tujuan,'MasterLayananPST'=>$LayananPst,'MasterLayananKantor'=>$LayananKantor,'DataPetugas'=>$DataPetugas,'PetugasJaga'=>$PetugasJaga]);
+    }
+    public function PageListKunjungan(Request $request)
+    {
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows display per page
+
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+
+        $columnIndex = $columnIndex_arr[0]['column']; // Column index
+        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+        $searchValue = $search_arr['value']; // Search value
+
+        // Total records
+        $totalRecords = Kunjungan::count();
+        //total record searching
+        $totalRecordswithFilter =  DB::table('m_kunjungan')
+        ->leftJoin('m_pengunjung', 'm_kunjungan.pengunjung_uid', '=', 'm_pengunjung.pengunjung_uid')
+        ->leftJoin('m_tujuan', 'm_kunjungan.kunjungan_tujuan', '=', 'm_tujuan.tujuan_kode')
+        ->leftJoin('users', 'm_kunjungan.kunjungan_petugas_uid', '=', 'users.user_uid')
+        ->leftJoin('m_layanan_kantor', 'm_kunjungan.kunjungan_layanan_kantor', '=', 'm_layanan_kantor.layanan_kantor_kode')
+        ->leftJoin('m_layanan_pst', 'm_kunjungan.kunjungan_layanan_pst', '=', 'm_layanan_pst.layanan_pst_kode')
+        ->leftJoin('m_pendidikan', 'm_pengunjung.pengunjung_pendidikan', '=', 'm_pendidikan.pendidikan_kode')
+        ->when($searchValue, function ($q) use ($searchValue) {
+            return $q->where('pengunjung_nama', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_keperluan', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_uid', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_tanggal', 'like', '%' . $searchValue . '%')
+                     ->orWhere('users.name', 'like', '%' . $searchValue . '%')
+                     ->orWhere('m_layanan_pst.layanan_pst_nama', 'like', '%' . $searchValue . '%')
+                     ->orWhere('m_layanan_kantor.layanan_kantor_nama', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_teks_antrian', 'like', '%' . $searchValue . '%');
+        })->count();
+
+        // Fetch records
+        $records = DB::table('m_kunjungan')
+        ->leftJoin('m_pengunjung', 'm_kunjungan.pengunjung_uid', '=', 'm_pengunjung.pengunjung_uid')
+        ->leftJoin('m_tujuan', 'm_kunjungan.kunjungan_tujuan', '=', 'm_tujuan.tujuan_kode')
+        ->leftJoin('users', 'm_kunjungan.kunjungan_petugas_uid', '=', 'users.user_uid')
+        ->leftJoin('m_layanan_kantor', 'm_kunjungan.kunjungan_layanan_kantor', '=', 'm_layanan_kantor.layanan_kantor_kode')
+        ->leftJoin('m_layanan_pst', 'm_kunjungan.kunjungan_layanan_pst', '=', 'm_layanan_pst.layanan_pst_kode')
+        ->leftJoin('m_pendidikan', 'm_pengunjung.pengunjung_pendidikan', '=', 'm_pendidikan.pendidikan_kode')
+            ->when($searchValue, function ($q) use ($searchValue) {
+                return $q->where('pengunjung_nama', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_keperluan', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_uid', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_tanggal', 'like', '%' . $searchValue . '%')
+                     ->orWhere('users.name', 'like', '%' . $searchValue . '%')
+                     ->orWhere('m_layanan_pst.layanan_pst_nama', 'like', '%' . $searchValue . '%')
+                     ->orWhere('m_layanan_kantor.layanan_kantor_nama', 'like', '%' . $searchValue . '%')
+                     ->orWhere('kunjungan_teks_antrian', 'like', '%' . $searchValue . '%');
+            })
+            ->select('m_kunjungan.*', 'm_pengunjung.pengunjung_nama','m_pengunjung.pengunjung_email', 'm_pengunjung.pengunjung_jenis_kelamin', 'm_tujuan.tujuan_inisial', 'm_tujuan.tujuan_nama', 'users.name', 'users.username', 'm_layanan_kantor.layanan_kantor_nama','m_layanan_pst.layanan_pst_nama', 'm_pendidikan.pendidikan_nama')
+            ->skip($start)
+            ->take($rowperpage)
+            ->orderBy($columnName, $columnSortOrder)
+            ->get();
+            //inisiasi aawal
+            $data_arr = array();
+            foreach ($records as $item) {
+                //link feedback
+                if ($item->kunjungan_flag_feedback == 'sudah')
+                {
+                    //sudah isi feedback
+                    $kirim_link_feedback = '';
+                }
+                else
+                {
+
+                    $kirim_link_feedback = '<a class="dropdown-item kirimlinkfeedback" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Link Feedback">Kirim Link Feedback</a>';
+                }
+                //tombol aksi
+                $aksi = '
+            <div class="btn-group">
+            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ti-settings"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" data-uid="' . $item->kunjungan_uid . '" data-toggle="modal" data-target="#ViewKunjunganModal">View</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="'.route("kunjungan.printantrian",$item->kunjungan_uid).'" target="_blank" data-toggle="tooltip" title="Print Nomor Antrian">Print Antrian</a>
+                <a class="dropdown-item kirimnomorantrian" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Nomor Antrian">Kirim Antrian</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item kirimlinkskd" href="#" data-puid="' . $item->pengunjung_uid . '" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Link SKD">Kirim Link SKD</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '" data-id="' . $item->kunjungan_id . '"data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditTindakLanjutModal"><span data-toggle="tooltip" title="Edit tindak lanjut kunjungan an. '.$item->pengunjung_nama.'">Edit Tindak Lanjut</span></a>
+                <a class="dropdown-item" href="#" data-uid="' . $item->kunjungan_uid . '" data-toggle="modal" data-target="#EditPetugasModal"><span data-toggle="tooltip" title="Edit Petugas kunjungan an. '.$item->pengunjung_nama.'">Edit Petugas</span></a>
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#EditTujuanModal" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '">Ubah Tujuan</a>
+                <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-jenis="'.$item->kunjungan_jenis.'" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditJenisKunjunganModal">Ubah Jenis</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditFlagAntrianModal">Flag Antrian</a>
+                <div class="dropdown-divider"></div>
+                '.$kirim_link_feedback.'
+                <a class="dropdown-item copyurlfeedback" target="_blank" href="'.route('kunjungan.feedback',$item->kunjungan_uid).'" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '">Copy Link Feedback</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item hapuskunjungan" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="'.$item->kunjungan_tanggal.'">Delete</a>
+                    </div>
+                </div>
+                ';
+                //batas tombol aksi
+                if ($item->kunjungan_tujuan == 1)
+                {
+                    //ke kantor
+                    $tujuan = $item->layanan_kantor_nama;
+                    if ($item->kunjungan_layanan_kantor == 1)
+                    {
+                        $warna_layanan_utama = 'badge-warning';
+                    }
+                    else if ($item->kunjungan_layanan_kantor == 2)
+                    {
+                        $warna_layanan_utama = 'badge-info';
+                    }
+                    else if ($item->kunjungan_layanan_kantor == 3)
+                    {
+                        $warna_layanan_utama = 'badge-success';
+                    }
+                    else
+                    {
+                        $warna_layanan_utama = 'badge-primary';
+                    }
+
+                }
+                elseif ($item->kunjungan_tujuan == 2)
+                {
+                    //ke pst ambil layanan pst
+                    $tujuan = $item->layanan_pst_nama;
+
+                    if ($item->kunjungan_layanan_pst == 1)
+                    {
+                        $warna_layanan_utama = 'badge-success';
+                    }
+                    else if ($item->kunjungan_layanan_pst == 2)
+                    {
+                        $warna_layanan_utama = 'badge-warning';
+                    }
+                    else if ($item->kunjungan_layanan_pst == 3)
+                    {
+                        $warna_layanan_utama = 'badge-info';
+                    }
+                    else if ($item->kunjungan_layanan_pst == 4)
+                    {
+                        $warna_layanan_utama = 'badge-primary';
+                    }
+                    else
+                    {
+                        $warna_layanan_utama = 'badge-primary';
+                    }
+                }
+                else
+                {
+                    //nama layanan aja
+                    $tujuan = $item->tujuan_nama;
+                    if ($item->kunjungan_tujuan == 1)
+                    {
+                        $warna_layanan_utama = 'badge-danger';
+                    }
+                    else if ($item->kunjungan_tujuan == 2)
+                    {
+                        $warna_layanan_utama = 'badge-success';
+                    }
+                    else if ($item->kunjungan_tujuan == 3)
+                    {
+                        $warna_layanan_utama = 'badge-warning';
+                    }
+                    else if ($item->kunjungan_tujuan == 4)
+                    {
+                        $warna_layanan_utama = 'badge-info';
+                    }
+                    else
+                    {
+                        $warna_layanan_utama = 'badge-primary';
+                    }
+                }
+                //batas
+                //warna layanan utama
+                $layanan_utama = '<span class="badge '.$warna_layanan_utama.' badge-pill">'.$tujuan.'</span>';
+                //warna flag antrian
+                if ($item->kunjungan_flag_antrian == 'antrian')
+                {
+                    $warna_flag_antrian = 'badge-danger';
+                    $tombol_feedback='';
+                }
+                else if ($item->kunjungan_flag_antrian == 'dalam_antrian')
+                {
+                    $warna_flag_antrian = 'badge-warning';
+                    $tombol_feedback='';
+                }
+                else
+                {
+                    $warna_flag_antrian = 'badge-success';
+                    if ($item->kunjungan_flag_feedback == 'sudah')
+                    {
+                        if ($item->kunjungan_komentar_feedback == "")
+                        {
+                            $warna_komentar_feedback = 'btn-info';
+                        }
+                        else
+                        {
+                            $warna_komentar_feedback = 'btn-success';
+                        }
+                        $tombol_feedback = '<button type="button" class="btn btn-rounded '.$warna_komentar_feedback.' btn-xs m-t-5" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '" data-toggle="modal" data-target="#ViewFeedbackModal"><span data-toggle="tooltip" data-placement="top" title="Sudah memberikan feedback"><i class="fas fa-check-circle"></i> feedback</span></button>';
+                    }
+                    else
+                    {
+                        $tombol_feedback = '<button type="button" class="btn btn-rounded btn-danger btn-xs tombolfeedback m-t-5" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '" data-toggle="modal" data-target="#BeriFeebackModal"><span data-toggle="tooltip" data-placement="top" title="Belum memberikan feedback"><i class="fas fa-question"></i> feedback</span></button>';
+                    }
+                }
+                //batas
+                //flag antrian
+                    $flag_antrian_teks = '<span class="badge '.$warna_flag_antrian.' badge-pill">'.$item->kunjungan_flag_antrian.'</span>';
+                    //batas flag antrian
+                    //waktu datang dan waktu pulang
+                    if ($item->kunjungan_jam_datang == "") {
+                        $mulai = '<button type="button" class="btn btn-circle btn-success btn-sm mulailayanan" data-toggle="tooltip" data-placement="top" title="Mulai memberikan layanan" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '"><i class="fas fa-hand-holding-heart"></i></button>';
+                    }
+                    else {
+                        $mulai = '<span class="badge badge-info badge-pill">' . Carbon::parse($item->kunjungan_jam_datang)->format('H:i') . '</span>';
+                    }
+                    if ($item->kunjungan_jam_pulang == "") {
+                        if ($item->kunjungan_jam_datang != "") {
+                            $akhir = '<button type="button" class="btn btn-circle btn-danger btn-sm akhirlayanan" data-toggle="tooltip" data-placement="top" title="Mengakhiri pemberian layanan" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '"><i class="fas fa-sign-out-alt"></i></button>';
+                        } else {
+                            $akhir = '';
+                        }
+                    } else {
+                        $akhir = '<span class="badge badge-success badge-pill">' . Carbon::parse($item->kunjungan_jam_pulang)->format('H:i') . '</span>';
+                    }
+                //batas
+                //petugas
+                    //petugas
+                    if ($item->kunjungan_petugas_uid != "") {
+                        if ($item->kunjungan_loket_petugas == 1)
+                        {
+                            $loket_petugas = '<span class="badge badge-success badge-pill">Petugas '.$item->kunjungan_loket_petugas.'</span>';
+                        }
+                        else
+                        {
+                            $loket_petugas = '<span class="badge badge-info badge-pill">Petugas '.$item->kunjungan_loket_petugas.'</span>';
+                        }
+                        $petugas = $item->name .'<br />'.Generate::RatingPetugas($item->kunjungan_petugas_uid).'<br />'. $loket_petugas;
+                    }
+                    else {
+                        $petugas = '<span class="badge badge-danger badge-pill">belum ada</span';
+                    }
+                //batas petugas
+                //jenis kelamin
+                if ($item->pengunjung_jenis_kelamin == 'laki_laki') {
+                    $jk = '<span class="badge badge-info badge-pill">Laki-Laki</span>';
+                }
+                else {
+                    $jk = '<span class="badge badge-danger badge-pill">Perempuan</span>';
+                }
+                //jenis kunjungan 1 perorangan 2 kelompok
+                if ($item->kunjungan_jenis == 'perorangan') {
+                    $kunjungan_jenis = '<span class="badge badge-info badge-pill">Perorangan</span>';
+                } else {
+                    $kunjungan_jenis = '<span class="badge badge-warning badge-pill">Kelompok '. $item->kunjungan_jumlah_orang . ' org)</span> <span class="badge badge-info badge-pill">L ' . $item->kunjungan_jumlah_pria . '</span> <span class="badge badge-danger badge-pill">P ' . $item->kunjungan_jumlah_wanita . '</span>';
+                }
+                //tujuan
+                if ($item->kunjungan_tujuan == 1) {
+                    $warna_tujuan = 'badge-danger';
+                }
+                elseif ($item->kunjungan_tujuan == 2)
+                {
+                    $warna_tujuan = 'badge-success';
+                }
+                elseif ($item->kunjungan_tujuan == 3)
+                {
+                    $warna_tujuan = 'badge-warning';
+                }
+                elseif ($item->kunjungan_tujuan == 4)
+                {
+                    $warna_tujuan = 'badge-info';
+                }
+                elseif ($item->kunjungan_tujuan == 5)
+                {
+                    $warna_tujuan = 'badge-dark';
+                }
+                else {
+                    $warna_tujuan = 'badge-primary';
+                }
+                $tujuan = '<span class="badge '.$warna_tujuan.' badge-pill">' . $item->tujuan_inisial . '</span>';
+                //batas
+                 //tindak lanjut more
+                if (strlen($item->kunjungan_tindak_lanjut) > 80)
+                {
+                    $tindak_lanjut = '<div id="dots">'.Str::limit($item->kunjungan_tindak_lanjut,80).'
+                    </div>
+                    <div id="moreTeks">'.$item->kunjungan_tindak_lanjut.'</div>
+                    <button class="m-t-5 m-b-5 btn btn-xs btn-info btnMore" id="btnMore">more</button>
+                    ';
+                }
+                else
+                {
+                    $tindak_lanjut = $item->kunjungan_tindak_lanjut;
+                }
+                //keperluan more
+                if (strlen($item->kunjungan_keperluan) > 80)
+                {
+                    $keperluan = '<div id="dots">'.Str::limit($item->kunjungan_keperluan,80).'
+                    </div>
+                    <div id="moreTeks">'.$item->kunjungan_keperluan.'</div>
+                    <button class="m-t-5 m-b-5 btn btn-xs btn-info btnMore" id="btnMore">more</button>
+                    ';
+                }
+                else
+                {
+                    $keperluan = $item->kunjungan_keperluan;
+                }
+                $nama ='<a class="text-black" href="#" data-uid="' . $item->kunjungan_uid . '" data-toggle="modal" data-target="#ViewKunjunganModal">'.$item->pengunjung_nama.'</a>';
+                //batas
+                $data_arr[] = array(
+                    "kunjungan_uid" => $item->kunjungan_uid,
+                    "pengunjung_nama" =>  $nama.'<br />'.$jk,
+                    "kunjungan_tanggal" => $item->kunjungan_tanggal,
+                    "kunjungan_keperluan" => $keperluan .'<br />'.$tujuan .'<br />'. $layanan_utama .'<br />'.$kunjungan_jenis,
+                    "kunjungan_tindak_lanjut" => $tindak_lanjut,
+                    "kunjungan_tujuan" => $layanan_utama,
+                    "kunjungan_teks_antrian" => $item->kunjungan_teks_antrian .'<br />'.$flag_antrian_teks,
+                    "kunjungan_jam_datang" => $mulai,
+                    "kunjungan_jam_pulang" => $akhir,
+                    "kunjungan_petugas_uid" => $petugas .'<br />'.$tombol_feedback,
+                    "kunjungan_created_at"=>$item->created_at,
+                    "aksi" => $aksi
+                );
+
+            };
+
+            $response = array(
+                "draw" => intval($draw),
+                "iTotalRecords" => $totalRecords,
+                "iTotalDisplayRecords" => $totalRecordswithFilter,
+                "aaData" => $data_arr
+            );
+            echo json_encode($response);
+            exit;
+    }
+    public function KirimNomorAntrian()
+    {
+
+    }
+    public function PrintNomorAntrian($uid)
+    {
+
+    }
+    public function NewFeedback($uid)
+    {
+
+    }
+    public function MulaiLayanan(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak tersedia'
+        );
+        if (Auth::user())
+        {
+            //hanya operator / admin yg bisa klik ini
+            $data = Kunjungan::where([['kunjungan_uid', $request->uid], ['kunjungan_jam_datang', NULL]])->first();
+            if ($data)
+            {
+                //cek dulu petugas ini lagi melayani tidak
+                //kalo tidak melayani
+                //cek loket petugas1 dan 2 pada tanggal itu flag_antrian kode 2 tidak
+                $cek = Kunjungan::where([['kunjungan_tanggal',Carbon::now()->format("Y-m-d")],['kunjungan_flag_antrian','dalam_layanan'],['kunjungan_petugas_uid',Auth::user()->user_uid]])->first();
+                if ($cek)
+                {
+                    //ada pengunjung ternyata
+                    $arr = array(
+                        'status' => false,
+                        'message' => 'Masih ada pengunjung yang dilayani, silakan diselesaikan dulu'
+
+                    );
+                }
+                else
+                {
+                   //cek apakah tujuan pst / tidak
+                   //kalo pst cek loket
+                   //selain itu langsung taruh loket sesuai kode tujuan
+                   if ($data->kunjungan_tujuan == 2)
+                    {
+                        $cek_jumlah_loket = Kunjungan::where([['kunjungan_tanggal',Carbon::now()->format("Y-m-d")],['kunjungan_flag_antrian','dalam_layanan'],['kunjungan_tujuan',2]])->get();
+                        if ($cek_jumlah_loket->count() == 2)
+                        {
+                            $arr = array(
+                                'status' => false,
+                                'message' => 'Semua loket petugas masih ada pengunjung dilayani, tunggu setelah selesai dilayani'
+
+                            );
+                        }
+                        elseif ($cek_jumlah_loket->count() == 1)
+                        {
+                            //hanya ada 1 loket, cek loket mana yg dipakai
+                            foreach ($cek_jumlah_loket as $item) {
+                                $loket_aktif = $item->kunjungan_loket_petugas;
+                            }
+                            if ($loket_aktif == 1)
+                            {
+                                $loket_petugas = 2;
+                            }
+                            else
+                            {
+                                $loket_petugas = 1;
+                            }
+                        }
+                        else
+                        {
+                            $loket_petugas = 1;
+                        }
+                    }
+                    else
+                        {
+                            //langsung masukkan loket sesuai kode tujuan
+                            $loket_petugas = $data->kunjungan_tujuan;
+                        }
+
+                    $data->kunjungan_petugas_uid = Auth::user()->user_uid;
+                    $data->kunjungan_jam_datang = \Carbon\Carbon::now();
+                    $data->kunjungan_loket_petugas = $loket_petugas;
+                    $data->kunjungan_flag_antrian = 'dalam_layanan';
+                    $data->update();
+                    $arr = array(
+                        'status' => true,
+                        'message' => 'Data kunjungan an. ' . $data->Pengunjung->pengunjung_nama . ' berhasil mulai dilayani',
+                        'data' => true
+                        );
+                }
+            }
+            else
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Kunjungan ini sudah dilayani'
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
+    public function AkhirLayanan(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak tersedia'
+        );
+        $data = Kunjungan::where([['kunjungan_uid', $request->uid], ['kunjungan_jam_pulang', NULL]])->first();
+        if ($data) {
+            $data->kunjungan_jam_pulang = Carbon::now();
+            $data->kunjungan_flag_antrian = 'selesai';
+            $data->kunjungan_flag_feedback = 'belum';
+            $data->update();
+            //kirim email untuk isi feedback
+            //pre email
+            //kirim mail
+            if ($data->kunjungan_tujuan == 1)
+            {
+                $layanan = $data->Tujuan->tujuan_nama .' - '. $data->LayananKantor->layanan_kantor_nama;
+            }
+            elseif ($data->kunjungan_tujuan == 2)
+            {
+                $layanan = $data->Tujuan->tujuan_nama .' - '. $data->LayananPst->layanan_pst_nama;
+            }
+            else
+            {
+                $layanan = $data->Tujuan->tujuan_nama;
+            }
+            $body = new \stdClass();
+            $body->kunjungan_uid = $data->kunjungan_uid;
+            $body->pengunjung_nama = $data->Pengunjung->pengunjung_nama;
+            $body->pengunjung_email = $data->Pengunjung->pengunjung_email;
+            $body->pengunjung_nomor_hp = $data->Pengunjung->pengunjung_nomor_hp;
+            $body->kunjungan_tanggal = Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y');
+            $body->layanan = $layanan;
+            $body->link_feedback = route('kunjungan.feedback',$data->kunjungan_uid);
+            $body->petugas = $data->Petugas->name;
+            $body->nama_aplikasi = ENV('NAMA_APLIKASI');
+            $body->nama_satker = ENV('NAMA_SATKER');
+            $body->alamat_satker = ENV('ALAMAT_SATKER');
+
+            if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
+            {
+                if (ENV('APP_KIRIM_MAIL') == true) {
+                    Mail::to($data->Pengunjung->pengunjung_email)->send(new KirimFeedback($body));
+                }
+                //batas
+            }
+
+            $arr = array(
+                'status' => true,
+                'message' => 'Data kunjungan an. ' . $data->Pengunjung->pengunjung_nama . ' berhasil diakhiri'
+            );
+            //cek dulu wa nya bisa apa ngga
+            //kirim wa baru
+            //persiapan untuk WA
+            $recipients = $data->Pengunjung->pengunjung_nomor_hp;
+            $recipients = $this->cek_nomor_hp($recipients);
+            $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10)
+            .'Kami mengucapkan terima kasih atas kunjungan Anda ke BPS Provinsi Nusa Tenggara Barat pada *'.\Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y').'* Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10)
+            .'#Detil Kunjungan'.chr(10)
+            .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
+            .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
+            .'Email : *'.$body->pengunjung_email.'*'.chr(10)
+            .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
+            .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10)
+            .'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback singkat berikut ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik.'.chr(10)
+            .'Jika mengalami kendala dalam klik link feedback, silakan copy paste link ini'.chr(10)
+            .'*'.route('kunjungan.feedback',$data->kunjungan_uid).'*'.chr(10)
+            .'Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.'.chr(10).chr(10)
+            .$body->nama_aplikasi.chr(10)
+            .$body->nama_satker.chr(10)
+            .$body->alamat_satker;
+             //input ke log pesan
+            $new_wa = new Whatsapp();
+            $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
+            $new_wa->wa_uid = Generate::Kode(8);
+            $new_wa->wa_pengunjung_uid = $data->pengunjung_uid;
+            $new_wa->wa_kunjungan_uid = $data->kunjungan_uid;
+            $new_wa->wa_target = $recipients;
+            $new_wa->wa_message = $message;
+            $new_wa->save();
+            //cek dulu wa nya bisa apa ngga
+            if (ENV('APP_WA_LOKAL_MODE') == true) {
+                try {
+                    $result = $this->WAservice->sendMessage($recipients, $message);
+                    //return response()->json($result);
+                    if ($result)
+                    {
+                        $new_wa->wa_message_id = $result['results']['message_id'];
+                        $new_wa->wa_status = $result['results']['status'];
+                        $new_wa->wa_flag = 2;
+                        $new_wa->update();
+                    }
+                    //$arr = $result;
+                } catch (\Throwable $e) {
+                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
+                    //return response()->json(['error' => 'Internal Server Error'],500);
+                    $new_wa->wa_status = $error ;
+                    $new_wa->wa_flag = 3;
+                    $new_wa->update();
+                }
+            }
+            //batas
+        }
+        return Response()->json($arr);
+    }
+    public function TindakLanjutSave(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tindak lanjut tidak di simpan'
+        );
+        if (Auth::user())
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
+            if ($data)
+            {
+                $data->kunjungan_tindak_lanjut = $request->kunjungan_tindak_lanjut;
+                $data->update();
+
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Tindak lanjut untuk kunjungan an. '.$data->Pengunjung->pengunjung_nama.' sudah tersimpan',
+                    'data'=>true
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
+    public function PetugasSimpan(Request $request)
+    {
+
+    }
+
 }

@@ -12,6 +12,7 @@ use App\Tanggal;
 use App\Whatsapp;
 use App\Pengunjung;
 use Carbon\Carbon;
+use App\User;
 
 class WebapiController extends Controller
 {
@@ -69,7 +70,7 @@ class WebapiController extends Controller
         if ($request->model == "petugas")
         {
             //member/users
-            $data = User::with('mLevel','Pengunjung','Pengunjung.Pendidikan','Pengunjung.JenisKelamin','Pengunjung.Kunjungan','Pengunjung.Kunjungan.Tujuan','Pengunjung.Kunjungan.JenisKunjungan','Pengunjung.Kunjungan.LayananUtama','Pengunjung.Kunjungan.LayananKantor','Pengunjung.Kunjungan.FlagAntrian')->where('id',$request->id)->first();
+            $data = User::with('Kunjungan','Kunjungan.Pengunjung','Kunjungan.Tujuan','Kunjungan.LayananPst','Kunjungan.LayananKantor','Kunjungan.Pengunjung.Pendidikan')->where('user_uid',$request->uid)->first();
             //$data = Pengunjung::with('Pendidikan','JenisKelamin','Member','Kunjungan','Kunjungan.Tujuan','Kunjungan.JenisKunjungan','Kunjungan.LayananUtama','Kunjungan.FlagAntrian')->where('pengunjung_uid',$request->uid)->first();
             if ($data)
             {

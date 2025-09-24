@@ -145,7 +145,7 @@ class Generate {
         $Data = \DB::table('bulan')->
                 leftJoin(\DB::Raw("(select month(tgl_brkt) as bln, count(*) as jumlah,format((sum(kuitansi.total_biaya)/1000000),2) as totalbiaya from transaksi left join kuitansi on kuitansi.trx_id=transaksi.trx_id where flag_trx > 3 and year(tgl_brkt)='".$tahun."' GROUP by bln) as trx"),'bulan.id_bulan','=','trx.bln')->select(\DB::Raw('nama_bulan as y,  COALESCE(jumlah,0) as a,COALESCE(totalbiaya,0) as b'))->get()->toJson();
         */
-        $data = \DB::table('bulan')
+        $data = \DB::table('m_bulan')
         ->leftJoin(\DB::Raw("(select month(tanggal) as bln_kntr, count(*) as jumlah_kntr, sum(jumlah_tamu) as tamu_kntr from kunjungan where year(tanggal)='".$tahun."' and is_pst='0' GROUP by bln_kntr) as kantor"),'bulan.id','=','kantor.bln_kntr')
         ->leftJoin(\DB::Raw("(select month(tanggal) as bln_pst, count(*) as jumlah_pst, sum(jumlah_tamu) as tamu_pst from kunjungan where year(tanggal)='".$tahun."' and is_pst='1' GROUP by bln_pst) as pst"),'bulan.id','=','pst.bln_pst')
         ->leftJoin(\DB::Raw("(select month(tanggal) as bln_total, count(*) as jumlah_total, sum(jumlah_tamu) as tamu_total from kunjungan where year(tanggal)='".$tahun."' GROUP by bln_total) as total"),'bulan.id','=','total.bln_total')
@@ -158,16 +158,16 @@ class Generate {
         $Data = \DB::table('bulan')->
                 leftJoin(\DB::Raw("(select month(tgl_brkt) as bln, count(*) as jumlah,format((sum(kuitansi.total_biaya)/1000000),2) as totalbiaya from transaksi left join kuitansi on kuitansi.trx_id=transaksi.trx_id where flag_trx > 3 and year(tgl_brkt)='".$tahun."' GROUP by bln) as trx"),'bulan.id_bulan','=','trx.bln')->select(\DB::Raw('nama_bulan as y,  COALESCE(jumlah,0) as a,COALESCE(totalbiaya,0) as b'))->get()->toJson();
         */
-        $data_total = \DB::table('bulan')
+        $data_total = \DB::table('m_bulan')
         ->leftJoin(\DB::Raw("(select month(tanggal) as bln_total, count(*) as jumlah_total from kunjungan where year(tanggal)='".$tahun."' GROUP by bln_total) as total"),'bulan.id','=','total.bln_total')
         ->select(\DB::Raw('COALESCE(jumlah_total,0) as k_total'))->get();
-        $data_kantor = \DB::table('bulan')
+        $data_kantor = \DB::table('m_bulan')
         ->leftJoin(\DB::Raw("(select month(tanggal) as bln_kntr, count(*) as jumlah_kntr from kunjungan where year(tanggal)='".$tahun."' and is_pst='0' GROUP by bln_kntr) as kantor"),'bulan.id','=','kantor.bln_kntr')
         ->select(\DB::Raw('COALESCE(jumlah_kntr,0) as k_kantor'))->get();
-        $data_pst = \DB::table('bulan')
+        $data_pst = \DB::table('m_bulan')
         ->leftJoin(\DB::Raw("(select month(tanggal) as bln_pst, count(*) as jumlah_pst from kunjungan where year(tanggal)='".$tahun."' and is_pst='1' GROUP by bln_pst) as pst"),'bulan.id','=','pst.bln_pst')
         ->select(\DB::Raw('COALESCE(jumlah_pst,0) as k_pst'))->get();
-        $data_bulan = \DB::table('bulan')->select(\DB::Raw('nama_bulan_pendek'))->get();
+        $data_bulan = \DB::table('m_bulan')->select(\DB::Raw('nama_bulan_pendek'))->get();
         foreach ($data_total as $item)
         {
             $kun_total[] = $item->k_total;
@@ -521,7 +521,8 @@ class Generate {
         //dd($arr);
         return $arr;
     }
-    public static function Grafik2Minggu()
+
+    public static function Grafik2Minggu() //dipakai ini
     {
         $hari_14_sblmnya = \Carbon\Carbon::today()->subDays(10)->format('Y-m-d');
         $besoknya = \Carbon\Carbon::today()->format('Y-m-d');
@@ -535,7 +536,7 @@ class Generate {
         $cat_tgl = array();
         foreach ($period as $i)
         {
-            $item = \App\NewKunjungan::where('kunjungan_tanggal',\Carbon\Carbon::parse($i)->format('Y-m-d'))
+            $item = \App\Kunjungan::where('kunjungan_tanggal',\Carbon\Carbon::parse($i)->format('Y-m-d'))
             ->select(\DB::Raw('kunjungan_tanggal, COALESCE(count(*),0) as jumlah_kunjungan, COALESCE(sum(kunjungan_jumlah_orang),0) as jumlah_total, COALESCE(sum(kunjungan_jumlah_pria),0) as jumlah_laki, COALESCE(sum(kunjungan_jumlah_wanita),0) as jumlah_wanita'))->groupBy('kunjungan_tanggal')->first();
             if ($item)
             {
@@ -552,10 +553,10 @@ class Generate {
                 $jumlah_total[]= 0;
             }
             //ambil info tanggal
-            $info_tanggal = \App\MTanggal::where('tanggal',\Carbon\Carbon::parse($i)->format('Y-m-d'))->first();
+            $info_tanggal = \App\Tanggal::where('tanggal_angka',\Carbon\Carbon::parse($i)->format('Y-m-d'))->first();
             if ($info_tanggal)
             {
-                if ($info_tanggal->jtgl > 2)
+                if ($info_tanggal->tanggal_jenis != 'kerja')
                 {
                     $cat_tgl[]=\Carbon\Carbon::parse($i)->isoFormat('dddd, D MMM Y').' ('.$info_tanggal->deskripsi.')';
                 }
@@ -631,10 +632,10 @@ class Generate {
                     $jumlah_total[]= 0;
                 }
                 //ambil info tanggal
-                $info_tanggal = \App\MTanggal::where('tanggal',\Carbon\Carbon::parse($tgl_i)->format('Y-m-d'))->first();
+                $info_tanggal = \App\Tanggal::where('tanggal_angka',\Carbon\Carbon::parse($tgl_i)->format('Y-m-d'))->first();
                 if ($info_tanggal)
                 {
-                    if ($info_tanggal->jtgl > 1)
+                    if ($info_tanggal->jtgl != 'kerja')
                     {
                         $cat_tgl[]=$i.'-'.$info_tanggal->deskripsi;
                     }
@@ -676,16 +677,16 @@ class Generate {
         //dd($arr);
         return $arr;
     }
-    public static function NewGrafikTahunan($tahun)
+    public static function NewGrafikTahunan($tahun) //dipakai ini
     {
         /*
         $Data = \DB::table('bulan')->
                 leftJoin(\DB::Raw("(select month(tgl_brkt) as bln, count(*) as jumlah,format((sum(kuitansi.total_biaya)/1000000),2) as totalbiaya from transaksi left join kuitansi on kuitansi.trx_id=transaksi.trx_id where flag_trx > 3 and year(tgl_brkt)='".$tahun."' GROUP by bln) as trx"),'bulan.id_bulan','=','trx.bln')->select(\DB::Raw('nama_bulan as y,  COALESCE(jumlah,0) as a,COALESCE(totalbiaya,0) as b'))->get()->toJson();
         */
-        $data_total = \DB::table('bulan')
-        ->leftJoin(\DB::Raw("(select month(kunjungan_tanggal) as bln_total, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_new_kunjungan where year(kunjungan_tanggal)='".$tahun."' GROUP by bln_total) as total"),'bulan.id','=','total.bln_total')
+        $data_total = \DB::table('m_bulan')
+        ->leftJoin(\DB::Raw("(select month(kunjungan_tanggal) as bln_total, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_kunjungan where year(kunjungan_tanggal)='".$tahun."' GROUP by bln_total) as total"),'m_bulan.id','=','total.bln_total')
         ->select(\DB::Raw('COALESCE(jumlah_kunjungan,0) as jumlah_kunjungan, COALESCE(jumlah_total,0) as jumlah_total, COALESCE(jumlah_laki,0) as jumlah_laki, COALESCE(jumlah_wanita,0) as jumlah_wanita'))->get();
-        $data_bulan = \DB::table('bulan')->select(\DB::Raw('nama_bulan_pendek'))->get();
+        $data_bulan = \DB::table('m_bulan')->select(\DB::Raw('bulan_nama_pendek'))->get();
         foreach ($data_total as $item)
         {
             $jumlah_kunjungan[] = $item->jumlah_kunjungan;
@@ -713,7 +714,7 @@ class Generate {
         $data = json_encode($data);
         foreach ($data_bulan as $item)
         {
-            $data_bln[]=$item->nama_bulan_pendek;
+            $data_bln[]=$item->bulan_nama_pendek;
         }
         $cat_tgl = json_encode($data_bln);
         $arr = array(
@@ -723,7 +724,7 @@ class Generate {
         //dd($arr);
         return $arr;
     }
-    public static function NewDonatPendidikan()
+    public static function NewDonatPendidikan() //dipakai ini
     {
         /*
         $data_didik = \DB::table('m_new_kunjungan')
@@ -738,8 +739,8 @@ class Generate {
         (select m_pengunjung.pengunjung_pendidikan, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_new_kunjungan left join m_pengunjung on m_pengunjung.pengunjung_uid=m_new_kunjungan.pengunjung_uid GROUP by pengunjung_pendidikan) as kunjungan
             */
         $data_didik = \DB::table('m_pendidikan')
-        ->leftJoin(\DB::Raw("(select m_pengunjung.pengunjung_pendidikan, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_new_kunjungan left join m_pengunjung on m_pengunjung.pengunjung_uid=m_new_kunjungan.pengunjung_uid GROUP by pengunjung_pendidikan) as kunjungan"),'kunjungan.pengunjung_pendidikan','=','m_pendidikan.kode')
-        ->select(\DB::Raw('m_pendidikan.kode, nama, jumlah_kunjungan, jumlah_total, jumlah_laki, jumlah_wanita'))
+        ->leftJoin(\DB::Raw("(select m_pengunjung.pengunjung_pendidikan, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_kunjungan left join m_pengunjung on m_pengunjung.pengunjung_uid=m_kunjungan.pengunjung_uid GROUP by pengunjung_pendidikan) as kunjungan"),'kunjungan.pengunjung_pendidikan','=','m_pendidikan.pendidikan_kode')
+        ->select(\DB::Raw('m_pendidikan.pendidikan_kode as kode, pendidikan_nama as nama, jumlah_kunjungan, jumlah_total, jumlah_laki, jumlah_wanita'))
         ->get();
         //dd($data_didik);
         $jumlah_total = 0;
@@ -761,10 +762,10 @@ class Generate {
         //dd($arr);
         return $arr;
     }
-    public static function NewDonatJenisKelamin()
+    public static function NewDonatJenisKelamin() //dipakai ini
     {
-        $data_jk = \DB::table('m_new_kunjungan')
-                    ->leftJoin('m_pengunjung','m_pengunjung.pengunjung_uid','=','m_new_kunjungan.pengunjung_uid')
+        $data_jk = \DB::table('m_kunjungan')
+                    ->leftJoin('m_pengunjung','m_pengunjung.pengunjung_uid','=','m_kunjungan.pengunjung_uid')
                     ->select(\DB::Raw('count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita'))
                     ->first();
         /*
@@ -791,11 +792,11 @@ class Generate {
         //dd($arr);
         return $arr;
     }
-    public static function NewDonatLayananUtama()
+    public static function NewDonatLayananUtama() //dipakai ini
     {
         $data_tujuan = \DB::table('m_tujuan')
-                    ->leftJoin(\DB::Raw("(select kunjungan_tujuan, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_new_kunjungan GROUP by kunjungan_tujuan) as kunjungan"),'m_tujuan.kode','=','kunjungan.kunjungan_tujuan')
-                    ->select(\DB::Raw('kode, nama, jumlah_kunjungan, jumlah_total, jumlah_laki, jumlah_wanita'))
+                    ->leftJoin(\DB::Raw("(select kunjungan_tujuan, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_kunjungan GROUP by kunjungan_tujuan) as kunjungan"),'m_tujuan.tujuan_kode','=','kunjungan.kunjungan_tujuan')
+                    ->select(\DB::Raw('tujuan_kode as kode, tujuan_nama as nama, jumlah_kunjungan, jumlah_total, jumlah_laki, jumlah_wanita'))
                     ->get();
         /*
         name: 'Hybrids',
@@ -820,17 +821,17 @@ class Generate {
         //dd($arr);
         return $arr;
     }
-    public static function RatingPetugas($id)
+    public static function RatingPetugas($uid) //dipakai ini
     {
         /*
         $data = \DB::table('users')
                     ->leftJoin(\DB::Raw("(SELECt kunjungan_petugas_id, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai from m_new_kunjungan where kunjungan_petugas_id='".$id."' GROUP by kunjungan_petugas_id) as kunjungan"),'kunjungan.kunjungan_petugas_id','=','users.id')
                     ->select(\DB::Raw('kunjungan_petugas_id, users.username, users.name, jumlah_kunjungan, total_nilai, rata_nilai'))
                     ->first(); */
-        $data = \App\NewKunjungan::with('Petugas')
-                ->groupBy('kunjungan_petugas_id')
-                ->where('kunjungan_petugas_id',$id)
-                ->select(\DB::Raw('kunjungan_petugas_id, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai'))
+        $data = \App\Kunjungan::with('Petugas')
+                ->groupBy('kunjungan_petugas_uid')
+                ->where('kunjungan_petugas_uid',$uid)
+                ->select(\DB::Raw('kunjungan_petugas_uid, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai'))
                 ->first();
        //$arr = json_encode($arr);
         //dd($data);
@@ -844,17 +845,17 @@ class Generate {
         }
         return $arr;
     }
-    public static function RatingPetugasBulanan($bulan,$tahun,$id)
+    public static function RatingPetugasBulanan($bulan,$tahun,$uid) //dipakai ini
     {
         /*
         $data = \DB::table('users')
                     ->leftJoin(\DB::Raw("(SELECt kunjungan_petugas_id, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai from m_new_kunjungan where kunjungan_petugas_id='".$id."' GROUP by kunjungan_petugas_id) as kunjungan"),'kunjungan.kunjungan_petugas_id','=','users.id')
                     ->select(\DB::Raw('kunjungan_petugas_id, users.username, users.name, jumlah_kunjungan, total_nilai, rata_nilai'))
                     ->first(); */
-        $data = \App\NewKunjungan::whereMonth('kunjungan_tanggal', $bulan)->whereYear('kunjungan_tanggal', $tahun)
-                ->groupBy('kunjungan_petugas_id')
-                ->where('kunjungan_petugas_id',$id)
-                ->select(\DB::Raw('kunjungan_petugas_id, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai'))
+        $data = \App\Kunjungan::whereMonth('kunjungan_tanggal', $bulan)->whereYear('kunjungan_tanggal', $tahun)
+                ->groupBy('kunjungan_petugas_uid')
+                ->where('kunjungan_petugas_uid',$uid)
+                ->select(\DB::Raw('kunjungan_petugas_uid, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai'))
                 ->first();
        //$arr = json_encode($arr);
         //dd($data);

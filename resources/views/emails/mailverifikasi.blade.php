@@ -13,7 +13,7 @@ Jika mengalami kendala dalam klik tombol aktivasi, silakan copy paste link dibaw
 @endcomponent
 
 Terimakasih,<br>
-Aplikasi Bukutamu <br>
-BPS Provinsi Nusa Tenggara Barat<br>
-Jl. Dr. Soedjono No. 74 Mataram NTB 83116
+{{$body->nama_aplikasi}} <br>
+{{$body->nama_satker}}<br>
+{{$body->alamat_satker}}
 @endcomponent

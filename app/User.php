@@ -47,4 +47,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    public function Kunjungan()
+    {
+        return $this->hasMany('App\Kunjungan','kunjungan_petugas_uid','user_uid')->orderBy('kunjungan_tanggal','desc')->take(15);
+    }
 }

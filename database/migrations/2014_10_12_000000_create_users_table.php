@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('ganti_email',254)->nullable();
             $table->string('email_kodever',10)->default(0);
             $table->string('user_foto',254)->nullable();
+            $table->string('user_telepon',20)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('user_verified_at')->nullable();
             $table->string('password');
