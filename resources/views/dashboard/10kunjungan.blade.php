@@ -96,8 +96,8 @@
                                     </td>
                                     <td>{{$item->kunjungan_keperluan}}</td>
                                     <td class="text-center">
-                                        @if ($item->kunjungan_flag_antrian == 3)
-                                            @if ($item->kunjungan_flag_feedback == 1)
+                                        @if ($item->kunjungan_flag_antrian == 'selesai')
+                                            @if ($item->kunjungan_flag_feedback == 'belum')
                                             <button type="button" class="btn btn-rounded btn-danger btn-xs tombolfeedback" data-id="{{$item->kunjungan_id}}" data-uid="{{$item->kunjungan_uid}}" data-nama="{{$item->pengunjung_nama}}" data-tanggal="{{$item->kunjungan_tanggal}}" data-toggle="modal" data-target="#BeriFeebackModal"><span data-toggle="tooltip" data-placement="top" title="Belum memberikan feedback"><i class="fas fa-question"></i> belum</span></button>
                                             @else
                                                 @if ($item->kunjungan_komentar_feedback=="")
@@ -113,7 +113,7 @@
                                             <span class="badge badge-danger badge-pill">
                                                 {{$item->kunjungan_flag_antrian}}
                                             </span>
-                                        @elseif ($item->kunjungan_flag_antrian == 'dalam_antrian')
+                                        @elseif ($item->kunjungan_flag_antrian == 'dalam_layanan')
                                             <span class="badge badge-warning badge-pill">
                                                 {{$item->kunjungan_flag_antrian}}
                                             </span>

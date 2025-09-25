@@ -112,7 +112,7 @@ $('#EditPetugasModal .modal-footer #simpanPetugas').on('click', function(e) {
             data: {
                 kunjungan_id: kunjungan_id,
                 kunjungan_uid: kunjungan_uid,
-                petugas_id: kunjungan_petugas_baru
+                petugas_uid: kunjungan_petugas_baru
             },
             cache: false,
             dataType: 'json',

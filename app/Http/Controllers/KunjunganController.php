@@ -759,7 +759,8 @@ class KunjunganController extends Controller
     }
     public function NewFeedback($uid)
     {
-
+        $data = Kunjungan::where('kunjungan_uid',$uid)->first();
+        return view('feedback.index',['data'=>$data]);
     }
     public function MulaiLayanan(Request $request)
     {
@@ -981,7 +982,39 @@ class KunjunganController extends Controller
     }
     public function PetugasSimpan(Request $request)
     {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak tersedia'
+        );
+        if (Auth::user())
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
+            if ($data)
+            {
+                $data->kunjungan_petugas_uid = $request->petugas_uid;
+                $data->update();
 
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Data Petugas Layanan kunjungan an. '.$data->Pengunjung->pengunjung_nama.' tanggal '.$data->kunjungan_tanggal.' telah berhasil di update'
+                );
+            }
+            else
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Data kunjungan tidak tersedia'
+                );
+            }
+        }
+        else
+        {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Anda tidak mempunyai hak akses'
+            );
+        }
+        return Response()->json($arr);
     }
 
 }

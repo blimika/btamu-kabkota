@@ -81,7 +81,7 @@
     @if(!$DataKunjungan->isEmpty())
         @include('dashboard.grafik')
         @if (Auth::user() || Generate::CekAkses(\Request::getClientIp(true)))
-            @include('dashboard.jsfeedback-page')
+            @include('feedback.js-page-feedback')
         @endif
     @endif
 @stop

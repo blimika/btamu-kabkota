@@ -35,7 +35,7 @@
                 $('#BeriFeebackModal .modal-body #kunjungan_id').text('#'+d.data.kunjungan_id)
                 $('#BeriFeebackModal .modal-body #kunjungan_uid').text(d.data.kunjungan_uid)
                 $('#BeriFeebackModal .modal-body #pengunjung_nama').text(d.data.pengunjung.pengunjung_nama)
-                $('#BeriFeebackModal .modal-body #pengunjung_jk').text(d.data.pengunjung.jenis_kelamin.nama)
+                $('#BeriFeebackModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
                 $('#BeriFeebackModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
 
                 $('#BeriFeebackModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
@@ -51,28 +51,28 @@
                 {
                     var warna_flag_antrian = 'badge-success';
                 }
-                $('#BeriFeebackModal .modal-body #kunjungan_flag_antrian').html('<span class="badge '+warna_flag_antrian+' badge-pill">'+d.data.flag_antrian.nama+'</span>')
-                if (d.data.kunjungan_jenis == 1)
+                $('#BeriFeebackModal .modal-body #kunjungan_flag_antrian').html('<span class="badge '+warna_flag_antrian+' badge-pill">'+d.data.kunjungan_flag_antrian+'</span>')
+                if (d.data.kunjungan_jenis == 'perorangan')
                 {
                     //perorangan
-                    $('#BeriFeebackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-info badge-pill">'+d.data.jenis_kunjungan.nama+'</span>')
+                    $('#BeriFeebackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-info badge-pill">'+d.data.kunjungan_jenis+'</span>')
                 }
                 else
                 {
-                    $('#BeriFeebackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.jenis_kunjungan.nama+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
+                    $('#BeriFeebackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
                 }
 
                 if (d.data.kunjungan_tujuan == 1)
                 {
-                    $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.nama+'</span>')
+                    $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
                 }
                 else if (d.data.kunjungan_tujuan == 2)
                 {
-                    $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_utama.nama+'</span>')
+                    $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
                 }
                 else
                 {
-                    $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.nama+'</span>')
+                    $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
                 }
                 $('#BeriFeebackModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
                 $('#BeriFeebackModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
@@ -179,7 +179,7 @@
                 $('#ViewFeedbackModal .modal-body #kunjungan_id').text('#'+d.data.kunjungan_id)
                 $('#ViewFeedbackModal .modal-body #kunjungan_uid').text(d.data.kunjungan_uid)
                 $('#ViewFeedbackModal .modal-body #pengunjung_nama').text(d.data.pengunjung.pengunjung_nama)
-                $('#ViewFeedbackModal .modal-body #pengunjung_jk').text(d.data.pengunjung.jenis_kelamin.nama)
+                $('#ViewFeedbackModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
                 $('#ViewFeedbackModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
 
                 $('#ViewFeedbackModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
@@ -195,28 +195,28 @@
                 {
                     var warna_flag_antrian = 'badge-success';
                 }
-                $('#ViewFeedbackModal .modal-body #kunjungan_flag_antrian').html('<span class="badge '+warna_flag_antrian+' badge-pill">'+d.data.flag_antrian.nama+'</span>')
-                if (d.data.kunjungan_jenis == 1)
+                $('#ViewFeedbackModal .modal-body #kunjungan_flag_antrian').html('<span class="badge '+warna_flag_antrian+' badge-pill">'+d.data.kunjungan_flag_antrian+'</span>')
+                if (d.data.kunjungan_jenis == 'perorangan')
                 {
                     //perorangan
-                    $('#ViewFeedbackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-info badge-pill">'+d.data.jenis_kunjungan.nama+'</span>')
+                    $('#ViewFeedbackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-info badge-pill">'+d.data.kunjungan_jenis+'</span>')
                 }
                 else
                 {
-                    $('#ViewFeedbackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.jenis_kunjungan.nama+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
+                    $('#ViewFeedbackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
                 }
 
                 if (d.data.kunjungan_tujuan == 1)
                 {
-                    $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.nama+'</span>')
+                    $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
                 }
                 else if (d.data.kunjungan_tujuan == 2)
                 {
-                    $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_utama.nama+'</span>')
+                    $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
                 }
                 else
                 {
-                    $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.nama+'</span>')
+                    $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
                 }
                 $('#ViewFeedbackModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
                 $('#ViewFeedbackModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
