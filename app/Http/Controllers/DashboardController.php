@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $kunjungan_tahun_ini = Kunjungan::whereYear('kunjungan_tanggal',Carbon::today()->format('Y'))->count();
         $pengunjung_tahun_ini = Kunjungan::whereYear('kunjungan_tanggal',Carbon::today()->format('Y'))->sum('kunjungan_jumlah_orang');
 
-        $DataKunjungan = Kunjungan::orderBy('kunjungan_tanggal','desc')->take(10)->get();
+        $DataKunjungan = Kunjungan::orderBy('kunjungan_tanggal','desc')->orderBy('created_at','desc')->take(10)->get();
         return view('depan',[
             'tahun'=>$tahun,
             'nama_bulan_pendek'=>$nama_bulan_pendek,

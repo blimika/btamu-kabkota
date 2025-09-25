@@ -39,7 +39,7 @@ $('#BeriFeebackModal').on('show.bs.modal', function (event) {
             $('#BeriFeebackModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
 
             $('#BeriFeebackModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }
@@ -183,7 +183,7 @@ $('#ViewFeedbackModal').on('show.bs.modal', function (event) {
             $('#ViewFeedbackModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
 
             $('#ViewFeedbackModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }

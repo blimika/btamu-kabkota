@@ -109,7 +109,7 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        @if ($item->kunjungan_flag_antrian == 'antrian')
+                                        @if ($item->kunjungan_flag_antrian == 'ruang_tunggu')
                                             <span class="badge badge-danger badge-pill">
                                                 {{$item->kunjungan_flag_antrian}}
                                             </span>

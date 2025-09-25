@@ -401,10 +401,11 @@ class KunjunganController extends Controller
         $LayananPst = LayananPst::orderBy('layanan_pst_kode', 'asc')->get();
         $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
         $flag_antrian = array(
-            array ('kode' => 'antrian', 'nama' => 'Antrian'),
-            array ('kode' => 'dalam_layanan', 'nama' => 'Dalam Layanan'),
-            array ('kode' => 'selesai', 'nama' => 'Selesai'),
+            array('kode' => 'ruang_tunggu', 'nama' => 'Ruang Tunggu'),
+            array('kode' => 'dalam_layanan', 'nama' => 'Dalam Layanan'),
+            array('kode' => 'selesai', 'nama' => 'Selesai'),
         );
+        //dd($flag_antrian);
         $DataPetugas = User::where('user_flag','aktif')->get();
         $PetugasJaga = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
         return view('kunjungan.index',['master_flag_antrian'=>$flag_antrian,'MasterTujuan'=>$Tujuan,'MasterLayananPST'=>$LayananPst,'MasterLayananKantor'=>$LayananKantor,'DataPetugas'=>$DataPetugas,'PetugasJaga'=>$PetugasJaga]);
@@ -468,6 +469,7 @@ class KunjunganController extends Controller
             ->skip($start)
             ->take($rowperpage)
             ->orderBy($columnName, $columnSortOrder)
+            ->orderBy('created_at','desc')
             ->get();
             //inisiasi aawal
             $data_arr = array();
@@ -589,7 +591,7 @@ class KunjunganController extends Controller
                 //warna layanan utama
                 $layanan_utama = '<span class="badge '.$warna_layanan_utama.' badge-pill">'.$tujuan.'</span>';
                 //warna flag antrian
-                if ($item->kunjungan_flag_antrian == 'antrian')
+                if ($item->kunjungan_flag_antrian == 'ruang_tunggu')
                 {
                     $warna_flag_antrian = 'badge-danger';
                     $tombol_feedback='';
@@ -1016,5 +1018,65 @@ class KunjunganController extends Controller
         }
         return Response()->json($arr);
     }
+    public function FlagAntrianUpdate(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak tersedia'
+        );
+        if (Auth::user())
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
+            if ($data)
+            {
+                $data->kunjungan_flag_antrian = $request->kunjungan_flag_antrian;
+                if ($request->kunjungan_flag_antrian == 'ruang_tunggu')
+                {
+                    $jam_datang = null;
+                    $jam_pulang = null;
+                    $petugas_uid = null;
+                    $loket_petugas = 0;
+                }
+                elseif ($request->kunjungan_flag_antrian == 'dalam_layanan')
+                {
+                    $jam_datang = Carbon::parse($data->tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
+                    $jam_pulang = null;
+                    $petugas_uid = Auth::user()->user_uid;
+                    $loket_petugas = 1;
+                }
+                else
+                {
+                    $jam_datang = Carbon::parse($data->tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
+                    $jam_pulang = Carbon::parse($data->tanggal . ' 10:00:00')->format('Y-m-d H:i:s');
+                    $petugas_uid = Auth::user()->user_uid;
+                    $loket_petugas = 1;
+                }
+                $data->kunjungan_petugas_uid = $petugas_uid;
+                $data->kunjungan_jam_datang = $jam_datang;
+                $data->kunjungan_jam_pulang = $jam_pulang;
+                $data->kunjungan_loket_petugas = $loket_petugas;
+                $data->update();
 
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Data kunjungan an. '.$data->Pengunjung->pengunjung_nama.' tanggal '.$data->kunjungan_tanggal.' telah berhasil di update'
+                );
+            }
+            else
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Data kunjungan tidak tersedia'
+                );
+            }
+        }
+        else
+        {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Anda tidak mempunyai hak akses'
+            );
+        }
+        return Response()->json($arr);
+    }
 }

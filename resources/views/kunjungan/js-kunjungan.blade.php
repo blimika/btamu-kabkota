@@ -60,7 +60,7 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
                     $('#ViewKunjunganModal .modal-body #kunjungan_foto').attr("src","https://placehold.co/480x360/0000FF/FFFFFF/?text=belum+ada+photo")
                 }
             $('#ViewKunjunganModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }
@@ -183,7 +183,7 @@ $('#EditFlagAntrianModal').on('show.bs.modal', function (event) {
             $('#EditFlagAntrianModal .modal-footer #pengunjung_timeline').attr("href","{{route('timeline','')}}/"+d.data.pengunjung.pengunjung_uid)
             $('#EditFlagAntrianModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             $('#EditFlagAntrianModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }
@@ -324,7 +324,7 @@ $('#EditTindakLanjutModal').on('show.bs.modal', function (event) {
             $('#EditTindakLanjutModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
             $('#EditTindakLanjutModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             $('#EditTindakLanjutModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }
@@ -474,7 +474,7 @@ $('#EditTujuanModal').on('show.bs.modal', function (event) {
             $('#EditTujuanModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
             $('#EditTujuanModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             $('#EditTujuanModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }
@@ -662,7 +662,7 @@ $('#EditJenisKunjunganModal').on('show.bs.modal', function (event) {
             $('#EditJenisKunjunganModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
             $('#EditJenisKunjunganModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             $('#EditJenisKunjunganModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }

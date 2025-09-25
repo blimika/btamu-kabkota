@@ -66,19 +66,24 @@
                             <hr class="m-t-0 m-b-20">
                             @include('kunjungan.form-jenis')
                         </div>
-                        <div>
-                            <h3 class="card-title">Photo Pengunjung</h3>
-                            <h6 class="card-subtitle">ambil posisi terlihat semua wajah</h6>
-                            <hr class="m-t-0 m-b-20">
-                            @include('kunjungan.form-photo')
-                        </div>
+                        @if (ENV('APP_WEBCAM_MODE'))
+                            <div>
+                                <h3 class="card-title">Photo Pengunjung</h3>
+                                <h6 class="card-subtitle">ambil posisi terlihat semua wajah</h6>
+                                <hr class="m-t-0 m-b-20">
+                                @include('kunjungan.form-photo')
+                            </div>
+                        @endif
+
                         <hr>
                         <div class="form-actions">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row">
                                         <div class="col-md-offset-3 col-md-9">
-                                            <button type="submit" id="newKunjunganSave" class="btn btn-success waves-effect waves-light" disabled>Simpan</button>
+                                            <button type="submit" id="newKunjunganSave" class="btn btn-success waves-effect waves-light" @if (ENV('APP_WEBCAM_MODE'))
+                                                disabled
+                                            @endif>Simpan</button>
                         <button type="reset" class="btn btn-danger waves-effect waves-light">Reset</button>
                                         </div>
                                     </div>
@@ -142,7 +147,7 @@ $('#kunjungan_tujuan').change(function(){
     {
         $('#PSTLayanan').hide();
         $('#LayananKantor').hide();
-        $('#tujuan_label').text("Dari");
+        $('#tujuan_label').text("Tujuan");
         $('#keperluan_label').text("Keperluan");
     }
 

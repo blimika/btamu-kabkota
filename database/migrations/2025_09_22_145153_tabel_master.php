@@ -97,7 +97,7 @@ class TabelMaster extends Migration
             $table->tinyInteger('kunjungan_nomor_antrian')->unsigned()->default(0);
             $table->string('kunjungan_teks_antrian',15)->nullable();
             $table->boolean('kunjungan_loket_petugas')->default(1);
-            $table->enum('kunjungan_flag_antrian',['antrian','dalam_layanan','selesai'])->default('antrian');
+            $table->enum('kunjungan_flag_antrian',['ruang_tunggu','dalam_layanan','selesai'])->default('ruang_tunggu');
             $table->dateTime('kunjungan_jam_datang')->nullable();
             $table->dateTime('kunjungan_jam_pulang')->nullable();
             $table->string('kunjungan_petugas_uid',6)->nullable();

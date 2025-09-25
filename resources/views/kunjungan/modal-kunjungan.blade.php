@@ -104,9 +104,9 @@
                     <div class="col-sm-8">
                         <select class="form-control" id="edit_flag_antrian" name="edit_flag_antrian" required>
                             <option value="">Pilih salah satu</option>
-                            <option value="antrian">Antrian</option>
-                            <option value="dalam_layanan">Dalam Layanan</option>
-                            <option value="selesai">Selesai</option>
+                            @foreach ($master_flag_antrian as $item)
+                                <option value="{{$item['kode']}}">{{$item['nama']}}</option>
+                            @endforeach
                     </select>
                     </div>
                 </div>

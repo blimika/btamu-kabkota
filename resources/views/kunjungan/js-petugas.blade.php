@@ -28,7 +28,7 @@ $('#EditPetugasModal').on('show.bs.modal', function (event) {
             $('#EditPetugasModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
             $('#EditPetugasModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             $('#EditPetugasModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
-            if (d.data.kunjungan_flag_antrian == 'antrian')
+            if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
             }
