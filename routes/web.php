@@ -20,23 +20,13 @@ Route::post('/login', 'PetugasController@login')->name('login.proses');
 Route::get('/logout', 'PetugasController@logout')->name('logout');
 //feedback
 Route::post('/feedbacksave', 'KunjunganController@FeedbackSave')->name('feedbacksave');
-Route::get('/kunjungan/feedback/{uid}', 'KunjunganController@NewFeedback')->name('kunjungan.feedback');
+Route::get('/k/f/{uid}', 'KunjunganController@NewFeedback')->name('kunjungan.feedback');
+Route::get('/kunjungan/tambah', 'KunjunganController@tambah')->name('kunjungan.tambah');
+Route::post('/kunjungan/simpan', 'KunjunganController@simpan')->name('kunjungan.simpan');
+Route::get('/permintaan/tambah', 'KunjunganController@TambahPermintaan')->name('permintaan.tambah');
+Route::post('/permintaan/simpan', 'KunjunganController@simpanPermintaan')->name('permintaan.simpan');
 Route::group(['middleware' => 'ip.or.login'], function () {
-    Route::get('/kunjungan/index', 'KunjunganController@index')->name('kunjungan.index');
-    Route::get('/kunjungan/pagelist', 'KunjunganController@PageListKunjungan')->name('kunjungan.pagelist');
-    Route::post('/kunjungan/kirimnomor', 'KunjunganController@KirimNomorAntrian')->name('kunjungan.kirimnomor');
-    Route::post('/kunjungan/kirimlinkfeedback', 'KunjunganController@KirimLinkFeedback')->name('kunjungan.kirimlinkfeedback');
-    Route::post('/kunjungan/kirimlinkskd', 'KunjunganController@KirimLinkSKD')->name('kunjungan.kirimlinkskd');
-    Route::post('/kunjungan/mulai', 'KunjunganController@MulaiLayanan')->name('kunjungan.mulai');
-    Route::post('/kunjungan/akhir', 'KunjunganController@AkhirLayanan')->name('kunjungan.akhir');
-    Route::post('/kunjungan/tindaklanjut', 'KunjunganController@TindakLanjutSave')->name('tindaklanjut.save');
-    Route::post('/kunjungan/flagantrian', 'KunjunganController@FlagAntrianUpdate')->name('flagantrian.update');
-    Route::post('/tujuanbaru/save', 'KunjunganController@TujuanBaruSave')->name('tujuanbaru.save');
-    Route::post('/jeniskunjungansave', 'KunjunganController@JenisKunjunganSave')->name('jeniskunjungan.save');
-    Route::get('/kunjungan/printantrian/{uid}', 'KunjunganController@PrintNomorAntrian')->name('kunjungan.printantrian');
 
-    Route::get('/kunjungan/tambah', 'KunjunganController@tambah')->name('kunjungan.tambah');
-    Route::post('/kunjungan/simpan', 'KunjunganController@simpan')->name('kunjungan.simpan');
     Route::post('/kunjungan/hapus', 'KunjunganController@HapusKunjungan')->name('kunjungan.hapus');
     //webapi
     Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
@@ -45,10 +35,22 @@ Route::group(['middleware' => 'ip.or.login'], function () {
     Route::post('/cron/notif', 'WhatsappController@NotifJaga')->name('cron.notif');
     Route::post('/wa/import', 'WhatsappController@WhatsappImport')->name('wa.import');
     //timeline
-    Route::get('/timeline/{uid}', 'KunjunganController@Timeline')->name('timeline');
+    Route::get('/timeline/{uid}', 'PengunjungController@Timeline')->name('timeline');
 });
 Route::group(['middleware' => ['auth']], function () {
     //Petugas
+    Route::get('/kunjungan/index', 'KunjunganController@index')->name('kunjungan.index');
+    Route::get('/kunjungan/pagelist', 'KunjunganController@PageListKunjungan')->name('kunjungan.pagelist');
+    Route::post('/kunjungan/kirimnomor', 'KunjunganController@KirimNomorAntrian')->name('kunjungan.kirimnomor');
+    Route::post('/kunjungan/kirimlinkfeedback', 'KunjunganController@KirimLinkFeedback')->name('kunjungan.kirimlinkfeedback');
+    Route::post('/pengunjung/kirimlinkskd', 'PengunjungController@KirimLinkSKD')->name('pengunjung.kirimlinkskd');
+    Route::post('/kunjungan/mulai', 'KunjunganController@MulaiLayanan')->name('kunjungan.mulai');
+    Route::post('/kunjungan/akhir', 'KunjunganController@AkhirLayanan')->name('kunjungan.akhir');
+    Route::post('/kunjungan/tindaklanjut', 'KunjunganController@TindakLanjutSave')->name('tindaklanjut.save');
+    Route::post('/kunjungan/flagantrian', 'KunjunganController@FlagAntrianUpdate')->name('flagantrian.update');
+    Route::post('/tujuanbaru/save', 'KunjunganController@TujuanBaruSave')->name('tujuanbaru.save');
+    Route::post('/jeniskunjungansave', 'KunjunganController@JenisKunjunganSave')->name('jeniskunjungan.save');
+    Route::get('/k/p/{uid}', 'KunjunganController@PrintNomorAntrian')->name('kunjungan.printantrian');
     Route::post('/kunjungan/petugassimpan', 'KunjunganController@PetugasSimpan')->name('kunjungan.petugassimpan');
     Route::get('/petugas/index', 'PetugasController@index')->name('petugas.index');
     Route::post('/petugas/simpan', 'PetugasController@simpan')->name('petugas.simpan');
@@ -67,4 +69,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/master/updatetgl', 'MasterController@UpdateTanggal')->name('master.updatetgl');
     Route::post('/master/updatejadwal', 'MasterController@UpdateJadwal')->name('master.updatejadwal');
     Route::post('/master/import/jadwal', 'MasterController@ImportJadwalPetugas')->name('master.importjadwal');
+    Route::get('/master/tujuan', 'MasterController@tujuan')->name('master.tujuan');
+    Route::get('/master/listtujuan', 'MasterController@PageListTujuan')->name('master.listtujuan');
+    Route::post('/master/simpantujuan', 'MasterController@SimpanTujuan')->name('master.simpantujuan');
 });

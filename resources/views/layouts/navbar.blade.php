@@ -30,7 +30,7 @@
                 <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-layout-grid2"></i><span class="hide-menu">Tambah Data</span></a>
                     <ul aria-expanded="false" class="collapse">
                         <li><a href="{{route('kunjungan.tambah')}}">Kunjungan</a></li>
-                        <li><a href="">Permintaan</a></li>
+                        <li><a href="{{route('permintaan.tambah')}}">Permintaan</a></li>
                     </ul>
                 </li>
                 <li> <a class="waves-effect waves-dark" href="{{route('display.antrian')}}" target="_blank"><i class="ti-email"></i><span class="hide-menu">Display Antrian</span></a>
@@ -63,6 +63,8 @@
                     </ul>
                 </li>
                 @if (Auth::user()->user_level == 'admin')
+                    <li> <a class="waves-effect waves-dark" href="{{route('master.tujuan')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Tujuan</span></a>
+                    </li>
                     <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Daftar Akses</span></a>
                     </li>
                     <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fab fa-whatsapp"></i><span class="hide-menu">Whatsapp</span></a>

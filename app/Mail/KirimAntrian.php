@@ -28,7 +28,7 @@ class KirimAntrian extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from('noreply@statsntb.id',ENV('NAMA_APLIKASI'))
+        return $this->from(ENV('MAIL_USERNAME'),ENV('NAMA_APLIKASI'))
                     ->subject('[NOREPLY] Nomor Antrian')
                     ->markdown('emails.newantrian')->with('body',$this->body);
     }

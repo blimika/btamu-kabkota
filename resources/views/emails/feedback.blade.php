@@ -1,8 +1,8 @@
 @component('mail::message')
 
 # Hai {{ $body->pengunjung_nama }}
-Kami mengucapkan terima kasih atas kunjungan Anda ke {{$body->nama_satker}}
-pada {{ $body->kunjungan_tanggal }}. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.
+Kami mengucapkan terima kasih atas kunjungan Anda ke {{$body->nama_satker}}.
+Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.
 
 # Detil Kunjungan <br>
 UID : {{ $body->kunjungan_uid }} <br>

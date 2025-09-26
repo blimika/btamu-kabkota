@@ -1,18 +1,4 @@
 <script>
-function GetUmur(birthDateString) {
-        var today = new Date();
-        var age = today.getFullYear() - birthDateString;
-        return age;
-}
-function GetJamMenit(JamString) {
-    var tgl = new Date(JamString);
-    var hours = tgl.getHours();
-    var minutes = tgl.getMinutes();
-    if (hours < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = "0"+minutes;}
-    var jam = hours+':'+minutes;
-    return jam;
-}
 $('#BeriFeebackModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var uid = button.data('uid')

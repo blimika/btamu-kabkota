@@ -1,6 +1,6 @@
 @component('mail::message')
 # Hai {{ $body->pengunjung_nama }}
-Kami mengucapkan terima kasih atas kunjungan Anda ke BPS Provinsi Nusa Tenggara Barat.
+Kami mengucapkan terima kasih atas kunjungan Anda ke {{$body->nama_satker}}.
 <br />
 Dalam rangka meningkatkan kualitas data dan pelayanan, <br />
 BPS Provinsi NTB menyelenggarakan Survei Kebutuhan Data (SKD). <br />
@@ -23,7 +23,7 @@ Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut 
 <br />
 Hubungi kami di: <br />
 ▶ Email : {{ENV('EMAIL_SATKER')}} <br />
-🗣 Chat dgn Customer Service: https://wa.me/{{ENV{'WA_SATKER'}}} <br />
+🗣 Chat dgn Customer Service: https://wa.me/{{ENV('WA_SATKER')}} <br />
 <br />
 Salam hangat,<br>
 {{$body->nama_satker}}<br>

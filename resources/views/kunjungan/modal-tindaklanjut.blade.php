@@ -34,7 +34,7 @@
                 </dl>
                 <hr style="width: 100%; color: black; height: 1px;" />
                 <dl class="row">
-                    <dt class="col-sm-4">Keperluan / Data yang dicari</dt>
+                    <dt class="col-sm-4">Keperluan</dt>
                     <dd class="col-sm-8"><span id="kunjungan_keperluan"></span></dd>
                 </dl>
                 <div class="form-group row">

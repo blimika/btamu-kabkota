@@ -2,7 +2,7 @@
 @section('konten')
 <div class="row page-titles">
     <div class="col-md-5 align-self-center">
-        <h4 class="text-themecolor">Bukutamu BPS Provinsi Nusa Tenggara Barat</h4>
+        <h4 class="text-themecolor">{{ENV('NAMA_APLIKASI')}}</h4>
     </div>
     <div class="col-md-7 align-self-center text-right">
         <div class="d-flex justify-content-end align-items-center">

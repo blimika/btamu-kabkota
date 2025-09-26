@@ -30,9 +30,8 @@ class KirimLinkSKD extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from('noreply@statsntb.id','BUKUTAMU')
+        return $this->from(ENV('MAIL_USERNAME'),ENV('NAMA_APLIKASI'))
                     ->subject('[NOREPLY] Pengisian Survei Kebutuhan Data')
                     ->markdown('emails.skd')->with('body',$this->body);
-        //return $this->markdown('emails.KirimAntrian');
     }
 }

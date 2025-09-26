@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exports\FormatJadwal;
 use App\Imports\ImportJadwalPetugas;
+use App\Tujuan;
 use Excel;
 
 class MasterController extends Controller
@@ -319,5 +320,111 @@ class MasterController extends Controller
     public function ImportJadwalPetugas(Request $request)
     {
 
+    }
+    public function tujuan()
+    {
+        $tujuan = Tujuan::orderBy('tujuan_kode','asc')->get();
+        return view('master.tujuan',['tujuan'=>$tujuan]);
+    }
+    public function PageListTujuan(Request $request)
+    {
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows display per page
+
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+
+        $columnIndex = $columnIndex_arr[0]['column']; // Column index
+        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+        $searchValue = $search_arr['value']; // Search value
+
+        // Total records
+        $totalRecords = AppTanggal::count();
+        $totalRecordswithFilter = DB::table('m_tujuan')
+        ->when($searchValue, function ($q) use ($searchValue) {
+            return $q->where('m_tujuan.tujuan_kode', 'like', '%' .$searchValue . '%')
+                         ->orWhere('m_tujuan.tujuan_inisial', 'like', '%' . $searchValue . '%')
+                         ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%');
+        })
+        ->count();
+
+        // Fetch records
+        $records = DB::table('m_tujuan')
+            ->when($searchValue, function ($q) use ($searchValue) {
+                return $q->where('m_tujuan.tujuan_kode', 'like', '%' .$searchValue . '%')
+                            ->orWhere('m_tujuan.tujuan_inisial', 'like', '%' . $searchValue . '%')
+                            ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%');
+            })
+            ->skip($start)
+            ->take($rowperpage)
+            ->orderBy($columnName,$columnSortOrder)
+            ->orderBy('tujuan_kode','asc')
+            ->get();
+
+        $data_arr = array();
+        $sno = $start+1;
+        foreach($records as $record){
+            $id = $record->id;
+            $kode = $record->tujuan_kode;
+            $inisial = $record->tujuan_inisial;
+            $nama = $record->tujuan_nama;
+            if (Auth::user()->user_level == 'admin')
+            {
+                if ($record->tujuan_kode <= 2)
+                {
+                    $aksi = '';
+                }
+                else
+                {
+                    $aksi ='
+                            <div class="btn-group">
+                            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ti-settings"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'" data-toggle="modal" data-target="#EditTujuan">Edit</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'" data-toggle="modal" data-target="#HapusTujuan">Hapus</a>
+                            </div>
+                            </div>
+                            ';
+                }
+
+            }
+            else
+            {
+                $aksi ='';
+            }
+            $data_arr[] = array(
+                "id" => $id,
+                "tujuan_kode"=>$kode,
+                "tujuan_inisial"=>$inisial,
+                "tujuan_nama"=> $nama,
+                "aksi"=>$aksi
+            );
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        echo json_encode($response);
+        exit;
+    }
+    public function SimpanTujuan(Request $request)
+    {
+
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data tidak disimpan'
+        );
+        return Response()->json($arr);
     }
 }

@@ -26,16 +26,25 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Mail\KirimAntrian;
 use App\Mail\KirimFeedback;
+use App\Mail\KirimLinkSKD;
+use PDF;
+use Excel;
 
 class KunjunganController extends Controller
 {
     protected $WhatsappService;
     protected $cek_nomor_hp;
     protected $link_skd;
+    protected $nama_aplikasi;
+    protected $nama_satker;
+    protected $alamat_satker;
 
     public function __construct()
     {
-       $this->link_skd = env('APP_LINK_SKD');
+        $this->link_skd = env('APP_LINK_SKD');
+        $this->nama_aplikasi = ENV('NAMA_APLIKASI');
+        $this->nama_satker = ENV('NAMA_SATKER');
+        $this->alamat_satker = ENV('ALAMAT_SATKER');
     }
     private function cek_nomor_hp($nomor)
     {
@@ -72,32 +81,6 @@ class KunjunganController extends Controller
     }
     public function simpan(Request $request)
     {
-        //dd($request->all());
-        /*
-        "_token" => "jp1T2XBSVwXZszpQdYRyaRDxjPaNWzDhdyOsmyjr"
-        "pengunjung_id" => null
-        "pengunjung_uid" => null
-        "edit_pengunjung" => "0"
-        "pengunjung_baru" => "1"
-        "validasi_nomorhp" => "1"
-        "nomor_hp" => "081237802900"
-        "pengunjung_nama" => "putu mika"
-        "pengunjung_jk" => "laki_laki"
-        "pengunjung_tahun_lahir" => "1982"
-        "pengunjung_pekerjaan" => "mahasiswa"
-        "pengunjung_pendidikan" => "3"
-        "pengunjung_email" => "mika@statsntb.id"
-        "pengunjung_alamat" => "mataram"
-        "kunjungan_tujuan" => "2"
-        "layananpst_kode" => "1"
-        "layanan_kantor_kode" => null
-        "kunjungan_keperluan" => "cari publikasi terbaru"
-        "jenis_kunjungan" => "1"
-        "jumlah_tamu" => "1"
-        "tamu_laki" => "0"
-        "tamu_wanita" => "0"
-        "foto" => "data:image/png;base64,iVBORw
-        */
         $waktu_hari_ini = date('Ymd_His');
         //cek nomor hp pengunjung
         //data pengunjung
@@ -293,9 +276,9 @@ class KunjunganController extends Controller
             $body->kunjungan_tanggal = \Carbon\Carbon::parse($newdata->created_at)->isoFormat('dddd, D MMMM Y');
             $body->layanan = $layanan;
             $body->nomor_antrian = $newdata->kunjungan_teks_antrian;
-            $body->nama_aplikasi = ENV('NAMA_APLIKASI');
-            $body->nama_satker = ENV('NAMA_SATKER');
-            $body->alamat_satker = ENV('ALAMAT_SATKER');
+            $body->nama_aplikasi = $this->nama_aplikasi;
+            $body->nama_satker = $this->nama_satker;
+            $body->alamat_satker = $this->alamat_satker;
             //cek email valid apa tidak
             if (filter_var($newdata->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
@@ -485,6 +468,18 @@ class KunjunganController extends Controller
 
                     $kirim_link_feedback = '<a class="dropdown-item kirimlinkfeedback" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Link Feedback">Kirim Link Feedback</a>';
                 }
+                //link tindak lanjut dan ganti petugas
+                if ($item->kunjungan_flag_antrian == 'ruang_tunggu')
+                {
+                    $link_tindaklanjut_ganti_petugas = "";
+                }
+                else
+                {
+                    $link_tindaklanjut_ganti_petugas = '
+                     <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '"data-uid="' . $item->kunjungan_uid . '" data-puid="' . $item->pengunjung_uid . '" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditTindakLanjutModal"><span data-toggle="tooltip" title="Edit tindak lanjut kunjungan an. '.$item->pengunjung_nama.'">Edit Tindak Lanjut</span></a>
+                    <a class="dropdown-item" href="#" data-uid="' . $item->kunjungan_uid . '" data-toggle="modal" data-target="#EditPetugasModal"><span data-toggle="tooltip" title="Edit Petugas kunjungan an. '.$item->pengunjung_nama.'">Edit Petugas</span></a>
+                    ';
+                }
                 //tombol aksi
                 $aksi = '
             <div class="btn-group">
@@ -497,15 +492,14 @@ class KunjunganController extends Controller
                 <a class="dropdown-item" href="'.route("kunjungan.printantrian",$item->kunjungan_uid).'" target="_blank" data-toggle="tooltip" title="Print Nomor Antrian">Print Antrian</a>
                 <a class="dropdown-item kirimnomorantrian" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Nomor Antrian">Kirim Antrian</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item kirimlinkskd" href="#" data-puid="' . $item->pengunjung_uid . '" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Link SKD">Kirim Link SKD</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '" data-id="' . $item->kunjungan_id . '"data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditTindakLanjutModal"><span data-toggle="tooltip" title="Edit tindak lanjut kunjungan an. '.$item->pengunjung_nama.'">Edit Tindak Lanjut</span></a>
-                <a class="dropdown-item" href="#" data-uid="' . $item->kunjungan_uid . '" data-toggle="modal" data-target="#EditPetugasModal"><span data-toggle="tooltip" title="Edit Petugas kunjungan an. '.$item->pengunjung_nama.'">Edit Petugas</span></a>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#EditTujuanModal" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '">Ubah Tujuan</a>
+                <div class="dropdown-divider"></div>'.
+                $link_tindaklanjut_ganti_petugas
+                .'<a class="dropdown-item" href="#" data-toggle="modal" data-target="#EditTujuanModal" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '">Ubah Tujuan</a>
                 <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-jenis="'.$item->kunjungan_jenis.'" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditJenisKunjunganModal">Ubah Jenis</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="#" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-toggle="modal" data-target="#EditFlagAntrianModal">Flag Antrian</a>
                 <div class="dropdown-divider"></div>
+                <a class="dropdown-item kirimlinkskd" href="#" data-puid="' . $item->pengunjung_uid . '" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-email="' . $item->pengunjung_email.'" data-toggle="tooltip" title="Kirim Link SKD">Kirim Link SKD</a>
                 '.$kirim_link_feedback.'
                 <a class="dropdown-item copyurlfeedback" target="_blank" href="'.route('kunjungan.feedback',$item->kunjungan_uid).'" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '">Copy Link Feedback</a>
                 <div class="dropdown-divider"></div>
@@ -596,7 +590,7 @@ class KunjunganController extends Controller
                     $warna_flag_antrian = 'badge-danger';
                     $tombol_feedback='';
                 }
-                else if ($item->kunjungan_flag_antrian == 'dalam_antrian')
+                else if ($item->kunjungan_flag_antrian == 'dalam_layanan')
                 {
                     $warna_flag_antrian = 'badge-warning';
                     $tombol_feedback='';
@@ -670,7 +664,7 @@ class KunjunganController extends Controller
                 if ($item->kunjungan_jenis == 'perorangan') {
                     $kunjungan_jenis = '<span class="badge badge-info badge-pill">Perorangan</span>';
                 } else {
-                    $kunjungan_jenis = '<span class="badge badge-warning badge-pill">Kelompok '. $item->kunjungan_jumlah_orang . ' org)</span> <span class="badge badge-info badge-pill">L ' . $item->kunjungan_jumlah_pria . '</span> <span class="badge badge-danger badge-pill">P ' . $item->kunjungan_jumlah_wanita . '</span>';
+                    $kunjungan_jenis = '<span class="badge badge-warning badge-pill">Kelompok ('. $item->kunjungan_jumlah_orang . ' org)</span> <span class="badge badge-info badge-pill">L ' . $item->kunjungan_jumlah_pria . '</span> <span class="badge badge-danger badge-pill">P ' . $item->kunjungan_jumlah_wanita . '</span>';
                 }
                 //tujuan
                 if ($item->kunjungan_tujuan == 1) {
@@ -725,11 +719,19 @@ class KunjunganController extends Controller
                 }
                 $nama ='<a class="text-black" href="#" data-uid="' . $item->kunjungan_uid . '" data-toggle="modal" data-target="#ViewKunjunganModal">'.$item->pengunjung_nama.'</a>';
                 //batas
+                if ($item->kunjungan_tujuan < 3)
+                {
+                    $kunj_keperluan = $keperluan .'<br />'.$tujuan .'<br />'. $layanan_utama .'<br />'.$kunjungan_jenis;
+                }
+                else
+                {
+                    $kunj_keperluan = $keperluan .'<br />'. $layanan_utama .'<br />'.$kunjungan_jenis;
+                }
                 $data_arr[] = array(
                     "kunjungan_uid" => $item->kunjungan_uid,
                     "pengunjung_nama" =>  $nama.'<br />'.$jk,
                     "kunjungan_tanggal" => $item->kunjungan_tanggal,
-                    "kunjungan_keperluan" => $keperluan .'<br />'.$tujuan .'<br />'. $layanan_utama .'<br />'.$kunjungan_jenis,
+                    "kunjungan_keperluan" => $kunj_keperluan,
                     "kunjungan_tindak_lanjut" => $tindak_lanjut,
                     "kunjungan_tujuan" => $layanan_utama,
                     "kunjungan_teks_antrian" => $item->kunjungan_teks_antrian .'<br />'.$flag_antrian_teks,
@@ -751,13 +753,115 @@ class KunjunganController extends Controller
             echo json_encode($response);
             exit;
     }
-    public function KirimNomorAntrian()
+    public function KirimNomorAntrian(Request $request)
     {
+        $data = Kunjungan::where('kunjungan_uid', $request->uid)->first();
+        $arr = array(
+            'status' => false,
+            'message' => 'Nomor antrian tidak ditemukan'
+        );
+        if ($data) {
+            if ($data->kunjungan_tujuan == 1)
+            {
+                $layanan = $data->Tujuan->nama .' - '. $data->LayananKantor->layanan_kantor_nama;
+            }
+            elseif ($data->kunjungan_tujuan == 2)
+            {
+                $layanan = $data->Tujuan->nama .' - '. $data->LayananPst->layanan_pst_nama;
+            }
+            else
+            {
+                $layanan = $data->Tujuan->nama;
+            }
+            //kirim mail
+            $body = new \stdClass();
+            $body->kunjungan_uid = $data->kunjungan_uid;
+            $body->pengunjung_nama = $data->Pengunjung->pengunjung_nama;
+            $body->pengunjung_email = $data->Pengunjung->pengunjung_email;
+            $body->pengunjung_nomor_hp = $data->Pengunjung->pengunjung_nomor_hp;
+            $body->kunjungan_tanggal = \Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y');
+            $body->layanan = $layanan;
+            $body->nomor_antrian = $data->kunjungan_teks_antrian;
+            $body->nama_aplikasi = $this->nama_aplikasi;
+            $body->nama_satker = $this->nama_satker;
+            $body->alamat_satker = $this->alamat_satker;
+            //cek email valid apa tidak
+            if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
+            {
+               if (ENV('APP_KIRIM_MAIL') == true) {
+                    Mail::to($data->Pengunjung->pengunjung_email)->send(new KirimAntrian($body));
 
+                    $arr = array(
+                        'status' => true,
+                        'message' => 'Nomor Antrian an. '.$data->Pengunjung->pengunjung_nama.' sudah dikirim ke alamat email '.$data->Pengunjung->pengunjung_email
+                    );
+                }
+                else
+                {
+                    $arr = array(
+                        'status' => false,
+                        'message' => 'APP_KIRIM_MAIL bernilai False di .env'
+                    );
+                }
+                //batas
+            }
+            else
+            {
+                $arr = array(
+                    'status' => false,
+                    'hasil' => 'Alamat email Kunjungan an. '.$data->Pengunjung->pengunjung_nama.' tidak sesuai format'
+                );
+            }
+            //persiapan untuk WA
+            $recipients = $data->Pengunjung->pengunjung_nomor_hp;
+            $recipients = $this->cek_nomor_hp($recipients);
+            $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10).'Terimakasih, telah berkunjung ke BPS Provinsi Nusa Tenggara Barat.'.chr(10).'Berikut nomor antrian Anda!'.chr(10).chr(10).'#Detil Kunjungan'.chr(10).'UID : *'.$body->kunjungan_uid.'*'.chr(10).'Nama : *'.$body->pengunjung_nama.'*'.chr(10).'Email : *'.$body->pengunjung_email.'*'.chr(10).'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10).'Tanggal Kunjungan : *'.$body->kunjungan_tanggal.'* '.chr(10).chr(10).'Layanan :  *'.$body->layanan.'*'.chr(10).'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10).'Terimakasih,'.chr(10).'Aplikasi Bukutamu '.chr(10).'BPS Provinsi Nusa Tenggara Barat'.chr(10).'Jl. Dr. Soedjono No. 74 Mataram NTB 83116';
+            //input ke log pesan
+            /*
+            $new_wa = new LogWhatsapp();
+            $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
+            $new_wa->wa_uid = Generate::Kode(8);
+            $new_wa->wa_pengunjung_uid = $data->pengunjung_uid;
+            $new_wa->wa_kunjungan_uid = $data->kunjungan_uid;
+            $new_wa->wa_target = $recipients;
+            $new_wa->wa_message = $message;
+            $new_wa->save();
+            //cek dulu wa nya bisa apa ngga
+            if (ENV('APP_WA_LOKAL_MODE') == true) {
+                try {
+                    $result = $this->WAservice->sendMessage($recipients, $message);
+                    //return response()->json($result);
+                    if ($result)
+                    {
+                        $new_wa->wa_message_id = $result['results']['message_id'];
+                        $new_wa->wa_status = $result['results']['status'];
+                        $new_wa->wa_flag = 2;
+                        $new_wa->update();
+                    }
+                    //$arr = $result;
+                } catch (\Throwable $e) {
+                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
+                    //return response()->json(['error' => 'Internal Server Error'],500);
+                    $new_wa->wa_status = $error ;
+                    $new_wa->wa_flag = 3;
+                    $new_wa->update();
+                }
+            } */
+            //batas
+        }
+        #dd($request->all());
+        return Response()->json($arr);
     }
     public function PrintNomorAntrian($uid)
     {
-
+        $data = Kunjungan::where('kunjungan_uid',$uid)->first();
+        if ($data)
+        {
+            PDF::setOptions(['dpi' => 150, 'defaultFont' => 'Helvetica','isHtml5ParserEnabled'=>true]);
+            $pdf = PDF::loadView('kunjungan.print',compact('data'))->setPaper('A7');
+            $nama=strtoupper($data->Pengunjung->pengunjung_nama);
+            return $pdf->stream('Antrian'.$nama.'_Nomor_Antrian_'.$data->kunjungan_teks_antrian.'.pdf');
+        }
     }
     public function NewFeedback($uid)
     {
@@ -889,9 +993,9 @@ class KunjunganController extends Controller
             $body->layanan = $layanan;
             $body->link_feedback = route('kunjungan.feedback',$data->kunjungan_uid);
             $body->petugas = $data->Petugas->name;
-            $body->nama_aplikasi = ENV('NAMA_APLIKASI');
-            $body->nama_satker = ENV('NAMA_SATKER');
-            $body->alamat_satker = ENV('ALAMAT_SATKER');
+            $body->nama_aplikasi = $this->nama_aplikasi;
+            $body->nama_satker = $this->nama_satker;
+            $body->alamat_satker = $this->alamat_satker;
 
             if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
@@ -1078,5 +1182,414 @@ class KunjunganController extends Controller
             );
         }
         return Response()->json($arr);
+    }
+    public function JenisKunjunganSave(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak di simpan'
+        );
+        if (Auth::user())
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
+            if ($data)
+            {
+                if ($request->kunjungan_jenis == 'perorangan')
+                {
+                    //perorangan
+                    if ($data->Pengunjung->pengunjung_jenis_kelamin == 'laki_laki')
+                    {
+                        $jumlah_orang = 1;
+                        $jumlah_pria = 1;
+                        $jumlah_wanita = 0;
+                    }
+                    else
+                    {
+                        $jumlah_orang = 1;
+                        $jumlah_pria = 0;
+                        $jumlah_wanita = 1;
+                    }
+                }
+                else
+                {
+                    $jumlah_orang = $request->jumlah_orang;
+                    $jumlah_pria = $request->jumlah_pria;
+                    $jumlah_wanita = $request->jumlah_wanita;
+                }
+                $data->kunjungan_jenis = $request->kunjungan_jenis;
+                $data->kunjungan_jumlah_orang = $jumlah_orang;
+                $data->kunjungan_jumlah_pria = $jumlah_pria;
+                $data->kunjungan_jumlah_wanita = $jumlah_wanita;
+                $data->update();
+
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Jenis kunjungan an. '.$data->Pengunjung->pengunjung_nama.' sudah diperbarui',
+                    'data'=>true
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
+    public function TujuanBaruSave(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tidak di simpan'
+        );
+        if (Auth::user())
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
+            if ($data)
+            {
+                if ($request->kunjungan_tujuan_baru == 1)
+                {
+                    $layanan_kantor_baru = $request->kunjungan_layanan_kantor_baru;
+                    $layanan_pst_baru = 99;
+                }
+                elseif ($request->kunjungan_tujuan_baru == 2)
+                {
+                    $layanan_pst_baru = $request->kunjungan_layanan_pst_baru;
+                    $layanan_kantor_baru = 99;
+                }
+                else
+                {
+                    $layanan_pst_baru = 99;
+                    $layanan_kantor_baru = 99;
+                }
+                $data->kunjungan_tujuan = $request->kunjungan_tujuan_baru;
+                $data->kunjungan_layanan_kantor = $layanan_kantor_baru;
+                $data->kunjungan_layanan_pst = $layanan_pst_baru;
+                $data->update();
+
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Tujuan untuk kunjungan an. '.$data->Pengunjung->pengunjung_nama.' sudah diperbarui',
+                    'data'=>true
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
+    public function KirimLinkFeedback(Request $request)
+    {
+        $data = Kunjungan::where('kunjungan_uid', $request->uid)->first();
+        $arr = array(
+            'status' => false,
+            'message' => 'Kunjungan tidak ditemukan'
+        );
+        if ($data) {
+            //kirim mail
+            if ($data->kunjungan_tujuan == 1)
+            {
+                $layanan = $data->Tujuan->nama .' - '. $data->LayananKantor->layanan_kantor_nama;
+            }
+            elseif ($data->kunjungan_tujuan == 2)
+            {
+                $layanan = $data->Tujuan->nama .' - '. $data->LayananPst->layanan_pst_nama;
+            }
+            else
+            {
+                $layanan = $data->Tujuan->nama;
+            }
+            //kirim mail
+            $body = new \stdClass();
+            $body->kunjungan_uid = $data->kunjungan_uid;
+            $body->pengunjung_nama = $data->Pengunjung->pengunjung_nama;
+            $body->pengunjung_email = $data->Pengunjung->pengunjung_email;
+            $body->pengunjung_nomor_hp = $data->Pengunjung->pengunjung_nomor_hp;
+            $body->kunjungan_tanggal = \Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y');
+            $body->layanan = $layanan;
+            $body->link_feedback = route('kunjungan.feedback',$data->kunjungan_uid);
+            $body->petugas = $data->Petugas->name;
+            $body->nama_aplikasi = $this->nama_aplikasi;
+            $body->nama_satker = $this->nama_satker;
+            $body->alamat_satker = $this->alamat_satker;
+            if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
+            {
+                if (ENV('APP_KIRIM_MAIL') == true) {
+                    Mail::to($data->Pengunjung->pengunjung_email)->send(new KirimFeedback($body));
+
+                    $arr = array(
+                        'status' => true,
+                        'message' => 'Link feedback kunjungan an. '.$data->Pengunjung->pengunjung_nama.' sudah dikirim ke alamat email '.$data->Pengunjung->pengunjung_email
+                    );
+                }
+                else
+                {
+                    $arr = array(
+                        'status' => false,
+                        'message' => 'APP_KIRIM_MAIL bernilai False di .env'
+                    );
+                }
+                //batas
+            }
+            else
+            {
+                $arr = array(
+                    'status' => false,
+                    'hasil' => 'Alamat email Kunjungan an. '.$data->Pengunjung->pengunjung_nama.' tidak sesuai format'
+                );
+            }
+
+            //cek dulu wa nya bisa apa ngga
+            //kirim wa baru
+            //persiapan untuk WA
+            $recipients = $data->Pengunjung->pengunjung_nomor_hp;
+            $recipients = $this->cek_nomor_hp($recipients);
+            $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10).
+            'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke BPS Provinsi Nusa Tenggara Barat pada *'.\Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y').'* Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10).'#Detil Kunjungan'.chr(10).'UID : *'.$body->kunjungan_uid.'*'.chr(10).'Nama : *'.$body->pengunjung_nama.'*'.chr(10).'Email : *'.$body->pengunjung_email.'*'.chr(10).'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10).'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10).'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback singkat berikut ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik.'.chr(10).'Jika mengalami kendala dalam klik link feedback, silakan copy paste link ini'.chr(10).'*'.route('kunjungan.feedback',$data->kunjungan_uid).'*'.chr(10).'Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.'.chr(10).chr(10).'Aplikasi Bukutamu '.chr(10).'BPS Provinsi Nusa Tenggara Barat'.chr(10).'Jl. Dr. Soedjono No. 74 Mataram NTB 83116';
+            //input ke log pesan
+            /*
+            $new_wa = new LogWhatsapp();
+            $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
+            $new_wa->wa_uid = Generate::Kode(8);
+            $new_wa->wa_pengunjung_uid = $data->pengunjung_uid;
+            $new_wa->wa_kunjungan_uid = $data->kunjungan_uid;
+            $new_wa->wa_target = $recipients;
+            $new_wa->wa_message = $message;
+            $new_wa->save();
+            //cek dulu wa nya bisa apa ngga
+            if (ENV('APP_WA_MODE') == true) {
+                try {
+                    $result = $this->fonnteService->sendMessage($recipients, $message);
+                    return response()->json($result);
+                } catch (\Throwable $e) {
+                    Log::error('Exception during WA API: ' . $e->getMessage());
+                    return response()->json(['error' => 'Internal Server Error'],500);
+                }
+            }
+            if (ENV('APP_WA_LOKAL_MODE') == true) {
+                try {
+                    $result = $this->WAservice->sendMessage($recipients, $message);
+                    //return response()->json($result);
+                    if ($result)
+                    {
+                        $new_wa->wa_message_id = $result['results']['message_id'];
+                        $new_wa->wa_status = $result['results']['status'];
+                        $new_wa->wa_flag = 2;
+                        $new_wa->update();
+                    }
+                    //$arr = $result;
+                } catch (\Throwable $e) {
+                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
+                    //return response()->json(['error' => 'Internal Server Error'],500);
+                    $new_wa->wa_status = $error ;
+                    $new_wa->wa_flag = 3;
+                    $new_wa->update();
+                }
+            }
+            //batas
+            //batas kirim wa */
+        }
+
+        #dd($request->all());
+        return Response()->json($arr);
+    }
+    public function TambahPermintaan()
+    {
+        $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
+        $Tujuan = Tujuan::where('tujuan_kode','>','2')->orderBy('tujuan_kode', 'asc')->get();
+        $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
+        $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
+        return view('kunjungan.permintaan',[
+            'Pendidikan' => $Pendidikan,
+            'LayananPst'=>$LayananPst,
+            'LayananKantor'=>$LayananKantor,
+            'Tujuan'=>$Tujuan
+            ]);
+    }
+    public function simpanPermintaan(Request $request)
+    {
+        //dd($request->all());
+        $waktu_hari_ini = date('Ymd_His');
+        //cek nomor hp pengunjung
+        //data pengunjung
+        $CekNomorHp = Pengunjung::where('pengunjung_nomor_hp',$request->nomor_hp)->first();
+        if ($request->pengunjung_baru == 1 && !$CekNomorHp)
+        {
+            //pengunjung baru
+            $pengunjung_uid = Generate::Kode(6);
+            $data = new Pengunjung();
+            $data->pengunjung_uid = $pengunjung_uid;
+            $data->pengunjung_nama = $request->pengunjung_nama;
+            $data->pengunjung_nomor_hp = $request->nomor_hp;
+            $data->pengunjung_tahun_lahir = $request->pengunjung_tahun_lahir;
+            $data->pengunjung_jenis_kelamin = $request->pengunjung_jk;
+            $data->pengunjung_pekerjaan = $request->pengunjung_pekerjaan;
+            $data->pengunjung_pendidikan = $request->pengunjung_pendidikan;
+            $data->pengunjung_email = $request->pengunjung_email;
+            $data->pengunjung_alamat = $request->pengunjung_alamat;
+            $data->pengunjung_total_kunjungan = 0;
+            //$data->pengunjung_user_uid = 0; kedepan untuk member
+            $data->save();
+            ///simpan foto
+            $pengunjung_id = $data->pengunjung_id;
+            if (preg_match('/^data:image\/(\w+);base64,/', $request->foto)) {
+                $namafile_kunjungan = '/img/kunjungan/kunjungan_' . $pengunjung_uid . '_' . $waktu_hari_ini . '.png';
+                $namafile_profil = '/img/profil/pengunjung_' . $pengunjung_uid . '.png';
+                $data_foto = substr($request->foto, strpos($request->foto, ',') + 1);
+                $data_foto = base64_decode($data_foto);
+                Storage::disk('public')->put($namafile_kunjungan, $data_foto);
+                Storage::disk('public')->put($namafile_profil, $data_foto);
+                //update link foto
+                $data->pengunjung_foto_profil = $namafile_profil;
+                $data->update();
+                //batas update
+            }
+            else {
+                $namafile_kunjungan = NULL;
+                $namafile_profil = NULL;
+            }
+        }
+        else
+        {
+            //data pengunjung sudah ada
+            //apakah di update apa tidak
+            //define foto kunjungan dulu
+            if (preg_match('/^data:image\/(\w+);base64,/', $request->foto)) {
+                $namafile_kunjungan = '/img/kunjungan/kunjungan_' . $request->pengunjung_uid . '_' . $waktu_hari_ini . '.png';
+                $namafile_profil = '/img/profil/pengunjung_' . $request->pengunjung_uid . '.png';
+                $data_foto = substr($request->foto, strpos($request->foto, ',') + 1);
+                $data_foto = base64_decode($data_foto);
+                Storage::disk('public')->put($namafile_kunjungan, $data_foto);
+                Storage::disk('public')->put($namafile_profil, $data_foto);
+            } else {
+                $namafile_kunjungan = NULL;
+                $namafile_profil = NULL;
+            }
+            //apakah edit pengunjung
+            $data = Pengunjung::where('pengunjung_uid',$request->pengunjung_uid)->first();
+            if ($request->edit_pengunjung == 1)
+            {
+                //kalo di edit
+                $data->pengunjung_nama = $request->pengunjung_nama;
+                $data->pengunjung_nomor_hp = $request->nomor_hp;
+                $data->pengunjung_tahun_lahir = $request->pengunjung_tahun_lahir;
+                $data->pengunjung_jenis_kelamin = $request->pengunjung_jk;
+                $data->pengunjung_pekerjaan = $request->pengunjung_pekerjaan;
+                $data->pengunjung_pendidikan = $request->pengunjung_pendidikan;
+                $data->pengunjung_email = $request->pengunjung_email;
+                $data->pengunjung_alamat = $request->pengunjung_alamat;
+            }
+
+            if ($namafile_profil != NULL) {
+                $data->pengunjung_foto_profil = $namafile_profil;
+            }
+            $data->update();
+        }
+        //batas pengunjung
+        //tambahkan tabel kunjungan
+
+        //cek kunjungan dulu apakah sudah pernah
+        $cek_kunjungan = Kunjungan::where([['pengunjung_uid', $data->pengunjung_uid], ['kunjungan_tanggal', Carbon::parse($request->kunjungan_tanggal)->format('Y-m-d')], ['kunjungan_tujuan', $request->kunjungan_tujuan]])->count();
+        if ($cek_kunjungan > 0) {
+            //sudah ada kasih info kalo sudah mengisi
+            $pesan_error = 'Data pengunjung ' . $data->pengunjung_nama . ' sudah pernah mengisi permintaan hari tanggal ' . Carbon::parse($request->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y');
+            $warna_error = 'danger';
+        }
+        else
+        {
+            //masukkan ke tabel kunjungan
+            //cek dulu antrian ada sesuai layanan
+            //kalo pst cek layanan pst juga
+            $data_antrian = Kunjungan::where([['kunjungan_tanggal', Carbon::parse($request->kunjungan_tanggal)->format('Y-m-d')], ['kunjungan_tujuan',$request->kunjungan_tujuan]])->orderBy('kunjungan_nomor_antrian', 'desc')->first();
+            $data_layanan_utama = Tujuan::where('tujuan_kode',$request->kunjungan_tujuan)->first();
+            $nomor_antrian_inisial = $data_layanan_utama->tujuan_inisial;
+            if ($data_antrian) {
+                //kalo sudah ada antrian
+                $nomor_selanjutnya = $data_antrian->kunjungan_nomor_antrian + 1;
+            }
+            else {
+                //belum ada sama sekali
+                $nomor_selanjutnya = 1;
+            }
+            $jumlah_tamu = 1;
+            //cek jenis kelamin ambil dari query data diatas
+            if ($data->pengunjung_jenis_kelamin == 'laki_laki') {
+                $laki = 1;
+                $wanita = 0;
+            } else {
+                $laki = 0;
+                $wanita = 1;
+            }
+            //flag antrian langsung aja diubah
+            $jam_datang = Carbon::parse($request->kunjungan_tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
+            $jam_pulang = Carbon::parse($request->kunjungan_tanggal . ' 15:30:00')->format('Y-m-d H:i:s');
+            if (Auth::user())
+            {
+                $petugas_uid = Auth::user()->user_uid;
+            }
+            else
+            {
+                $petugas_uid = null;
+            }
+            $loket_petugas = 1;
+            $newdata = new Kunjungan();
+            $newdata->pengunjung_uid = $data->pengunjung_uid;
+            $newdata->kunjungan_uid = Generate::Kode(7);
+            $newdata->kunjungan_tanggal = Carbon::parse($request->kunjungan_tanggal)->format('Y-m-d');
+            $newdata->kunjungan_keperluan = $request->kunjungan_keperluan;
+            $newdata->kunjungan_jenis = 'perorangan'; //perorangan
+            $newdata->kunjungan_tujuan = $request->kunjungan_tujuan;
+            if ($namafile_kunjungan != NULL) {
+                $newdata->kunjungan_foto = $namafile_kunjungan;
+            }
+            $newdata->kunjungan_jumlah_orang = $jumlah_tamu;
+            $newdata->kunjungan_jumlah_pria = $laki;
+            $newdata->kunjungan_jumlah_wanita = $wanita;
+            $newdata->kunjungan_nomor_antrian = $nomor_selanjutnya;
+            $newdata->kunjungan_teks_antrian = $nomor_antrian_inisial . '-' . sprintf("%03d", $nomor_selanjutnya);
+            $newdata->kunjungan_petugas_uid = $petugas_uid;
+            $newdata->kunjungan_jam_datang = $jam_datang;
+            $newdata->kunjungan_jam_pulang = $jam_pulang;
+            $newdata->kunjungan_loket_petugas = $loket_petugas;
+            $newdata->kunjungan_flag_antrian = 'selesai';
+            $newdata->save();
+            //tambah total kunjungan di tabel pengunjung
+
+            $total_kunjungan = $data->pengunjung_total_kunjungan;
+            $data->pengunjung_total_kunjungan = $total_kunjungan + 1;
+            $data->update();
+            //inisiasi email
+            if ($newdata->kunjungan_tujuan == 1)
+            {
+                $layanan = $newdata->Tujuan->tujuan_nama .' - '. $newdata->LayananKantor->layanan_kantor_nama;
+            }
+            elseif ($newdata->kunjungan_tujuan == 2)
+            {
+                $layanan = $newdata->Tujuan->tujuan_nama .' - '. $newdata->LayananPst->layanan_pst_nama;
+            }
+            else
+            {
+                $layanan = $newdata->Tujuan->tujuan_nama;
+            }
+            $body = new \stdClass();
+            $body->kunjungan_uid = $newdata->kunjungan_uid;
+            $body->pengunjung_nama = $newdata->Pengunjung->pengunjung_nama;
+            $body->pengunjung_email = $newdata->Pengunjung->pengunjung_email;
+            $body->pengunjung_nomor_hp = $newdata->Pengunjung->pengunjung_nomor_hp;
+            $body->kunjungan_tanggal = \Carbon\Carbon::parse($newdata->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y');
+            $body->layanan = $layanan;
+            $body->nomor_antrian = $newdata->kunjungan_teks_antrian;
+            $body->nama_aplikasi = $this->nama_aplikasi;
+            $body->nama_satker = $this->nama_satker;
+            $body->alamat_satker = $this->alamat_satker;
+            //cek email valid apa tidak
+            if (filter_var($newdata->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
+            {
+                if (ENV('APP_KIRIM_MAIL') == true) {
+                    Mail::to($newdata->Pengunjung->pengunjung_email)->send(new KirimAntrian($body));
+                }
+                //batas
+            }
+            $header_error = "<strong>Terimakasih</strong>";
+            $pesan_error = "Data kunjungan an. <strong><i>" . trim($request->pengunjung_nama) . "</i></strong> berhasil ditambahkan";
+            $warna_error = "success";
+        }
+        Session::flash('message_header', $header_error);
+        Session::flash('message', $pesan_error);
+        Session::flash('message_type', $warna_error);
+        return redirect()->route('depan');
     }
 }

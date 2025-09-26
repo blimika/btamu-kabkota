@@ -63,9 +63,31 @@ $('#EditPetugasModal').on('show.bs.modal', function (event) {
             {
                 $('#EditPetugasModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
             }
-            $('#EditPetugasModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
-            $('#EditPetugasModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
-            $('#EditPetugasModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
+            if (d.data.kunjungan_jam_datang != null)
+            {
+                $('#EditPetugasModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
+            }
+            else
+            {
+                $('#EditPetugasModal .modal-body #kunjungan_jam_datang').html("<i>--belum tersedia--</i>")
+            }
+            if (d.data.kunjungan_jam_pulang != null)
+            {
+                $('#EditPetugasModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
+            }
+            else
+            {
+                $('#EditPetugasModal .modal-body #kunjungan_jam_pulang').html("<i>--belum tersedia--</i>")
+            }
+
+            if (d.data.petugas != null)
+            {
+                $('#EditPetugasModal .modal-body #kunjungan_petugas_nama').html("<b>"+ d.data.petugas.name +"</b>")
+            }
+            else
+            {
+                $('#EditPetugasModal .modal-body #kunjungan_petugas_nama').html("<i>--belum tersedia--</i>")
+            }
             $('#EditPetugasModal .modal-body #kunjungan_keperluan').html(d.data.kunjungan_keperluan)
             $('#EditPetugasModal .modal-body #kunjungan_petugas_baru').val(d.data.kunjungan_petugas_uid).trigger('change')
             }

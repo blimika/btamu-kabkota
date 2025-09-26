@@ -32,7 +32,7 @@ class EmailVerifikasi extends Mailable implements ShouldQueue
     public function build()
     {
         //return $this->markdown('emails.mailverifikasi');
-        return $this->from('noreply@statsntb.id','BUKUTAMU')
+        return $this->from(ENV('MAIL_USERNAME'),ENV('NAMA_APLIKASI'))
                     ->subject('[NOREPLY] E-mail Verifikasi')
                     ->markdown('emails.mailverifikasi')->with('body',$this->body);
     }

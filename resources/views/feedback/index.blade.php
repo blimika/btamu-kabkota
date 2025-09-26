@@ -41,8 +41,8 @@
                                 Hi, <b>{{$data->Pengunjung->pengunjung_nama}}</b>
                             </p>
                             <p>
-                                Kami ingin mengucapkan terimakasih, telah berkunjung BPS Provinsi Nusa Tenggara Barat.
-                                berikut detil kunjungan anda.
+                               Kami mengucapkan terima kasih atas kunjungan Anda ke {{ENV('NAMA_SATKER')}}. <br />
+                                Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.
                             </p>
                             <p>
                                 # Detil Kunjungan <br>
@@ -57,7 +57,7 @@
                                     <dd class="col-lg-9 col-sm-9">{{ $data->Pengunjung->pengunjung_nomor_hp }}</dd>
                                     <dt class="col-lg-3 col-md-3 col-xs-12">Tanggal Kunjungan</dt>
                                     <dd class="col-lg-9 col-sm-9">{{ \Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y H:mm:ss') }}</dd>
-                                    @if ($data->kunjungan_flag_antrian == 3)
+                                    @if ($data->kunjungan_flag_antrian == 'selesai')
                                         <dt class="col-lg-3 col-md-3 col-xs-12">Petugas yang melayani</dt>
                                         <dd class="col-lg-9 col-sm-9">{{ $data->Petugas->name}}</dd>
                                     @endif
@@ -81,10 +81,10 @@
                                 Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.
                             </p>
                             <p>
-                                Salam hangat,<br />
-                                Pelayanan Statistik Terpadu <br />
-                                Badan Pusat Statistik <br />
-                                Provinsi Nusa Tenggara Barat
+                                Salam hangat,<br /> <br />
+                                {{ENV('NAMA_APLIKASI')}} <br />
+                                {{ENV('NAMA_SATKER')}}<br />
+                                {{ENV('ALAMAT_SATKER')}}
 
                             </p>
                         @else
