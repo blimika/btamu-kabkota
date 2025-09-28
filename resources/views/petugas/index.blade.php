@@ -41,8 +41,18 @@
         <div class="card">
             <div class="card-body">
                     <h4 class="card-title text-center">Data Petugas</h4>
-
-                    <div class="m-t-40 tabeldata">
+                    <div class="row">
+                        <div class="col-lg-6">&nbsp;</div>
+                        <div class="col-lg-6 text-right">
+                            @if (Auth::User()->user_level == 'admin')
+                                <a href="{{ route('petugas.format') }}" class="btn btn-info">
+                                    <i class="ti-export"></i> &nbsp;Format Import</a>
+                                <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal"
+                                    data-target="#ImportPetugasModal"><i class="ti-import"></i> Import Petugas</a>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="m-t-10 tabeldata">
                         <table id="dTabel" class="display table table-hover table-striped table-bordered" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
@@ -72,6 +82,7 @@
 @include('petugas.modal-view')
 @include('petugas.modal-edit')
 @include('petugas.modal-gantipasswd')
+@include('petugas.modal-importpetugas')
 @endsection
 
 @section('css')
@@ -313,4 +324,5 @@
     @include('petugas.js-view')
     @include('petugas.js-gantipasswd')
     @include('petugas.js-edit')
+    @include('petugas.js-importpetugas')
 @stop

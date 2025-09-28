@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FormatPetugas;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Helpers\Generate;
+use App\Imports\ImportPetugas;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Mail\KirimAntrian;
 use App\Mail\KirimFeedback;
+use Excel;
 
 class PetugasController extends Controller
 {
@@ -199,8 +202,8 @@ class PetugasController extends Controller
                         <i class="ti-settings"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-toggle="modal" data-target="#ViewMemberModal">View</a>
-                        <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-toggle="modal" data-target="#EditMemberModal">Edit</a>
+                        <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-toggle="modal" data-target="#ViewPetugasModal">View</a>
+                        <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-toggle="modal" data-target="#EditPetugasModal">Edit</a>
                         <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-username="'.$record->username.'" data-toggle="modal" data-target="#GantiPasswdModal">Ganti Password</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item ubahflagmember" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-flagmember="'.$record->user_flag.'">Ubah Flag</a>
@@ -271,5 +274,70 @@ class PetugasController extends Controller
             'data_tahun'=>$data_tahun,
             'data_bulan'=>$data_bulan_pendek,
         ]);
+    }
+    public function FormatPetugas()
+    {
+        $fileName = 'format-petugas-';
+        $data = [
+            [
+                'username' => 'username',
+                'name'=> 'nama lengkap',
+                'email' => 'email : format xxx@gmail.com',
+                'password' => 'password min 1 karakter',
+                'user_level' => 'operator/admin, pilih salah satu',
+                'user_telepon' => 'nomor whatsapp',
+            ]
+        ];
+        $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new FormatPetugas($data), $namafile);
+    }
+    public function ImportPetugas(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Import data tidak berhasil',
+            'data'=>false,
+        );
+
+        if ($request->hasFile('file_import')) {
+            $file = $request->file('file_import'); //GET FILE
+            Excel::import(new ImportPetugas, $file); //IMPORT FILE
+            $arr = array(
+                'status'=>true,
+                'message'=>'Import data berhasil',
+                'data'=>true,
+            );
+        }
+        return Response()->json($arr);
+    }
+    public function UpdatePetugasData(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Update petugas tidak berhasil',
+        );
+        $data = User::where('user_uid',$request->uid)->first();
+        $cek_data = User::where('username',trim($request->username))->first();
+        if ($data and (!$cek_data or $cek_data->user_uid == $data->user_uid))
+        {
+            $data->name = trim($request->name);
+            $data->username = trim($request->username);
+            $data->user_level = trim($request->level);
+            $data->email = trim($request->email);
+            $data->user_telepon = trim($request->telepon);
+            $data->update();
+            $arr = array(
+                'status'=>true,
+                'message'=>'Data petugas an. '.$request->name.' ('.$request->username.') berhasil diupdate'
+            );
+        }
+        else
+        {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Username '.$request->username.' sudah ada yang menggunakan',
+            );
+        }
+        return Response()->json($arr);
     }
 }

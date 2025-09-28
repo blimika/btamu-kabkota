@@ -1,12 +1,12 @@
-<div class="modal fade" id="EditMemberModal" tabindex="-1" role="dialog" aria-labelledby="vcenter">
+<div class="modal fade" id="EditPetugasModal" tabindex="-1" role="dialog" aria-labelledby="vcenter">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h4 class="modal-title text-white" id="EditMemberModal">Edit Member</h4>
+                <h4 class="modal-title text-white" id="EditPetugasModal">Edit Petugas</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal m-t-4" name="formEditMember" id="formEditMember" action=""  method="POST">
+                <form class="form-horizontal m-t-4" name="formEditPetugas" id="formEditPetugas" action=""  method="POST">
                     <div class="form-group">
                     <label class="control-label">Level</label>
                         <select class="form-control" id="edit_level" name="level" required>
@@ -34,10 +34,7 @@
                     <div class="form-group">
                         <span id="edit_member_error" class="text-danger"></span>
                     </div>
-                    <div class="form-group">
-                        <small class="font-italic">Mengubah alamat e-mail, akan membuat email baru perlu verifikasi ulang</small>
-                    </div>
-                    <input type="hidden" id="edit_member_id" name="member_id" value="" />
+                    <input type="hidden" id="edit_user_uid" name="user_uid" value="" />
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success waves-effect" id="UpdateMemberData" name="UpdateMemberData" data-dismiss="modal">UPDATE</button>

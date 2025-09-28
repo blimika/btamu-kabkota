@@ -49,9 +49,6 @@
                 <li class="nav-small-cap">--- MASTER</li>
                 <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-gallery"></i><span class="hide-menu">Petugas</span></a>
                     <ul aria-expanded="false" class="collapse">
-                        @if (Auth::user()->user_level == 'admin')
-                        <li><a href="layout-single-column.html">Tambah Petugas</a></li>
-                        @endif
                         <li><a href="{{route('petugas.index')}}">List Petugas</a></li>
                         <li><a href="{{route('petugas.nilai')}}">Penilaian</a></li>
                     </ul>
@@ -59,7 +56,7 @@
                 <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-files"></i><span class="hide-menu">Jadwal </span></a>
                     <ul aria-expanded="false" class="collapse">
                         <li><a href="{{route('master.tanggal')}}">List Jadwal</a></li>
-                        <li><a href="pages-blank.html">Kalendar</a></li>
+                        <li><a href="{{route('master.kalendar')}}">Kalendar</a></li>
                     </ul>
                 </li>
                 @if (Auth::user()->user_level == 'admin')

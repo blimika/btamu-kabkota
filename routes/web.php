@@ -60,8 +60,11 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/petugas/admgantipasswd', 'PetugasController@AdmGantiPasswd')->name('petugas.admgantipasswd');
     Route::post('/petugas/updatedata', 'PetugasController@UpdatePetugasData')->name('petugas.updatedata');
     Route::get('/petugas/penilaian', 'PetugasController@Penilaian')->name('petugas.nilai');
+    Route::get('/petugas/format', 'PetugasController@FormatPetugas')->name('petugas.format');
+    Route::post('/petugas/import', 'PetugasController@ImportPetugas')->name('petugas.import');
     //Tanggal dan jadwal
     Route::get('/master/tanggal', 'MasterController@tanggal')->name('master.tanggal');
+    Route::get('/master/kalendar', 'MasterController@kalendar')->name('master.kalendar');
     Route::get('/master/format/jadwal', 'MasterController@FormatJadwal')->name('master.formatjadwal');
     Route::get('/master/listtanggal', 'MasterController@PageListTanggal')->name('master.listtanggal');
     Route::post('/master/hapusakses', 'MasterController@HapusAkses')->name('master.hapusakses');

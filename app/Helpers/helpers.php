@@ -847,11 +847,6 @@ class Generate {
     }
     public static function RatingPetugasBulanan($bulan,$tahun,$uid) //dipakai ini
     {
-        /*
-        $data = \DB::table('users')
-                    ->leftJoin(\DB::Raw("(SELECt kunjungan_petugas_id, count(*) as jumlah_kunjungan, sum(kunjungan_nilai_feedback) as total_nilai, avg(kunjungan_nilai_feedback) as rata_nilai from m_new_kunjungan where kunjungan_petugas_id='".$id."' GROUP by kunjungan_petugas_id) as kunjungan"),'kunjungan.kunjungan_petugas_id','=','users.id')
-                    ->select(\DB::Raw('kunjungan_petugas_id, users.username, users.name, jumlah_kunjungan, total_nilai, rata_nilai'))
-                    ->first(); */
         $data = \App\Kunjungan::whereMonth('kunjungan_tanggal', $bulan)->whereYear('kunjungan_tanggal', $tahun)
                 ->groupBy('kunjungan_petugas_uid')
                 ->where('kunjungan_petugas_uid',$uid)

@@ -1,8 +1,8 @@
-<div class="modal fade" id="ViewMemberModal" tabindex="-1" role="dialog" aria-labelledby="vcenter" aria-hidden="true" style="display: none;">
+<div class="modal fade" id="ViewPetugasModal" tabindex="-1" role="dialog" aria-labelledby="vcenter" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-success">
-                <h4 class="modal-title text-white" id="ViewMemberModal">Data Detil Petugas</h4>
+                <h4 class="modal-title text-white" id="ViewPetugasModal">Data Detil Petugas</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">

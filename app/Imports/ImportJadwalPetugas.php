@@ -22,8 +22,8 @@ class ImportJadwalPetugas implements ToCollection, WithHeadingRow, WithBatchInse
     {
         foreach ($rows as $row)
         {
-            $cek_user1 = User::where('user_uid',$row['petugas1_uid'])->first();
-            $cek_user2 = User::where('user_uid',$row['petugas2_uid'])->first();
+            $cek_user1 = User::where('user_uid',trim($row['petugas1_uid']))->first();
+            $cek_user2 = User::where('user_uid',trim($row['petugas2_uid']))->first();
             $data = Tanggal::where([['tanggal_angka',$row['tanggal']],['tanggal_jenis','kerja']])->first();
             if ($data)
             {
@@ -32,33 +32,27 @@ class ImportJadwalPetugas implements ToCollection, WithHeadingRow, WithBatchInse
                     if ($cek_user2)
                     {
                         $petugas2_uid = $cek_user2->user_uid;
-                        $petugas2_username = $cek_user2->username;
                     }
                     else
                     {
                         $petugas2_uid = null;
-                        $petugas2_username = null;
                     }
                     $petugas1_uid = $cek_user1->user_uid;
-                    $petugas1_username = $cek_user1->username;
                 }
                 else
                 {
                     if ($cek_user2)
                     {
                         $petugas2_uid = $cek_user2->user_uid;
-                        $petugas2_username = $cek_user2->username;
                     }
                     else
                     {
                         $petugas2_uid = null;
-                        $petugas2_username = null;
                     }
                     $petugas1_uid = null;
-                    $petugas1_username = NULL;
                 }
-                $data->petugas1_id = $petugas1_uid;
-                $data->petugas2_id = $petugas2_uid;
+                $data->tanggal_petugas1_uid = $petugas1_uid;
+                $data->tanggal_petugas2_uid = $petugas2_uid;
                 $data->update();
             }
         }

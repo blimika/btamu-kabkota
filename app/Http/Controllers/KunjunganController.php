@@ -68,16 +68,24 @@ class KunjunganController extends Controller
     }
     public function tambah()
     {
-        $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
-        $Tujuan = Tujuan::orderBy('tujuan_kode', 'asc')->get();
-        $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
-        $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
-        return view('kunjungan.tambah',[
-            'Pendidikan' => $Pendidikan,
-            'LayananPst'=>$LayananPst,
-            'LayananKantor'=>$LayananKantor,
-            'Tujuan'=>$Tujuan
-            ]);
+        //cek hari dulu
+        $cek_hari = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
+        if ($cek_hari->tanggal_jenis == 'kerja' or ENV('APP_CEK_LIBUR') == false) {
+            $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
+            $Tujuan = Tujuan::orderBy('tujuan_kode', 'asc')->get();
+            $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
+            $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
+            return view('kunjungan.tambah',[
+                'Pendidikan' => $Pendidikan,
+                'LayananPst'=>$LayananPst,
+                'LayananKantor'=>$LayananKantor,
+                'Tujuan'=>$Tujuan
+                ]);
+        }
+        else
+        {
+            return view('kunjungan.libur', ['tanggal' => $cek_hari]);
+        }
     }
     public function simpan(Request $request)
     {

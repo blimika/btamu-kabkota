@@ -85,7 +85,7 @@
                                             <td>{{$loop->iteration}}</td>
                                             <td class="text-left">{{$item->name}}</td>
                                             @for ($i = 1; $i <= 12; $i++)
-                                                <td>{!! Generate::RatingPetugasBulanan($i,$tahun,$item->id)!!}</td>
+                                                <td>{!! Generate::RatingPetugasBulanan($i,$tahun,$item->user_uid)!!}</td>
                                             @endfor
                                         </tr>
                                     @endforeach

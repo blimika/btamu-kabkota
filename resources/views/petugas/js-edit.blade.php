@@ -1,5 +1,5 @@
 <script>
-    $('#EditMemberModal').on('show.bs.modal', function (event) {
+    $('#EditPetugasModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var uid = button.data('uid')
 
@@ -12,19 +12,19 @@
         },
         cache: false,
         dataType: 'json',
-        success: function(data){
-            if (data.status == true)
+        success: function(d){
+            if (d.status == true)
             {
-                $('#EditMemberModal .modal-body #edit_member_id').val(id);
-                $('#EditMemberModal .modal-body #edit_level').val(data.hasil.level);
-                $('#EditMemberModal .modal-body #edit_name').val(data.hasil.name)
-                $('#EditMemberModal .modal-body #edit_username').val(data.hasil.username)
-                $('#EditMemberModal .modal-body #edit_email').val(data.hasil.email)
-                $('#EditMemberModal .modal-body #edit_telepon').val(data.hasil.telepon)
+                $('#EditPetugasModal .modal-body #edit_user_uid').val(d.data.user_uid);
+                $('#EditPetugasModal .modal-body #edit_level').val(d.data.user_level);
+                $('#EditPetugasModal .modal-body #edit_name').val(d.data.name)
+                $('#EditPetugasModal .modal-body #edit_username').val(d.data.username)
+                $('#EditPetugasModal .modal-body #edit_email').val(d.data.email)
+                $('#EditPetugasModal .modal-body #edit_telepon').val(d.data.user_telepon)
             }
             else
             {
-                alert(data.hasil);
+                alert(d.message);
             }
         },
         error: function(){
@@ -33,38 +33,38 @@
         });
     });
     //simpan edit member
-    $('#EditMemberModal .modal-footer #UpdateMemberData').on('click', function(e) {
+    $('#EditPetugasModal .modal-footer #UpdateMemberData').on('click', function(e) {
         e.preventDefault();
-        var id = $('#EditMemberModal .modal-body #edit_member_id').val();
-        var level = $('#EditMemberModal .modal-body #edit_level').val();
-        var name = $('#EditMemberModal .modal-body #edit_name').val()
-        var username = $('#EditMemberModal .modal-body #edit_username').val()
-        var email = $('#EditMemberModal .modal-body #edit_email').val()
-        var telepon = $('#EditMemberModal .modal-body #edit_telepon').val()
+        var uid = $('#EditPetugasModal .modal-body #edit_user_uid').val();
+        var level = $('#EditPetugasModal .modal-body #edit_level').val();
+        var name = $('#EditPetugasModal .modal-body #edit_name').val()
+        var username = $('#EditPetugasModal .modal-body #edit_username').val()
+        var email = $('#EditPetugasModal .modal-body #edit_email').val()
+        var telepon = $('#EditPetugasModal .modal-body #edit_telepon').val()
         if (level == "")
         {
-            $('#EditMemberModal .modal-body #edit_member_error').text('Pilih salah satu level member');
+            $('#EditPetugasModal .modal-body #edit_member_error').text('Pilih salah satu level member');
             return false;
         }
         else if (name == "")
         {
-            $('#EditMemberModal .modal-body #edit_member_error').text('Nama lengkap tidak boleh kosong');
+            $('#EditPetugasModal .modal-body #edit_member_error').text('Nama lengkap tidak boleh kosong');
             return false;
         }
         else if (username == "")
         {
-            $('#EditMemberModal .modal-body #edit_member_error').text('Username tidak boleh kosong');
+            $('#EditPetugasModal .modal-body #edit_member_error').text('Username tidak boleh kosong');
             return false;
         }
         else if (email == "")
         {
-            $('#EditMemberModal .modal-body #edit_member_error').text('E-mail tidak boleh kosong');
-            $('#EditMemberModal .modal-body #edit_email').focus();
+            $('#EditPetugasModal .modal-body #edit_member_error').text('E-mail tidak boleh kosong');
+            $('#EditPetugasModal .modal-body #edit_email').focus();
             return false;
         }
         else if (telepon == "")
         {
-            $('#EditMemberModal .modal-body #edit_member_error').text('Telepon tidak boleh kosong');
+            $('#EditPetugasModal .modal-body #edit_member_error').text('Telepon tidak boleh kosong');
             return false;
         }
         else
@@ -74,12 +74,12 @@
                 var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
                 if(!email.match(mailformat))
                 {
-                    $('#EditMemberModal .modal-body #edit_member_error').text('Format e-mail tidak sesuai');
-                    $('#EditMemberModal .modal-body #edit_email').focus();
+                    $('#EditPetugasModal .modal-body #edit_member_error').text('Format e-mail tidak sesuai');
+                    $('#EditPetugasModal .modal-body #edit_email').focus();
                     return false;
                 }
             }
-            //ajax ganti passwd
+            //ajax edit petugas
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -89,7 +89,7 @@
                 url : '{{route('petugas.updatedata')}}',
                 method : 'post',
                 data: {
-                    id: id,
+                    uid: uid,
                     level: level,
                     name: name,
                     username: username,
@@ -103,7 +103,7 @@
                     {
                         Swal.fire(
                             'Berhasil!',
-                            ''+data.hasil+'',
+                            ''+data.message+'',
                             'success'
                         ).then(function() {
                             $('#dTabel').DataTable().ajax.reload(null,false);
@@ -113,7 +113,7 @@
                     {
                         Swal.fire(
                             'Error!',
-                            ''+data.hasil+'',
+                            ''+data.message+'',
                             'error'
                         );
                     }

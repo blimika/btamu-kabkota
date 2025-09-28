@@ -319,7 +319,22 @@ class MasterController extends Controller
     }
     public function ImportJadwalPetugas(Request $request)
     {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Import jadwal petugas tidak berhasil',
+            'data'=>'Import jadwal petugas tidak berhasil',
+        );
 
+        if ($request->hasFile('file_import')) {
+            $file = $request->file('file_import'); //GET FILE
+            Excel::import(new ImportJadwalPetugas, $file); //IMPORT FILE
+            $arr = array(
+                'status'=>true,
+                'hasil'=>'Import jadwal petugas berhasil',
+                'pesan_error'=>'Import jadwal petugas berhasil',
+            );
+        }
+        return Response()->json($arr);
     }
     public function tujuan()
     {
@@ -426,5 +441,46 @@ class MasterController extends Controller
             'hasil'=>'Data tidak disimpan'
         );
         return Response()->json($arr);
+    }
+    public function kalendar()
+    {
+        $tahun = date('Y')-1;
+        $data = AppTanggal::whereYear('tanggal_angka','>=',$tahun)->whereIn('tanggal_jenis',['kerja','libur'])->orderBy('tanggal_angka','asc')->get();
+        //dd($data);
+        foreach ($data as $item) {
+            if ($item->tanggal_jenis == 'libur')
+            {
+                $arr[]=array (
+                    'title' => $item->tanggal_deskripsi,
+                    'start' => $item->tanggal_angka,
+                    'end' => $item->tanggal_angka,
+                    'className' => 'bg-danger'
+                );
+            }
+            else
+            {
+                if ($item->tanggal_petugas1_uid != null)
+                {
+                    $arr[]=array (
+                        'title' => $item->Petugas1->name,
+                        'start' => $item->tanggal_angka,
+                        'end' => $item->tanggal_angka,
+                        'className' => 'bg-success'
+                    );
+                }
+                if ($item->tanggal_petugas2_uid != null)
+                {
+                    $arr[]=array (
+                        'title' => $item->Petugas2->name,
+                        'start' => $item->tanggal_angka,
+                        'end' => $item->tanggal_angka,
+                        'className' => 'bg-info'
+                    );
+                }
+
+            }
+        }
+        $data_jadwal = json_encode($arr);
+        return view('master.kalendar',['data_jadwal'=>$data_jadwal]);
     }
 }
