@@ -16,17 +16,19 @@ use App\Kunjungan;
 use App\Tujuan;
 use Excel;
 use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MasterController extends Controller
 {
-    protected $waService;
+    protected $whatsAppService;
     protected $cek_nomor_hp;
-    public function __construct(WhatsAppService $waService)
+    public function __construct(WhatsAppService $whatsAppService)
     {
         $this->nama_aplikasi = ENV('NAMA_APLIKASI');
         $this->nama_satker = ENV('NAMA_SATKER');
         $this->alamat_satker = ENV('ALAMAT_SATKER');
-        $this->waService = $waService;
+        $this->whatsAppService = $whatsAppService;
     }
     public function tanggal()
     {

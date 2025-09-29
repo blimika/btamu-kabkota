@@ -33,20 +33,20 @@ use App\Services\WhatsAppService;
 
 class PengunjungController extends Controller
 {
-    protected $waService;
+    protected $whatsappService;
     protected $cek_nomor_hp;
     protected $link_skd;
     protected $nama_aplikasi;
     protected $nama_satker;
     protected $alamat_satker;
 
-    public function __construct(WhatsAppService $waService)
+    public function __construct(WhatsAppService $whatsAppService)
     {
         $this->link_skd = env('APP_LINK_SKD');
         $this->nama_aplikasi = ENV('NAMA_APLIKASI');
         $this->nama_satker = ENV('NAMA_SATKER');
         $this->alamat_satker = ENV('ALAMAT_SATKER');
-        $this->waService = $waService;
+        $this->whatsAppService = $whatsAppService;
     }
     private function cek_nomor_hp($nomor)
     {
@@ -141,7 +141,7 @@ class PengunjungController extends Controller
                 $new_wa->save();
 
                 try {
-                    $result = $this->waService->sendLink($recipients, $this->link_skd, $message);
+                    $result = $this->whatsAppService->sendLink($recipients, $this->link_skd, $message);
                     if ($result)
                     {
                         $new_wa->wa_message_id = $result['results']['message_id'];
@@ -471,19 +471,19 @@ class PengunjungController extends Controller
                 //ke pst ambil layanan pst
                 $tujuan = $item->kunjungan_pst_teks;
 
-                if ($item->kunjungan_pst == 1)
+                if ($item->kunjungan_layanan_pst == 1)
                 {
                     $warna_layanan_utama = 'badge-success';
                 }
-                else if ($item->kunjungan_pst == 2)
+                else if ($item->kunjungan_layanan_pst == 2)
                 {
                     $warna_layanan_utama = 'badge-warning';
                 }
-                else if ($item->kunjungan_pst == 3)
+                else if ($item->kunjungan_layanan_pst == 3)
                 {
                     $warna_layanan_utama = 'badge-info';
                 }
-                else if ($item->kunjungan_pst == 4)
+                else if ($item->kunjungan_layanan_pst == 4)
                 {
                     $warna_layanan_utama = 'badge-primary';
                 }

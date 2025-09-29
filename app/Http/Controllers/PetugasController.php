@@ -408,4 +408,8 @@ class PetugasController extends Controller
 
         return Response()->json($arr);
     }
+    public function profil()
+    {
+        return view('petugas.profil');
+    }
 }

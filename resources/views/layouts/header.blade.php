@@ -56,7 +56,7 @@
                     <div class="dropdown-menu dropdown-menu-right animated flipInY">
                         @if (Auth::user())
                             <!-- text-->
-                            <a href="javascript:void(0)" class="dropdown-item"><i class="ti-user"></i> My Profile</a>
+                            <a href="{{route('petugas.profil')}}" class="dropdown-item"><i class="ti-user"></i> Profil</a>
                             <div class="dropdown-divider"></div>
                             <a href="{{route('logout')}}" class="dropdown-item"><i class="fa fa-power-off"></i> Logout</a>
                             <!-- text-->

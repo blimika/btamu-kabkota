@@ -16,7 +16,7 @@
                         </span></a>
                     <ul aria-expanded="false" class="collapse">
                         @if (Auth::user())
-                            <li><a href="javascript:void(0)"><i class="ti-user"></i> My Profile</a></li>
+                            <li><a href="{{route('petugas.profil')}}"><i class="ti-user"></i> Profil</a></li>
                             <li><a href="{{route('logout')}}"><i class="fa fa-power-off"></i> Logout</a></li>
                         @else
                             <li><a href="{{route('login')}}"><i class="fa fa-power-off"></i> Login</a></li>
@@ -64,7 +64,7 @@
                     </li>
                     <li> <a class="waves-effect waves-dark" href="{{route('master.akses')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Daftar Akses</span></a>
                     </li>
-                    <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fab fa-whatsapp"></i><span class="hide-menu">Whatsapp</span></a>
+                    <li> <a class="waves-effect waves-dark" href="{{route('whatsapp.index')}}" aria-expanded="false"><i class="fab fa-whatsapp"></i><span class="hide-menu">Whatsapp</span></a>
                     </li>
                 @endif
                 @endif

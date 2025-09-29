@@ -63,6 +63,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/petugas/penilaian', 'PetugasController@Penilaian')->name('petugas.nilai');
     Route::get('/petugas/format', 'PetugasController@FormatPetugas')->name('petugas.format');
     Route::post('/petugas/import', 'PetugasController@ImportPetugas')->name('petugas.import');
+    Route::get('/petugas/profil', 'PetugasController@profil')->name('petugas.profil');
     //Tanggal dan jadwal
     Route::get('/master/tanggal', 'MasterController@tanggal')->name('master.tanggal');
     Route::get('/master/kalendar', 'MasterController@kalendar')->name('master.kalendar');
@@ -90,4 +91,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/pengunjung/update', 'PengunjungController@update')->name('pengunjung.update');
     Route::post('/pengunjung/hapus', 'PengunjungController@hapus')->name('pengunjung.hapus');
     Route::get('/pengunjung/pagelistfeedback', 'PengunjungController@PageListFeedback')->name('pengunjung.pagelistfeedback');
+    //whatsapp
+    Route::get('/whatsapp/index', 'WhatsappController@index')->name('whatsapp.index');
 });
