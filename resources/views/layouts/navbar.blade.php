@@ -39,12 +39,12 @@
                 <li class="nav-small-cap">--- KUNJUNGAN</li>
                 <li> <a class="waves-effect waves-dark" href="{{route('kunjungan.index')}}" aria-expanded="false"><i class="icon-people"></i><span class="hide-menu">List Kunjungan</span></a>
                 </li>
-                <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="icon-chart"></i><span class="hide-menu">Laporan</span></a>
+                <li> <a class="waves-effect waves-dark" href="{{route('kunjungan.laporan')}}" aria-expanded="false"><i class="icon-chart"></i><span class="hide-menu">Laporan</span></a>
                 </li>
                 <li class="nav-small-cap">--- PENGUNJUNG</li>
-                <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fa fa-graduation-cap"></i><span class="hide-menu">List Pengunjung</span></a>
+                <li> <a class="waves-effect waves-dark" href="{{route('pengunjung.index')}}" aria-expanded="false"><i class="fa fa-graduation-cap"></i><span class="hide-menu">List Pengunjung</span></a>
                 </li>
-                <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-files"></i><span class="hide-menu">Feedback</span></a>
+                <li> <a class="waves-effect waves-dark" href="{{route('pengunjung.feedback')}}" aria-expanded="false"><i class="ti-files"></i><span class="hide-menu">Feedback</span></a>
                 </li>
                 <li class="nav-small-cap">--- MASTER</li>
                 <li> <a class="has-arrow waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-gallery"></i><span class="hide-menu">Petugas</span></a>
@@ -62,7 +62,7 @@
                 @if (Auth::user()->user_level == 'admin')
                     <li> <a class="waves-effect waves-dark" href="{{route('master.tujuan')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Tujuan</span></a>
                     </li>
-                    <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Daftar Akses</span></a>
+                    <li> <a class="waves-effect waves-dark" href="{{route('master.akses')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Daftar Akses</span></a>
                     </li>
                     <li> <a class="waves-effect waves-dark" href="javascript:void(0)" aria-expanded="false"><i class="fab fa-whatsapp"></i><span class="hide-menu">Whatsapp</span></a>
                     </li>

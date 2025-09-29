@@ -2,11 +2,13 @@
 $('#GantiPasswdModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var gp_id = button.data('id')
+    var gp_uid = button.data('uid')
     var gp_username = button.data('username')
     var gp_nama = button.data('nama')
     $('#GantiPasswdModal .modal-body #gp_nama').text(gp_nama);
     $('#GantiPasswdModal .modal-body #gp_username').text(gp_username);
     $('#GantiPasswdModal .modal-body #gp_id').val(gp_id);
+    $('#GantiPasswdModal .modal-body #gp_uid').val(gp_uid);
     $('#GantiPasswdModal .modal-body #gp_id_teks').text('#'+gp_id);
 });
 
@@ -15,6 +17,7 @@ $('#GantiPasswdModal .modal-footer #GantiPasswdMember').on('click', function(e) 
     var gp_passwd = $('#GantiPasswdModal .modal-body #gp_passwd').val();
     var gp_ulangi_passwd = $('#GantiPasswdModal .modal-body #gp_ulangi_passwd').val();
     var gp_id = $('#GantiPasswdModal .modal-body #gp_id').val();
+    var gp_uid = $('#GantiPasswdModal .modal-body #gp_uid').val();
     if (gp_passwd == "")
     {
         $('#GantiPasswdModal .modal-body #gantipasswd_error').text('Password Baru tidak boleh kosong');
@@ -43,6 +46,7 @@ $('#GantiPasswdModal .modal-footer #GantiPasswdMember').on('click', function(e) 
             method : 'post',
             data: {
                 id: gp_id,
+                uid: gp_uid,
                 passwd_baru: gp_passwd,
                 ulangi_passwd_baru: gp_ulangi_passwd,
             },
@@ -53,7 +57,7 @@ $('#GantiPasswdModal .modal-footer #GantiPasswdMember').on('click', function(e) 
                 {
                     Swal.fire(
                         'Berhasil!',
-                        ''+data.hasil+'',
+                        ''+data.message+'',
                         'success'
                     ).then(function() {
                         $('#dTabel').DataTable().ajax.reload(null,false);
@@ -63,7 +67,7 @@ $('#GantiPasswdModal .modal-footer #GantiPasswdMember').on('click', function(e) 
                 {
                     Swal.fire(
                         'Error!',
-                        ''+data.hasil+'',
+                        ''+data.message+'',
                         'error'
                     );
                 }

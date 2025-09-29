@@ -28,6 +28,7 @@
                         <span id="gantipasswd_error" class="text-danger"></span>
                     </div>
                     <input type="hidden" id="gp_id" name="gp_id" value="" />
+                    <input type="hidden" id="gp_uid" name="gp_uid" value="" />
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success waves-effect" id="GantiPasswdMember" data-dismiss="modal">Ganti Password</button>

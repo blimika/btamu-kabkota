@@ -61,6 +61,7 @@
                                             <th>kode</th>
                                             <th>inisial</th>
                                             <th>nama</th>
+                                            <th>kunjungan</th>
                                             <th>aksi</th>
                                         </tr>
                                     </thead>
@@ -158,6 +159,10 @@
                         data: 'tujuan_nama'
                     },
                     {
+                        data: 'kunjungan',
+                        orderable: false
+                    },
+                    {
                         data: 'aksi',
                         orderable: false
                     },
@@ -169,8 +174,75 @@
                 ],
                 responsive: true,
                 "fnDrawCallback": function() {
-                    //hapus tamu
+                    //hapus tujuan
+                $(".hapustujuan").click(function (e) {
+                    e.preventDefault();
+                    var id = $(this).data('id');
+                    var kode = $(this).data('kode');
+                    var inisial = $(this).data('inisial');
+                    var nama = $(this).data('nama');
+                    var kunjungan = $(this).data('kunjungan');
+                    Swal.fire({
+                                title: 'Akan dihapus?',
+                                text: "Data tujuan ("+kode+"-"+inisial+"-"+nama+") akan dihapus permanen dan data "+kunjungan+" kunjungan akan ikut terhapus",
+                                type: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: 'Hapus'
+                            }).then((result) => {
+                                if (result.value) {
+                                    //response ajax disini
+                                    $.ajaxSetup({
+                                        headers: {
+                                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                        }
+                                    });
+                                    $.ajax({
+                                        url : '{{route('master.hapustujuan')}}',
+                                        method : 'post',
+                                        data: {
+                                            id: id,
+                                            tujuan_kode: kode,
+                                            tujuan_inisial: inisial,
+                                            tujuan_nama: nama
+                                        },
+                                        cache: false,
+                                        dataType: 'json',
+                                        success: function(d){
+                                            if (d.status == true)
+                                            {
+                                                Swal.fire(
+                                                    'Berhasil!',
+                                                    ''+d.message+'',
+                                                    'success'
+                                                ).then(function() {
+                                                    $('#dTabel').DataTable().ajax.reload(null,false);
+                                                });
+                                            }
+                                            else
+                                            {
+                                                Swal.fire(
+                                                    'Error!',
+                                                    ''+d.message+'',
+                                                    'danger'
+                                                );
+                                            }
 
+                                        },
+                                        error: function(){
+                                            Swal.fire(
+                                                'Error',
+                                                'Koneksi Error',
+                                                'danger'
+                                            );
+                                        }
+
+                                    });
+
+                                }
+                            })
+                    });
                     //batas hapus
 
                 }
@@ -182,4 +254,5 @@
     <!-- Sweet-Alert  -->
     <script src="{{ asset('assets/node_modules/sweetalert2/dist/sweetalert2.all.min.js') }}"></script>
     @include('master.js-tujuan')
+    @include('master.js-edittujuan')
 @stop

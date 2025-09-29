@@ -29,22 +29,24 @@ use App\Mail\KirimFeedback;
 use App\Mail\KirimLinkSKD;
 use PDF;
 use Excel;
+use App\Services\WhatsAppService;
 
 class KunjunganController extends Controller
 {
-    protected $WhatsappService;
+    protected $waService;
     protected $cek_nomor_hp;
     protected $link_skd;
     protected $nama_aplikasi;
     protected $nama_satker;
     protected $alamat_satker;
 
-    public function __construct()
+    public function __construct(WhatsAppService $waService)
     {
         $this->link_skd = env('APP_LINK_SKD');
         $this->nama_aplikasi = ENV('NAMA_APLIKASI');
         $this->nama_satker = ENV('NAMA_SATKER');
         $this->alamat_satker = ENV('ALAMAT_SATKER');
+        $this->waService = $waService;
     }
     private function cek_nomor_hp($nomor)
     {
@@ -297,6 +299,149 @@ class KunjunganController extends Controller
             }
             //batasan email
             //notif whatsapp dilengkapi kemudian
+            //kirim notif ke pengunjung
+            if (ENV('APP_WA_LOKAL_MODE') == true) {
+                //persiapan untuk WA
+                $recipients = $newdata->Pengunjung->pengunjung_nomor_hp;
+                $recipients = $this->cek_nomor_hp($recipients);
+                $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10).
+                'Terimakasih, telah berkunjung ke BPS Provinsi Nusa Tenggara Barat.'.chr(10)
+                .'Berikut nomor antrian Anda!'.chr(10).chr(10)
+                .'#Detil Kunjungan'.chr(10)
+                .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
+                .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
+                .'Email : *'.$body->pengunjung_email.'*'.chr(10)
+                .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
+                .'Tanggal Kunjungan : *'.$body->kunjungan_tanggal.'* '.chr(10).chr(10)
+                .'Layanan :  *'.$body->layanan.'*'.chr(10)
+                .'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10)
+                .'Terimakasih,'.chr(10)
+                .$this->nama_aplikasi.chr(10)
+                .$this->nama_satker.chr(10)
+                .$this->alamat_satker;
+                //input ke log pesan
+                $new_wa = new Whatsapp();
+                $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
+                $new_wa->wa_uid = Generate::Kode(8);
+                $new_wa->wa_pengunjung_uid = $data->pengunjung_uid;
+                $new_wa->wa_kunjungan_uid = $newdata->kunjungan_uid;
+                $new_wa->wa_target = $recipients;
+                $new_wa->wa_message = $message;
+                $new_wa->save();
+                try {
+                    $result = $this->waService->sendMessage($recipients, $message);
+                    //return response()->json($result);
+                    if ($result)
+                    {
+                        $new_wa->wa_message_id = $result['results']['message_id'];
+                        $new_wa->wa_status = $result['results']['status'];
+                        $new_wa->wa_flag = 'terkirim';
+                        $new_wa->update();
+                    }
+                    //$arr = $result;
+                } catch (\Throwable $e) {
+                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
+                    //return response()->json(['error' => 'Internal Server Error'],500);
+                    $new_wa->wa_status = $error ;
+                    $new_wa->wa_flag = 'gagal';
+                    $new_wa->update();
+                }
+            }
+            //kirim notif ke petugas jaga
+            //jika kunjungan ke PST
+            if ($request->kunjungan_tujuan == 2)
+            {
+                if (ENV('APP_WA_PETUGAS_MODE') == true) {
+                    $petugas_jaga = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
+                    if ($petugas_jaga)
+                    {
+                        if ($petugas_jaga->tanggal_jenis == 'kerja')
+                        {
+                            $msg_operator = 'Ada kunjungan ke '.$this->nama_satker.chr(10)
+                            .'Berikut informasinya:'.chr(10).chr(10)
+                            .'#Detil Kunjungan'.chr(10)
+                            .'Pengunjung UID : *'.$data->pengunjung_uid.'*'.chr(10)
+                            .'Kunjungan UID : *'.$body->kunjungan_uid.'*'.chr(10)
+                            .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
+                            .'Email : *'.$body->pengunjung_email.'*'.chr(10)
+                            .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
+                            .'Tanggal Kunjungan : *'.$body->kunjungan_tanggal.'* '.chr(10)
+                            .'Keperluan : *'.$request->kunjungan_keperluan.'*'.chr(10).chr(10)
+                            .'Layanan :  *'.$body->layanan.'*'.chr(10)
+                            .'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10)
+                            .'Terimakasih,'.chr(10)
+                            .$this->nama_aplikasi.chr(10)
+                            .$this->nama_satker.chr(10)
+                            .$this->alamat_satker;
+                            //penjaga pst 1
+                            if ($petugas_jaga->tanggal_petugas1_uid != null)
+                            {
+                                if (ENV('APP_WA_LOKAL_MODE') == true) {
+                                    $hp_petugas1 = $petugas_jaga->Petugas1->user_telepon;
+                                    $recipients1 = $this->cek_nomor_hp($hp_petugas1);
+                                    $new_wa1 = new Whatsapp();
+                                    $new_wa1->wa_tanggal = Carbon::today()->format('Y-m-d');
+                                    $new_wa1->wa_uid = Generate::Kode(8);
+                                    $new_wa1->wa_pengunjung_uid = $data->pengunjung_uid;
+                                    $new_wa1->wa_kunjungan_uid = $body->kunjungan_uid;
+                                    $new_wa1->wa_target = $recipients1;
+                                    $new_wa1->wa_message = $msg_operator;
+                                    $new_wa1->save();
+                                    try {
+                                        $result1 = $this->WAservice->sendMessage($recipients1, $msg_operator);
+                                        if ($result1)
+                                        {
+                                            $new_wa1->wa_message_id = $result1['results']['message_id'];
+                                            $new_wa1->wa_status = $result1['results']['status'];
+                                            $new_wa1->wa_flag = 'terkirim';
+                                            $new_wa1->update();
+                                        }
+
+                                    } catch (\Throwable $e) {
+                                        $error1 = Log::error('WA LOKAL 1: ' . $e->getMessage());
+                                        $new_wa1->wa_status = $error1 ;
+                                        $new_wa1->wa_flag = 'gagal';
+                                        $new_wa1->update();
+                                    }
+                                }
+                            }
+                            sleep(1);
+                            if ($petugas_jaga->tanggal_petugas2_uid != null)
+                            {
+                                if (ENV('APP_WA_LOKAL_MODE') == true) {
+                                    $hp_petugas2 = $petugas_jaga->Petugas2->user_telepon;
+                                    $recipients2 = $this->cek_nomor_hp($hp_petugas2);
+                                    $new_wa2 = new Whatsapp();
+                                    $new_wa2->wa_tanggal = Carbon::today()->format('Y-m-d');
+                                    $new_wa2->wa_uid = Generate::Kode(8);
+                                    $new_wa2->wa_pengunjung_uid = $data->pengunjung_uid;
+                                    $new_wa2->wa_kunjungan_uid = $body->kunjungan_uid;
+                                    $new_wa2->wa_target = $recipients1;
+                                    $new_wa2->wa_message = $msg_operator;
+                                    $new_wa2->save();
+                                    try {
+                                        $result2 = $this->WAservice->sendMessage($recipients2, $msg_operator);
+                                        if ($result2)
+                                        {
+                                            $new_wa2->wa_message_id = $result2['results']['message_id'];
+                                            $new_wa2->wa_status = $result2['results']['status'];
+                                            $new_wa2->wa_flag = 'terkirim';
+                                            $new_wa2->update();
+                                        }
+
+                                    } catch (\Throwable $e) {
+                                        $error2 = Log::error('WA LOKAL 2: ' . $e->getMessage());
+                                        $new_wa2->wa_status = $error2 ;
+                                        $new_wa2->wa_flag = 'gagal';
+                                        $new_wa2->update();
+                                    }
+                                }
+                            }
+                            //penjaga pst 2
+                        }
+                    }
+                }
+            }
             $header_error = "<strong>Terimakasih</strong>";
             $pesan_error = "Data kunjungan an. <strong><i>" . trim($request->pengunjung_nama) . "</i></strong> berhasil ditambahkan";
             $warna_error = "success";
@@ -771,15 +916,15 @@ class KunjunganController extends Controller
         if ($data) {
             if ($data->kunjungan_tujuan == 1)
             {
-                $layanan = $data->Tujuan->nama .' - '. $data->LayananKantor->layanan_kantor_nama;
+                $layanan = $data->Tujuan->tujuan_nama .' - '. $data->LayananKantor->layanan_kantor_nama;
             }
             elseif ($data->kunjungan_tujuan == 2)
             {
-                $layanan = $data->Tujuan->nama .' - '. $data->LayananPst->layanan_pst_nama;
+                $layanan = $data->Tujuan->tujuan_nama .' - '. $data->LayananPst->layanan_pst_nama;
             }
             else
             {
-                $layanan = $data->Tujuan->nama;
+                $layanan = $data->Tujuan->tujuan_nama;
             }
             //kirim mail
             $body = new \stdClass();
@@ -817,33 +962,46 @@ class KunjunganController extends Controller
             {
                 $arr = array(
                     'status' => false,
-                    'hasil' => 'Alamat email Kunjungan an. '.$data->Pengunjung->pengunjung_nama.' tidak sesuai format'
+                    'message' => 'Alamat email Kunjungan an. '.$data->Pengunjung->pengunjung_nama.' tidak sesuai format'
                 );
             }
             //persiapan untuk WA
-            $recipients = $data->Pengunjung->pengunjung_nomor_hp;
-            $recipients = $this->cek_nomor_hp($recipients);
-            $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10).'Terimakasih, telah berkunjung ke BPS Provinsi Nusa Tenggara Barat.'.chr(10).'Berikut nomor antrian Anda!'.chr(10).chr(10).'#Detil Kunjungan'.chr(10).'UID : *'.$body->kunjungan_uid.'*'.chr(10).'Nama : *'.$body->pengunjung_nama.'*'.chr(10).'Email : *'.$body->pengunjung_email.'*'.chr(10).'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10).'Tanggal Kunjungan : *'.$body->kunjungan_tanggal.'* '.chr(10).chr(10).'Layanan :  *'.$body->layanan.'*'.chr(10).'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10).'Terimakasih,'.chr(10).'Aplikasi Bukutamu '.chr(10).'BPS Provinsi Nusa Tenggara Barat'.chr(10).'Jl. Dr. Soedjono No. 74 Mataram NTB 83116';
-            //input ke log pesan
-            /*
-            $new_wa = new LogWhatsapp();
-            $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
-            $new_wa->wa_uid = Generate::Kode(8);
-            $new_wa->wa_pengunjung_uid = $data->pengunjung_uid;
-            $new_wa->wa_kunjungan_uid = $data->kunjungan_uid;
-            $new_wa->wa_target = $recipients;
-            $new_wa->wa_message = $message;
-            $new_wa->save();
-            //cek dulu wa nya bisa apa ngga
             if (ENV('APP_WA_LOKAL_MODE') == true) {
+                //persiapan untuk WA
+                $recipients = $data->Pengunjung->pengunjung_nomor_hp;
+                $recipients = $this->cek_nomor_hp($recipients);
+                $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10)
+                .'Terimakasih, telah berkunjung ke BPS Provinsi Nusa Tenggara Barat.'.chr(10)
+                .'Berikut nomor antrian Anda!'.chr(10).chr(10)
+                .'#Detil Kunjungan'.chr(10)
+                .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
+                .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
+                .'Email : *'.$body->pengunjung_email.'*'.chr(10)
+                .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
+                .'Tanggal Kunjungan : *'.$body->kunjungan_tanggal.'* '.chr(10).chr(10)
+                .'Layanan :  *'.$body->layanan.'*'.chr(10)
+                .'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10)
+                .'Terimakasih,'.chr(10)
+                .$this->nama_aplikasi.chr(10)
+                .$this->nama_satker.chr(10)
+                .$this->alamat_satker;
+                //input ke log pesan
+                $new_wa = new Whatsapp();
+                $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
+                $new_wa->wa_uid = Generate::Kode(8);
+                $new_wa->wa_pengunjung_uid = $data->pengunjung_uid;
+                $new_wa->wa_kunjungan_uid = $data->kunjungan_uid;
+                $new_wa->wa_target = $recipients;
+                $new_wa->wa_message = $message;
+                $new_wa->save();
                 try {
-                    $result = $this->WAservice->sendMessage($recipients, $message);
+                    $result = $this->waService->sendMessage($recipients, $message);
                     //return response()->json($result);
                     if ($result)
                     {
                         $new_wa->wa_message_id = $result['results']['message_id'];
                         $new_wa->wa_status = $result['results']['status'];
-                        $new_wa->wa_flag = 2;
+                        $new_wa->wa_flag = 'terkirim';
                         $new_wa->update();
                     }
                     //$arr = $result;
@@ -851,11 +1009,10 @@ class KunjunganController extends Controller
                     $error = Log::error('WA LOKAL: ' . $e->getMessage());
                     //return response()->json(['error' => 'Internal Server Error'],500);
                     $new_wa->wa_status = $error ;
-                    $new_wa->wa_flag = 3;
+                    $new_wa->wa_flag = 'gagal';
                     $new_wa->update();
                 }
-            } */
-            //batas
+            }
         }
         #dd($request->all());
         return Response()->json($arr);
@@ -1290,15 +1447,15 @@ class KunjunganController extends Controller
             //kirim mail
             if ($data->kunjungan_tujuan == 1)
             {
-                $layanan = $data->Tujuan->nama .' - '. $data->LayananKantor->layanan_kantor_nama;
+                $layanan = $data->Tujuan->tujuan_nama .' - '. $data->LayananKantor->layanan_kantor_nama;
             }
             elseif ($data->kunjungan_tujuan == 2)
             {
-                $layanan = $data->Tujuan->nama .' - '. $data->LayananPst->layanan_pst_nama;
+                $layanan = $data->Tujuan->tujuan_nama .' - '. $data->LayananPst->layanan_pst_nama;
             }
             else
             {
-                $layanan = $data->Tujuan->nama;
+                $layanan = $data->Tujuan->tujuan_nama;
             }
             //kirim mail
             $body = new \stdClass();
@@ -1345,8 +1502,20 @@ class KunjunganController extends Controller
             //persiapan untuk WA
             $recipients = $data->Pengunjung->pengunjung_nomor_hp;
             $recipients = $this->cek_nomor_hp($recipients);
-            $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10).
-            'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke BPS Provinsi Nusa Tenggara Barat pada *'.\Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y').'* Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10).'#Detil Kunjungan'.chr(10).'UID : *'.$body->kunjungan_uid.'*'.chr(10).'Nama : *'.$body->pengunjung_nama.'*'.chr(10).'Email : *'.$body->pengunjung_email.'*'.chr(10).'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10).'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10).'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback singkat berikut ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik.'.chr(10).'Jika mengalami kendala dalam klik link feedback, silakan copy paste link ini'.chr(10).'*'.route('kunjungan.feedback',$data->kunjungan_uid).'*'.chr(10).'Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.'.chr(10).chr(10).'Aplikasi Bukutamu '.chr(10).'BPS Provinsi Nusa Tenggara Barat'.chr(10).'Jl. Dr. Soedjono No. 74 Mataram NTB 83116';
+            $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10)
+            .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke BPS Provinsi Nusa Tenggara Barat pada *'.\Carbon\Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y').'* Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10)
+            .'#Detil Kunjungan'.chr(10)
+            .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
+            .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
+            .'Email : *'.$body->pengunjung_email.'*'.chr(10)
+            .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
+            .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10)
+            .'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback singkat berikut ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik.'.chr(10)
+            .'Jika mengalami kendala dalam klik link feedback, silakan copy paste link ini'.chr(10).chr(10)
+            .'*'.route('kunjungan.feedback',$data->kunjungan_uid).'*'.chr(10).chr(10)
+            .'Aplikasi Bukutamu '.chr(10)
+            .'BPS Provinsi Nusa Tenggara Barat'
+            .chr(10).'Jl. Dr. Soedjono No. 74 Mataram NTB 83116';
             //input ke log pesan
             /*
             $new_wa = new LogWhatsapp();
@@ -1599,5 +1768,18 @@ class KunjunganController extends Controller
         Session::flash('message', $pesan_error);
         Session::flash('message_type', $warna_error);
         return redirect()->route('depan');
+    }
+    public function laporan(Request $request)
+    {
+        if (request('tahun') == NULL) {
+            $tahun_filter = Carbon::today()->format('Y');
+        } else {
+            $tahun_filter = request('tahun');
+        }
+        $data = \DB::table('m_bulan')
+        ->leftJoin(\DB::Raw("(select month(kunjungan_tanggal) as bln_total, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_kunjungan where year(kunjungan_tanggal)='".$tahun_filter."' GROUP by bln_total) as total"),'m_bulan.id','=','total.bln_total')
+        ->select(\DB::Raw('bulan_nama,bulan_nama_pendek,COALESCE(jumlah_kunjungan,0) as jumlah_kunjungan, COALESCE(jumlah_total,0) as jumlah_total, COALESCE(jumlah_laki,0) as jumlah_laki, COALESCE(jumlah_wanita,0) as jumlah_wanita'))->get();
+        //dd($data);
+        return view('kunjungan.laporan',['data'=>$data,'tahun'=>$tahun_filter]);
     }
 }

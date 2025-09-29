@@ -40,6 +40,7 @@ Route::group(['middleware' => 'ip.or.login'], function () {
 Route::group(['middleware' => ['auth']], function () {
     //Petugas
     Route::get('/kunjungan/index', 'KunjunganController@index')->name('kunjungan.index');
+    Route::get('/kunjungan/laporan', 'KunjunganController@laporan')->name('kunjungan.laporan');
     Route::get('/kunjungan/pagelist', 'KunjunganController@PageListKunjungan')->name('kunjungan.pagelist');
     Route::post('/kunjungan/kirimnomor', 'KunjunganController@KirimNomorAntrian')->name('kunjungan.kirimnomor');
     Route::post('/kunjungan/kirimlinkfeedback', 'KunjunganController@KirimLinkFeedback')->name('kunjungan.kirimlinkfeedback');
@@ -67,7 +68,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/master/kalendar', 'MasterController@kalendar')->name('master.kalendar');
     Route::get('/master/format/jadwal', 'MasterController@FormatJadwal')->name('master.formatjadwal');
     Route::get('/master/listtanggal', 'MasterController@PageListTanggal')->name('master.listtanggal');
-    Route::post('/master/hapusakses', 'MasterController@HapusAkses')->name('master.hapusakses');
     Route::post('/master/gen/tanggal', 'MasterController@GenerateTanggal')->name('master.gentanggal');
     Route::post('/master/updatetgl', 'MasterController@UpdateTanggal')->name('master.updatetgl');
     Route::post('/master/updatejadwal', 'MasterController@UpdateJadwal')->name('master.updatejadwal');
@@ -75,4 +75,19 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/master/tujuan', 'MasterController@tujuan')->name('master.tujuan');
     Route::get('/master/listtujuan', 'MasterController@PageListTujuan')->name('master.listtujuan');
     Route::post('/master/simpantujuan', 'MasterController@SimpanTujuan')->name('master.simpantujuan');
+    Route::post('/master/hapustujuan', 'MasterController@HapusTujuan')->name('master.hapustujuan');
+    Route::post('/master/updatetujuan', 'MasterController@updateTujuan')->name('master.updatetujuan');
+    Route::get('/master/akses', 'MasterController@akses')->name('master.akses');
+    Route::get('/master/listakses', 'MasterController@PageListAkses')->name('master.listakses');
+    Route::post('/master/hapusakses', 'MasterController@HapusAkses')->name('master.hapusakses');
+    Route::post('/master/ubahflagakses', 'MasterController@UbahFLagAkses')->name('master.ubahflagakses');
+    Route::post('/master/simpanakses', 'MasterController@SimpanAkses')->name('master.simpanakses');
+    Route::post('/master/updateakses', 'MasterController@UpdateAkses')->name('master.updateakses');
+    //pengunjung
+    Route::get('/pengunjung/index', 'PengunjungController@index')->name('pengunjung.index');
+    Route::get('/pengunjung/pagelist', 'PengunjungController@PageList')->name('pengunjung.pagelist');
+    Route::get('/pengunjung/feedback', 'PengunjungController@feedback')->name('pengunjung.feedback');
+    Route::post('/pengunjung/update', 'PengunjungController@update')->name('pengunjung.update');
+    Route::post('/pengunjung/hapus', 'PengunjungController@hapus')->name('pengunjung.hapus');
+    Route::get('/pengunjung/pagelistfeedback', 'PengunjungController@PageListFeedback')->name('pengunjung.pagelistfeedback');
 });

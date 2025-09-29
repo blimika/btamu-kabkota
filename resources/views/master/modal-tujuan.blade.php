@@ -1,4 +1,4 @@
-<div class="modal fade" id="EditTujuan" tabindex="-1" role="dialog" aria-labelledby="vcenter">
+<div class="modal fade" id="EditTujuanModal" tabindex="-1" role="dialog" aria-labelledby="vcenter">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-info">
@@ -12,33 +12,29 @@
                     <dl class="row">
                         <dt class="col-sm-4">ID</dt>
                         <dd class="col-sm-8"><span id="edit_id"></span></dd>
+                        <dt class="col-sm-4">Kode</dt>
+                        <dd class="col-sm-8"><span id="edit_kode"></span></dd>
                     </dl>
                     <hr />
                     <div class="form-group row">
-                        <label class="control-label col-md-2">Kode</label>
-                        <div class="input-group col-md-10">
-                            <input type="text" class="form-control" id="edit_tujuan_kode" name="tujuan_kode" />
-                        </div>
-                    </div>
-                    <div class="form-group row">
                         <label class="control-label col-md-2">Inisial</label>
                         <div class="input-group col-md-10">
-                            <input type="text" class="form-control" id="edit_tujuan_inisial" name="tujuan_inisial" />
+                            <input type="text" class="form-control" id="edit_tujuan_inisial" name="edit_tujuan_inisial" />
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="control-label col-md-2">Nama</label>
                         <div class="input-group col-md-10">
-                            <input type="text" class="form-control" id="edit_tujuan_nama" name="tujuan_nama" />
+                            <input type="text" class="form-control" id="edit_tujuan_nama" name="edit_tujuan_inisial" />
                         </div>
                     </div>
                     <div class="form-group">
-                        <span id="tanggal_error" class="text-danger"></span>
+                        <span id="edit_tujuan_error" class="text-danger"></span>
                     </div>
-                    <input type="hidden" id="tujuan_id" name="tujuan_id" value="" />
+                    <input type="hidden" id="edit_tujuan_id" name="edit_tujuan_id" value="" />
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-success waves-effect" id="updatetgl"
+                <button type="submit" class="btn btn-success waves-effect" id="updatetujuan"
                     data-dismiss="modal">UPDATE</button>
                 <button type="button" class="btn btn-danger waves-effect" data-dismiss="modal">CLOSE</button>
             </div>

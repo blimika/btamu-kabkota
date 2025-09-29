@@ -24,7 +24,7 @@
                 if (data.status == true) {
                     Swal.fire(
                         'Berhasil!',
-                        '' + data.hasil + '',
+                        '' + data.message + '',
                         'success'
                     ).then(function() {
                         $('#dTabel').DataTable().ajax.reload(null, false);
@@ -32,7 +32,7 @@
                 } else {
                     Swal.fire(
                         'Error!',
-                        '' + data.hasil + '',
+                        '' + data.message + '',
                         'error'
                     );
                 }

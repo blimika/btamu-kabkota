@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\KirimAntrian;
 use App\Mail\KirimFeedback;
 use Excel;
+use App\Services\WhatsAppService;
 
 class PetugasController extends Controller
 {
@@ -338,6 +339,73 @@ class PetugasController extends Controller
                 'message'=>'Username '.$request->username.' sudah ada yang menggunakan',
             );
         }
+        return Response()->json($arr);
+    }
+    public function AdmGantiPasswd(Request $request)
+    {
+        //hanya admin dan operator yg bisa ganti password nya
+        //tapi tidak bisa ganti password sendiri harus dari menu profil
+        //admin boleh ganti password level dibawahnya
+        if (!Auth::User()) {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Anda tidak memiliki akses untuk ganti password petugas'
+            );
+            return Response()->json($arr);
+        }
+        $data = User::where('user_uid',$request->uid)->first();
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data petugas tidak ditemukan'
+        );
+        if ($data)
+        {
+            if ($data->username == 'admin')
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Superadmin tidak ganti password melalui menu ini, harus melalui menu profil'
+                );
+            }
+            elseif (Auth::User()->username == $data->username)
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Tidak bisa mengganti password sendiri, harus dari menu profil'
+                );
+            }
+            elseif (Auth::User()->user_level == "operator")
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Operator tidak bisa mengganti password operator/admin'
+                );
+            }
+            elseif ($request->passwd_baru != $request->ulangi_passwd_baru )
+            {
+                /*
+                id: gp_id,
+                passwd_baru: gp_passwd,
+                ulangi_passwd_baru: gp_ulangi_passwd,
+                */
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Password baru dan ulangi password tidak sama'
+                );
+            }
+            else
+            {
+                //$data->password = bcrypt($request->passwd);
+                $data->password = bcrypt($request->passwd_baru);
+                $data->update();
+
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Password petugas an. '.$data->name.' berhasil diganti'
+                );
+            }
+        }
+
         return Response()->json($arr);
     }
 }

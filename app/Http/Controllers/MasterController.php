@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Akses;
 use App\Helpers\Tanggal;
 use App\Tanggal as AppTanggal;
 use App\User;
@@ -10,11 +12,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exports\FormatJadwal;
 use App\Imports\ImportJadwalPetugas;
+use App\Kunjungan;
 use App\Tujuan;
 use Excel;
+use App\Services\WhatsAppService;
 
 class MasterController extends Controller
 {
+    protected $waService;
+    protected $cek_nomor_hp;
+    public function __construct(WhatsAppService $waService)
+    {
+        $this->nama_aplikasi = ENV('NAMA_APLIKASI');
+        $this->nama_satker = ENV('NAMA_SATKER');
+        $this->alamat_satker = ENV('ALAMAT_SATKER');
+        $this->waService = $waService;
+    }
     public function tanggal()
     {
         $data_tahun = DB::table('m_tanggal')
@@ -171,10 +184,6 @@ class MasterController extends Controller
 
         echo json_encode($response);
         exit;
-    }
-    public function HapusAkses()
-    {
-
     }
     public function GenerateTanggal(Request $request)
     {
@@ -360,6 +369,7 @@ class MasterController extends Controller
         // Total records
         $totalRecords = AppTanggal::count();
         $totalRecordswithFilter = DB::table('m_tujuan')
+        ->leftJoin(DB::Raw("(select kunjungan_tujuan, count(*) as jumlah_kunjungan from m_kunjungan group by kunjungan_tujuan) as kunjungan"),'m_tujuan.tujuan_kode','=','kunjungan.kunjungan_tujuan')
         ->when($searchValue, function ($q) use ($searchValue) {
             return $q->where('m_tujuan.tujuan_kode', 'like', '%' .$searchValue . '%')
                          ->orWhere('m_tujuan.tujuan_inisial', 'like', '%' . $searchValue . '%')
@@ -369,15 +379,17 @@ class MasterController extends Controller
 
         // Fetch records
         $records = DB::table('m_tujuan')
+            ->leftJoin(DB::Raw("(select kunjungan_tujuan, count(*) as jumlah_kunjungan from m_kunjungan group by kunjungan_tujuan) as kunjungan"),'m_tujuan.tujuan_kode','=','kunjungan.kunjungan_tujuan')
             ->when($searchValue, function ($q) use ($searchValue) {
                 return $q->where('m_tujuan.tujuan_kode', 'like', '%' .$searchValue . '%')
                             ->orWhere('m_tujuan.tujuan_inisial', 'like', '%' . $searchValue . '%')
                             ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%');
             })
+            ->select('m_tujuan.*','kunjungan.*')
             ->skip($start)
             ->take($rowperpage)
             ->orderBy($columnName,$columnSortOrder)
-            ->orderBy('tujuan_kode','asc')
+            ->orderBy('m_tujuan.tujuan_kode','asc')
             ->get();
 
         $data_arr = array();
@@ -387,6 +399,7 @@ class MasterController extends Controller
             $kode = $record->tujuan_kode;
             $inisial = $record->tujuan_inisial;
             $nama = $record->tujuan_nama;
+            $kunjungan = $record->jumlah_kunjungan;
             if (Auth::user()->user_level == 'admin')
             {
                 if ($record->tujuan_kode <= 2)
@@ -401,9 +414,10 @@ class MasterController extends Controller
                                 <i class="ti-settings"></i>
                             </button>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'" data-toggle="modal" data-target="#EditTujuan">Edit</a>
+                                <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'"
+                                data-inisial="'.$record->tujuan_inisial.'" data-nama="'.$record->tujuan_nama.'" data-toggle="modal" data-target="#EditTujuanModal">Edit</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'" data-toggle="modal" data-target="#HapusTujuan">Hapus</a>
+                                <a class="dropdown-item hapustujuan" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'" data-inisial="'.$record->tujuan_inisial.'" data-nama="'.$record->tujuan_nama.'" data-kunjungan="'.$record->jumlah_kunjungan.'">Hapus</a>
                             </div>
                             </div>
                             ';
@@ -419,6 +433,7 @@ class MasterController extends Controller
                 "tujuan_kode"=>$kode,
                 "tujuan_inisial"=>$inisial,
                 "tujuan_nama"=> $nama,
+                "kunjungan"=>$kunjungan,
                 "aksi"=>$aksi
             );
         }
@@ -438,8 +453,51 @@ class MasterController extends Controller
 
         $arr = array(
             'status'=>false,
-            'hasil'=>'Data tidak disimpan'
+            'message'=>'Data tidak disimpan'
         );
+        $cek_kode = Tujuan::where('tujuan_kode',$request->tujuan_kode)->first();
+        $cek_inisial = Tujuan::where('tujuan_inisial','like',trim($request->tujuan_inisial))->first();
+        $cek_nama = Tujuan::where('tujuan_nama','like','%'.trim($request->tujuan_nama).'%')->first();
+        if ($cek_kode)
+        {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Kode ('.$request->tujuan_kode.') sudah tersedia',
+            );
+        }
+        else
+        {
+            if ($cek_inisial)
+            {
+                 $arr = array(
+                    'status'=>false,
+                    'message'=>'Inisial ('.$request->tujuan_inisial.') sudah tersedia',
+                );
+            }
+            else
+            {
+                if ($cek_nama)
+                {
+                    $arr = array(
+                    'status'=>false,
+                    'message'=>'Nama ('.$request->tujuan_nama.') sudah tersedia',
+                    );
+                }
+                else
+                {
+                    $data = new Tujuan();
+                    $data->tujuan_kode = trim($request->tujuan_kode);
+                    $data->tujuan_inisial = trim($request->tujuan_inisial);
+                    $data->tujuan_nama = trim($request->tujuan_nama);
+                    $data->save();
+
+                    $arr = array(
+                        'status'=>true,
+                        'message'=>'Tujuan ('.$request->tujuan_nama.') sudah tersimpan',
+                    );
+                }
+            }
+        }
         return Response()->json($arr);
     }
     public function kalendar()
@@ -482,5 +540,272 @@ class MasterController extends Controller
         }
         $data_jadwal = json_encode($arr);
         return view('master.kalendar',['data_jadwal'=>$data_jadwal]);
+    }
+    public function akses()
+    {
+        $data = Akses::get();
+        return view('master.akses',['data'=>$data]);
+    }
+    public function PageListAkses(Request $request)
+    {
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length"); // Rows display per page
+
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+
+        $columnIndex = $columnIndex_arr[0]['column']; // Column index
+        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
+        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
+        $searchValue = $search_arr['value']; // Search value
+
+        // Total records
+        $totalRecords = Akses::select('count(*) as allcount')->count();
+        $totalRecordswithFilter = Akses::select('count(*) as allcount')->where('akses_ip', 'like', '%' .$searchValue . '%')->count();
+
+        // Fetch records
+        $records = Akses::orderBy($columnName,$columnSortOrder)
+            ->where('m_akses.akses_ip', 'like', '%' .$searchValue . '%')
+            ->select('m_akses.*')
+            ->skip($start)
+            ->take($rowperpage)
+            ->orderBy('created_at','desc')
+            ->get();
+
+        $data_arr = array();
+        $sno = $start+1;
+        foreach($records as $record){
+            $id = $record->id;
+            $ip = $record->akses_ip;
+            $flag = $record->akses_flag;
+            $created_at = $record->created_at;
+            $updated_at = $record->updated_at;
+            if ($record->akses_flag == 0)
+            {
+                if (Auth::user()->user_level == 'admin')
+                {
+                    $flagteks ='<a class="dropdown-item ubahflagakses" href="#" data-id="'.$record->id.'" data-ip="'.$record->akses_ip.'" data-flag="'.$record->akses_flag.'">Ubah Flag</a>';
+                }
+                else
+                {
+                    $flagteks = '';
+                }
+                $aksi ='
+                <div class="btn-group">
+                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="ti-settings"></i>
+                </button>
+                <div class="dropdown-menu">
+
+                    <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-ip="'.$record->akses_ip.'" data-toggle="modal" data-target="#EditAksesModal">Edit</a>
+                    '.$flagteks.'
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item hapusakses" href="#" data-id="'.$record->id.'" data-ip="'.$record->akses_ip.'">Hapus</a>
+                </div>
+                </div>
+                ';
+            }
+            else
+            {
+                if (Auth::user()->user_level == 'admin')
+                {
+                    $aksi ='
+                    <div class="btn-group">
+                    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="ti-settings"></i>
+                    </button>
+                    <div class="dropdown-menu">
+
+                        <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-ip="'.$record->akses_ip.'" data-toggle="modal" data-target="#EditAksesModal">Edit</a>
+                        <a class="dropdown-item ubahflagakses" href="#" data-id="'.$record->id.'" data-ip="'.$record->akses_ip.'" data-flag="'.$record->akses_flag.'">Ubah Flag</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item hapusakses" href="#" data-id="'.$record->id.'" data-ip="'.$record->akses_ip.'">Hapus</a>
+                    </div>
+                    </div>
+                    ';
+                }
+                else
+                {
+                    $aksi ='';
+                }
+            }
+            $data_arr[] = array(
+                "id" => $id,
+                "akses_ip"=>$ip,
+                "akses_flag"=> $flag,
+                "created_at"=>$created_at,
+                "updated_at"=>$updated_at,
+                "aksi"=>$aksi
+            );
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        echo json_encode($response);
+        exit;
+    }
+    public function HapusAkses(Request $request)
+    {
+        $data = Akses::where('id',$request->id)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data IP Address ('.trim($request->ip).') tidak tersedia'
+        );
+        if ($data)
+        {
+            $ip = $data->akses_ip;
+            $data->delete();;
+            $arr = array(
+                'status'=>true,
+                'hasil'=>'IP Address '.$ip.' berhasil hapus'
+            );
+        }
+        return Response()->json($arr);
+    }
+    public function UbahFLagAkses(Request $request)
+    {
+        $flag_akses = array(0=>'Edit','No-Edit');
+        $data = Akses::where('id',$request->id)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data IP Address ('.trim($request->ip).') tidak tersedia'
+        );
+        if ($data)
+        {
+            $flag_lama = $data->akses_flag;
+            if ($data->akses_flag == 0)
+            {
+                $flag_baru = 1;
+            }
+            else
+            {
+                $flag_baru = 0;
+            }
+            $data->akses_flag = $flag_baru;
+            $data->update();;
+            $arr = array(
+                'status'=>true,
+                'hasil'=>'Flag IP Address ('.trim($request->ip).') diubah dari '.$flag_akses[$flag_lama].' ke '.$flag_akses[$flag_baru].' berhasil diupdate'
+            );
+        }
+        return Response()->json($arr);
+    }
+    public function SimpanAkses(Request $request)
+    {
+        $data = Akses::where('akses_ip',$request->ipaddress)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'IP Address ('.trim($request->ipaddress).') sudah ada'
+        );
+        if (!$data)
+        {
+            $data = new Akses();
+            $data->akses_ip = trim($request->ipaddress);
+            $data->akses_flag = 0;
+            $data->save();
+            $arr = array(
+                'status'=>true,
+                'hasil'=>'IP Address '.$request->ipaddress.' berhasil ditambahkan'
+            );
+        }
+        return Response()->json($arr);
+    }
+    public function UpdateAkses(Request $request)
+    {
+        $data = Akses::where('id',$request->id)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data IP Address ('.trim($request->ipaddress).') tidak tersedia'
+        );
+        if ($data)
+        {
+            $cek = Akses::where('akses_ip',$request->ipaddress)->where('id','<>',$request->id)->count();
+            if ($cek > 0)
+            {
+                //ada ip tsb
+                $arr = array(
+                    'status'=>false,
+                    'hasil'=>'Data IP Address ('.trim($request->ipaddress).') sudah digunakan'
+                );
+            }
+            else
+            {
+                $ip_lama = $data->akses_ip;
+                $data->akses_ip = $request->ipaddress;
+                $data->update();
+                $arr = array(
+                    'status'=>true,
+                    'hasil'=>'IP Address ('.$ip_lama.') ke ('.$request->ipaddress.') berhasil diupdate'
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
+    public function HapusTujuan(Request $request)
+    {
+        $data = Tujuan::where('id',$request->id)->first();
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data tujuan ('.$request->tujuan_inisial.'-'.trim($request->tujuan_nama).') tidak tersedia'
+        );
+        if ($data)
+        {
+            $msg = $data->tujuan_inisial .'-'.$data->tujuan_nama;
+            $data->delete();
+            //hapus data kunjungan juga
+            $data_kunjungan = Kunjungan::where('kunjungan_tujuan',$data->tujuan_kode)->delete();
+            $arr = array(
+                'status'=>true,
+                'message'=>'Data tujuan ('.$msg.') dan kunjungan berhasil hapus'
+            );
+        }
+        return Response()->json($arr);
+    }
+    public function updateTujuan(Request $request)
+    {
+        $data = Tujuan::where('id',$request->edit_tujuan_id)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data Tujuan ('.trim($request->edit_tujuan_nama).') tidak tersedia'
+        );
+        $cek_inisial = Tujuan::where('tujuan_inisial','like',trim($request->edit_tujuan_inisial))->first();
+        $cek_nama = Tujuan::where('tujuan_nama','like','%'.trim($request->edit_tujuan_nama).'%')->first();
+        if ($cek_inisial && $cek_inisial->id != $data->id)
+        {
+                $arr = array(
+                'status'=>false,
+                'message'=>'Inisial ('.$request->edit_tujuan_inisial.') ('.$request->edit_tujuan_id.') sudah tersedia',
+            );
+        }
+        else
+        {
+            if ($cek_nama && $cek_nama->id != $data->id)
+            {
+                $arr = array(
+                'status'=>false,
+                'message'=>'Nama ('.$request->edit_tujuan_nama.') ('.$request->edit_tujuan_id.') sudah tersedia',
+                );
+            }
+            else
+            {
+                $data->tujuan_inisial = trim($request->edit_tujuan_inisial);
+                $data->tujuan_nama = trim($request->edit_tujuan_nama);
+                $data->update();
+
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Tujuan ('.$request->edit_tujuan_nama.') sudah terupdate',
+                );
+            }
+        }
+        return Response()->json($arr);
     }
 }

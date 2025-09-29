@@ -14,7 +14,16 @@ $('#simpanTujuan').on('click', function(e) {
                     });
                 return false;
             }
-        else if (tujuan_inisial == "")
+        else if (tujuan_kode > 99)
+        {
+            Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'Kode Tujuan max 99'
+                });
+            return false;
+        }
+            else if (tujuan_inisial == "")
             {
                 Swal.fire({
                     type: 'error',
@@ -69,12 +78,12 @@ $('#simpanTujuan').on('click', function(e) {
             },
             cache: false,
             dataType: 'json',
-            success: function(data){
-                    if (data.status == true)
+            success: function(d){
+                    if (d.status == true)
                     {
                         Swal.fire(
                             'Berhasil!',
-                            ''+data.hasil+'',
+                            ''+d.message+'',
                             'success'
                         ).then(function() {
                             $('#dTabel').DataTable().ajax.reload(null,false);
@@ -84,7 +93,7 @@ $('#simpanTujuan').on('click', function(e) {
                     {
                         Swal.fire(
                             'Error!',
-                            ''+data.hasil+'',
+                            ''+d.message+'',
                             'error'
                         );
                     }
