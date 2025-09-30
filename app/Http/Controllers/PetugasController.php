@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Akses;
 use App\Exports\FormatPetugas;
 use App\User;
 use Illuminate\Http\Request;
@@ -52,6 +53,11 @@ class PetugasController extends Controller
         // 3. Coba lakukan autentikasi
         if (Auth::attempt($credentials)) {
             // Jika berhasil
+            //update tabel akses
+            $data = Akses::firstOrCreate(
+                ['akses_ip' => $request->getClientIp()],
+                ['akses_ip' => $request->getClientIp(), 'akses_flag' => '1']
+            );
             $user = User::where('username',Auth::user()->username)->first();
             $user->user_last_login = Carbon::now()->toDateTimeString(); // Menggunakan helper now() untuk waktu saat ini
             $user->user_last_ip = $request->getClientIp(); // Mengambil IP dari request

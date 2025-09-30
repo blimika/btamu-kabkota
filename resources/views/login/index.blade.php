@@ -68,9 +68,12 @@
                             </div>
                         </div>
                         <div class="form-group text-center">
-                            <div class="col-xs-12 p-b-20">
+                            <div class="col-xs-12 p-b-10">
                                 <button class="btn btn-block btn-lg btn-info btn-rounded" type="submit">Log In</button>
                             </div>
+                        </div>
+                        <div class="form-group text-center p-b-20">
+                            <a href="{{route('depan')}}" class="btn btn-rounded btn-danger"><< Kembali ke depan</a>
                         </div>
                     </form>
                     <form class="form-horizontal" id="recoverform" action="index.html">

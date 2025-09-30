@@ -9,7 +9,7 @@
     <meta name="author" content="I Putu Dyatmika">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{asset('assets/images/'.ENV('APP_FAVICON'))}}">
-    <title>Bukutamu - {{ENV('NAMA_SATKER')}}</title>
+    <title>{{ENV('NAMA_APLIKASI')}} - {{ENV('NAMA_SATKER')}}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Custom CSS -->
     <link href="{{asset('dist/css/style.min.css')}}" rel="stylesheet">
