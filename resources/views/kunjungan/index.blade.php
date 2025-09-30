@@ -79,6 +79,7 @@
     @include('kunjungan.modal-jenis')
     @include('kunjungan.modal-whatsapp')
     @include('kunjungan.modal-petugas')
+    @include('kunjungan.modal-flagantrian')
 @endsection
 
 @section('css')
@@ -787,4 +788,5 @@
     @include('kunjungan.js-tindaklanjut')
     @include('kunjungan.js-jenis')
     @include('kunjungan.js-tujuan')
+    @include('kunjungan.js-flagantrian')
 @stop

@@ -1775,4 +1775,41 @@ class KunjunganController extends Controller
         //dd($data);
         return view('kunjungan.laporan',['data'=>$data,'tahun'=>$tahun_filter]);
     }
+    public function HapusKunjungan(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data kunjungan tidak tersedia'
+        );
+        if (Auth::user())
+        {
+            $data = Kunjungan::where('kunjungan_uid',$request->uid)->first();
+            if ($data)
+            {
+                $nama = $data->Pengunjung->pengunjung_nama;
+                $tanggal = $data->kunjungan_tanggal;
+                $file = $data->kunjungan_foto;
+                //hapus dulu kunjungan
+                $data->delete();
+                //cek dulu file fotonya ada tidak
+                if (Storage::disk('public')->exists($file))
+                {
+                    Storage::disk('public')->delete($file);
+                }
+                $arr = array(
+                    'status' => true,
+                    'message' => 'Data kunjungan an. ' . $nama . ' tanggal '.$tanggal.' berhasil dihapus',
+                    'data' => true,
+                );
+            }
+            else
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Data kunjungan tidak tersedia'
+                );
+            }
+        }
+        return Response()->json($arr);
+    }
 }

@@ -68,7 +68,13 @@
                 <small class="text-muted p-t-30 db">Level</small>
                 <h6>{{Auth::user()->user_level}}</h6>
                 <small class="text-muted p-t-30 db">Login Terakhir</small>
-                <h6>{{Auth::user()->user_last_login}}</h6>
+                <h6>
+                    @if (Auth::user()->user_last_login)
+                        {{\Carbon\Carbon::parse(Auth::user()->user_last_login)->isoFormat('dddd, D MMMM Y H:mm:ss')}}
+                    @else
+                        <i>--belum tersedia--</i>
+                    @endif
+                </h6>
                 <small class="text-muted p-t-30 db">IP Terakhir</small>
                 <h6>{{Auth::user()->user_last_ip}}</h6>
 
@@ -80,28 +86,101 @@
         <div class="card">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs profile-tab" role="tablist">
-                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#profil" role="tab">Profil</a> </li>
-                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#pelayanan" role="tab">Pelayanan</a> </li>
+                <li class="nav-item"> <a class="nav-link active" data-toggle="tab" href="#timeline" role="tab">Timeline</a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#profil" role="tab">Profil</a> </li>
                 <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#editprofil" role="tab">Edit Profil</a> </li>
+                <li class="nav-item"> <a class="nav-link" data-toggle="tab" href="#gantipassword" role="tab">Ganti Password</a> </li>
             </ul>
             <!-- Tab panes -->
             <div class="tab-content">
-                <div class="tab-pane active" id="profil" role="tabpanel">
+                <div class="tab-pane active" id="timeline" role="tabpanel">
                     <div class="card-body">
+                        @if ($data->isEmpty())
+                            <h4>Belum ada data kunjungan</h4>
+                        @else
+                            @include('petugas.timeline')
+                        @endif
                     </div>
                 </div>
-                <div class="tab-pane" id="pelayanan" role="tabpanel">
+                <div class="tab-pane" id="profil" role="tabpanel">
                     <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-lg-2">UID</dt>
+                            <dd class="col-lg-10">#{{Auth::user()->user_uid}}</dd>
+                            <dt class="col-lg-2">Nama</dt>
+                            <dd class="col-lg-10">{{Auth::user()->name}}</dd>
+                            <dt class="col-lg-2">Username</dt>
+                            <dd class="col-lg-10">{{Auth::user()->username}}</dd>
+                            <dt class="col-lg-2">E-mail</dt>
+                            <dd class="col-lg-10">{{Auth::user()->email}}</dd>
+                            <dt class="col-lg-2">Level</dt>
+                            <dd class="col-lg-10">
+                                @if (Auth::user()->user_level == 'operator')
+                                    <span class="label label-danger">{{Auth::user()->user_level}}</span>
+                                @else
+                                     <span class="label label-info">{{Auth::user()->user_level}}</span>
+                                @endif
+
+                            </dd>
+                            <dt class="col-lg-2">Telepon</dt>
+                            <dd class="col-lg-10">{{Auth::user()->user_telepon}}</dd>
+                            <dt class="col-lg-2">Rating Layanan</dt>
+                            <dd class="col-lg-10">{!! Generate::RatingPetugas(Auth::user()->user_uid) !!}</dd>
+                        </dl>
+                        <hr>
+                        <dl class="row">
+                            <dt class="col-lg-2">Last login</dt>
+                            <dd class="col-lg-10">
+                                @if (Auth::user()->user_last_login)
+                                    {{\Carbon\Carbon::parse(Auth::user()->user_last_login)->isoFormat('dddd, D MMMM Y H:mm:ss')}}
+                                @else
+                                    <i>--tidak tersedia--</i>
+                                @endif
+                            </dd>
+                            <dt class="col-lg-2">Last IP</dt>
+                            <dd class="col-lg-10">{{Auth::user()->user_last_ip}}</dd>
+                            <dt class="col-lg-2">Dibuat</dt>
+                            <dd class="col-lg-10">
+                                @if (Auth::user()->created_at)
+                                    {{\Carbon\Carbon::parse(Auth::user()->created_at)->isoFormat('dddd, D MMMM Y H:mm:ss')}}
+                                @else
+                                    <i>--tidak tersedia--</i>
+                                @endif
+                            </dd>
+                            <dt class="col-lg-2">Diupdate</dt>
+                            <dd class="col-lg-10">
+                                @if (Auth::user()->updated_at)
+                                    {{\Carbon\Carbon::parse(Auth::user()->updated_at)->isoFormat('dddd, D MMMM Y H:mm:ss')}}
+                                @else
+                                    <i>--tidak tersedia--</i>
+                                @endif
+                            </dd>
+                            <dt class="col-lg-2">Flag</dt>
+                            <dd class="col-lg-10">
+                               @if (Auth::user()->user_flag == 'aktif')
+                                    <span class="label label-success">{{Auth::user()->user_flag}}</span>
+                                @else
+                                    <span class="label label-danger">{{Auth::user()->user_flag}}</span>
+                                @endif
+                            </dd>
+                        </dl>
                     </div>
                 </div>
                 <div class="tab-pane" id="editprofil" role="tabpanel">
                     <div class="card-body">
+                        @include('petugas.form-editprofil')
+                    </div>
+                </div>
+                <div class="tab-pane" id="gantipassword" role="tabpanel">
+                    <div class="card-body">
+                        @include('petugas.form-gantipassword')
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+@include('kunjungan.modal-kunjungan')
 @endsection
 
 @section('css')
@@ -145,7 +224,21 @@
             });
             $('.buttons-copy, .buttons-csv, .buttons-print, .buttons-pdf, .buttons-excel').addClass('btn btn-info mr-1');
         });
+        function GetUmur(birthDateString) {
+            var today = new Date();
+            var age = today.getFullYear() - birthDateString;
+            return age;
+        }
+        function GetJamMenit(JamString) {
+            var tgl = new Date(JamString);
+            var hours = tgl.getHours();
+            var minutes = tgl.getMinutes();
+            if (hours < 10) {hours   = "0"+hours;}
+            if (minutes < 10) {minutes = "0"+minutes;}
+            var jam = hours+':'+minutes;
+            return jam;
+        }
     </script>
-
-
+@include('petugas.js-profil')
+@include('kunjungan.js-kunjungan')
 @stop

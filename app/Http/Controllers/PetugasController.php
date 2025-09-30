@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Helpers\Generate;
 use App\Imports\ImportPetugas;
+use App\Kunjungan;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -410,6 +411,74 @@ class PetugasController extends Controller
     }
     public function profil()
     {
-        return view('petugas.profil');
+        $data = Kunjungan::where('kunjungan_petugas_uid',Auth::user()->user_uid)->take(10)->get();
+        return view('petugas.profil',[
+            'data' => $data
+        ]);
+    }
+    public function UpdateProfil(Request $request)
+    {
+        $cekData = User::where('username',trim($request->username))->orWhere('email',trim($request->email))->orWhere('user_telepon',trim($request->telepon))->first();
+        $data = User::where('user_uid',Auth::user()->user_uid)->first();
+        $arr = array(
+            'status'=>false,
+            'message'=>'Username ('.trim($request->username).'), E-Mail ('.trim($request->email).') atau Nomor HP ('.trim($request->telepon).') sudah digunakan/username tidak ditemukan'
+        );
+        if ($data && (!$cekData or ($cekData && $cekData->user_uid == Auth::user()->user_uid)))
+        {
+            //$email_kodever = Str::random(10);
+            //simpan data member
+            $data->name = trim($request->name);
+            $data->username = trim($request->username);
+            $data->email = trim($request->email);
+            $data->user_telepon = trim($request->telepon);
+            $data->update();
+            $arr = array(
+                'status'=>true,
+                'message'=>'Data member an. '.$request->name.' ('.$request->username.') berhasil diupdate, jika mengganti username silakan login ulang dgn username baru'
+            );
+        }
+        //dd($request->all());
+        return Response()->json($arr);
+    }
+    public function GantiPassword(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data profil tidak ditemukan'
+        );
+        $data = User::where('user_uid',Auth::user()->user_uid)->first();
+        if ($data)
+        {
+            /*
+             passwd_lama: passwd_lama,
+                passwd_baru: passwd_baru,
+                ulangi_passwd_baru: ulangi_passwd_baru,
+                */
+            if (!\Hash::check($request->passwd_lama, $data->password))
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Password lama tidak sama'
+                );
+            }
+            elseif ($request->passwd_baru != $request->ulangi_passwd_baru)
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Password baru tidak sama dengan ulangi password baru'
+                );
+            }
+            else
+            {
+                $data->password = bcrypt($request->passwd_baru);
+                $data->update();
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Password berhasil diganti, anda akan otomatis logout, dan masuk dengan password baru'
+                );
+            }
+        }
+        return Response()->json($arr);
     }
 }

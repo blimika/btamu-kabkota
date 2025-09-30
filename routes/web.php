@@ -26,8 +26,6 @@ Route::post('/kunjungan/simpan', 'KunjunganController@simpan')->name('kunjungan.
 Route::get('/permintaan/tambah', 'KunjunganController@TambahPermintaan')->name('permintaan.tambah');
 Route::post('/permintaan/simpan', 'KunjunganController@simpanPermintaan')->name('permintaan.simpan');
 Route::group(['middleware' => 'ip.or.login'], function () {
-
-    Route::post('/kunjungan/hapus', 'KunjunganController@HapusKunjungan')->name('kunjungan.hapus');
     //webapi
     Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
     //whatsapp
@@ -39,6 +37,7 @@ Route::group(['middleware' => 'ip.or.login'], function () {
 });
 Route::group(['middleware' => ['auth']], function () {
     //Petugas
+    Route::post('/kunjungan/hapus', 'KunjunganController@HapusKunjungan')->name('kunjungan.hapus');
     Route::get('/kunjungan/index', 'KunjunganController@index')->name('kunjungan.index');
     Route::get('/kunjungan/laporan', 'KunjunganController@laporan')->name('kunjungan.laporan');
     Route::get('/kunjungan/pagelist', 'KunjunganController@PageListKunjungan')->name('kunjungan.pagelist');
@@ -64,6 +63,8 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/petugas/format', 'PetugasController@FormatPetugas')->name('petugas.format');
     Route::post('/petugas/import', 'PetugasController@ImportPetugas')->name('petugas.import');
     Route::get('/petugas/profil', 'PetugasController@profil')->name('petugas.profil');
+    Route::post('/petugas/updateprofil', 'PetugasController@UpdateProfil')->name('petugas.updateprofil');
+    Route::post('/petugas/gantipassword', 'PetugasController@GantiPassword')->name('petugas.gantipassword');
     //Tanggal dan jadwal
     Route::get('/master/tanggal', 'MasterController@tanggal')->name('master.tanggal');
     Route::get('/master/kalendar', 'MasterController@kalendar')->name('master.kalendar');

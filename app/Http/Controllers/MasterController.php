@@ -118,7 +118,7 @@ class MasterController extends Controller
                             ->orWhere('m_tanggal.tanggal_hari', 'like', '%' . $searchValue . '%');
             })
             ->when($tahun_filter > 0, function ($query) use ($tahun_filter) {
-                return $query->whereYear('m_tanggal.tanggal_angka', $tahun_filter);
+                return $query->whereYear('m_tanggal.tanggal_angka',$tahun_filter);
             })
             ->select('m_tanggal.*','petugas1.*','petugas2.*')
             ->skip($start)
