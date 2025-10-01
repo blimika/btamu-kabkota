@@ -75,7 +75,7 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
             }
             else if (d.data.kunjungan_tujuan == 2)
             {
-                $('#ViewKunjunganModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_nama+'</span>')
+                $('#ViewKunjunganModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
             }
             else
             {

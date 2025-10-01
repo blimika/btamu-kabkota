@@ -558,7 +558,7 @@ class Generate {
             {
                 if ($info_tanggal->tanggal_jenis != 'kerja')
                 {
-                    $cat_tgl[]=\Carbon\Carbon::parse($i)->isoFormat('dddd, D MMM Y').' ('.$info_tanggal->deskripsi.')';
+                    $cat_tgl[]=\Carbon\Carbon::parse($i)->isoFormat('dddd, D MMM Y').' ('.$info_tanggal->tanggal_deskripsi.')';
                 }
                 else
                 {
