@@ -76,7 +76,7 @@ class KunjunganController extends Controller
         $cek_hari = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
         if ($cek_hari->tanggal_jenis == 'kerja' or ENV('APP_CEK_LIBUR') == false) {
             $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
-            $Tujuan = Tujuan::orderBy('tujuan_kode', 'asc')->get();
+            $Tujuan = Tujuan::where('tujuan_tipe','kunjungan')->orderBy('tujuan_kode', 'asc')->get();
             $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
             $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
             return view('kunjungan.tambah',[
@@ -459,7 +459,7 @@ class KunjunganController extends Controller
             'status'=>false,
             'message'=>'Data tidak di simpan'
         );
-        if ($request->feedback_nilai == "")
+        if ($request->feedback_nilai == "" || $request->feedback_sarpras == "")
         {
             //balikin nilai masih kosong
             $arr = array(
@@ -474,6 +474,7 @@ class KunjunganController extends Controller
             {
                 $data->kunjungan_flag_feedback = 'sudah';
                 $data->kunjungan_nilai_feedback = $request->feedback_nilai;
+                $data->kunjungan_sarpras_feedback = $request->feedback_sarpras;
                 $data->kunjungan_komentar_feedback = $request->feedback_komentar;
                 $data->kunjungan_ip_feedback = $request->getClientIp();
                 $data->kunjungan_tanggal_feedback = now();
@@ -1655,6 +1656,7 @@ class KunjunganController extends Controller
         $cek_kunjungan = Kunjungan::where([['pengunjung_uid', $data->pengunjung_uid], ['kunjungan_tanggal', Carbon::parse($request->kunjungan_tanggal)->format('Y-m-d')], ['kunjungan_tujuan', $request->kunjungan_tujuan]])->count();
         if ($cek_kunjungan > 0) {
             //sudah ada kasih info kalo sudah mengisi
+            $header_error = '<strong>Error!</strong>';
             $pesan_error = 'Data pengunjung ' . $data->pengunjung_nama . ' sudah pernah mengisi permintaan hari tanggal ' . Carbon::parse($request->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y');
             $warna_error = 'danger';
         }
@@ -1719,7 +1721,8 @@ class KunjunganController extends Controller
             }
             else
             {
-                $petugas_uid = null;
+                $petugas = User::where('username','admin')->first();
+                $petugas_uid = $petugas->user_uid;
             }
             $loket_petugas = 1;
             $newdata = new Kunjungan();
@@ -1787,7 +1790,7 @@ class KunjunganController extends Controller
             $pesan_error = "Data kunjungan an. <strong><i>" . trim($request->pengunjung_nama) . "</i></strong> berhasil ditambahkan";
             $warna_error = "success";
         }
-        //Session::flash('message_header', $header_error);
+        Session::flash('message_header', $header_error);
         Session::flash('message', $pesan_error);
         Session::flash('message_type', $warna_error);
         return redirect()->route('depan');

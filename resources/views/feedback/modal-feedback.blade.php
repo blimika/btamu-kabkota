@@ -36,19 +36,36 @@
                 <hr style="width: 100%; color: black; height: 1px;" />
                 <div class="form-group row">
                     <div class="col-sm-4">
-                        <label class="control-label">Nilai layanan kami</label>
+                        <label class="control-label">beri nilai petugas kami</label>
                     </div>
                     <div class="col-sm-8">
-                        <p class="stars">
-                            <div class="starfeedback d-flex justify-content-center flex-row-reverse">
-                                    <input type="radio" class="feedback_nilai" id="star6" name="feedback_nilai" value="6" required /><label for="star6" title="6 star"></label>
-                                    <input type="radio" class="feedback_nilai" id="star5" name="feedback_nilai" value="5" /><label for="star5" title="5 star"></label>
-                                    <input type="radio" class="feedback_nilai" id="star4" name="feedback_nilai" value="4" /><label for="star4" title="4 star"></label>
-                                    <input type="radio" class="feedback_nilai" id="star3" name="feedback_nilai" value="3" /><label for="star3" title="3 star"></label>
-                                    <input type="radio" class="feedback_nilai" id="star2" name="feedback_nilai" value="2" /><label for="star2" title="2 star"></label>
-                                    <input type="radio" class="feedback_nilai" id="star1" name="feedback_nilai" value="1" /><label for="star1" title="1 star"></label>
-                                </div>
-                        </p>
+                        <div class="rating-stars" id="ratingPetugas">
+                            <i class="far fa-star" data-value="1"></i>
+                            <i class="far fa-star" data-value="2"></i>
+                            <i class="far fa-star" data-value="3"></i>
+                            <i class="far fa-star" data-value="4"></i>
+                            <i class="far fa-star" data-value="5"></i>
+                            <i class="far fa-star" data-value="6"></i>
+                        </div>
+                        <input type="hidden" name="feedback_nilai" id="feedback_nilai" value="0">
+                        <div class="rating-display">Nilai Anda: <strong id="displayPetugas">0</strong> Bintang</div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-4">
+                        <label class="control-label">beri nilai sarana dan prasarana kami</label>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="rating-stars" id="ratingSarpras">
+                            <i class="far fa-star" data-value="1"></i>
+                            <i class="far fa-star" data-value="2"></i>
+                            <i class="far fa-star" data-value="3"></i>
+                            <i class="far fa-star" data-value="4"></i>
+                            <i class="far fa-star" data-value="5"></i>
+                            <i class="far fa-star" data-value="6"></i>
+                        </div>
+                        <input type="hidden" name="feedback_sarpras" id="feedback_sarpras" value="0">
+                        <div class="rating-display">Nilai Anda: <strong id="displaySarpras">0</strong> Bintang</div>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -111,8 +128,10 @@
                     <hr style="width: 100%; color: black; height: 1px;" />
                     <dt class="col-sm-4">Flag</dt>
                     <dd class="col-sm-8"><span id="kunjungan_flag_feedback"></span></dd>
-                    <dt class="col-sm-4">Nilai</dt>
+                    <dt class="col-sm-4">Nilai Petugas</dt>
                     <dd class="col-sm-8"><span id="kunjungan_nilai_feedback"></span></dd>
+                    <dt class="col-sm-4">Nilai Fasilitas</dt>
+                    <dd class="col-sm-8"><span id="kunjungan_sarpras_feedback"></span></dd>
                     <dt class="col-sm-4">Komentar</dt>
                     <dd class="col-sm-8"><span id="kunjungan_komentar_feedback"></span></dd>
                     <dt class="col-sm-4">Tanggal isi</dt>

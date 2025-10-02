@@ -3,6 +3,46 @@ $('#BeriFeebackModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var uid = button.data('uid')
     //load dulu transaksinya
+    // --- FUNGSI UTAMA UNTUK INTERAKSI BINTANG ---
+
+        function refreshStars(starGroup, ratingValue) {
+            starGroup.children('i.fa-star').each(function(index) {
+                if (index < ratingValue) {
+                     $(this).addClass('selected fas').removeClass('far');
+                } else {
+                     $(this).removeClass('selected fas').addClass('far');
+                }
+            });
+        }
+
+        $('.rating-stars i').on('mouseover', function() {
+            var hoverValue = parseInt($(this).data('value'));
+            var starGroup = $(this).parent();
+            refreshStars(starGroup, hoverValue);
+        });
+
+        $('.rating-stars').on('mouseleave', function() {
+            var hiddenInput = $(this).next('input[type="hidden"]');
+            var savedRating = parseInt(hiddenInput.val());
+            refreshStars($(this), savedRating);
+        });
+
+        $('.rating-stars i').on('click', function() {
+            var clickedValue = parseInt($(this).data('value'));
+            var starGroup = $(this).parent();
+            var hiddenInput = starGroup.next('input[type="hidden"]');
+            // TEMUKAN DISPLAY YANG SESUAI
+            var displayElement = starGroup.siblings('.rating-display').find('strong');
+
+            // SIMPAN NILAI
+            hiddenInput.val(clickedValue);
+
+            // UPDATE TAMPILAN ANGKA
+            displayElement.text(clickedValue);
+
+            // UPDATE TAMPILAN BINTANG
+            refreshStars(starGroup, clickedValue);
+        });
     $.ajax({
         url : '{{route("webapi")}}/',
         method : 'get',
@@ -80,9 +120,10 @@ $('#BeriFeebackModal .modal-footer #simpanFeedback').on('click', function(e) {
     e.preventDefault();
     var kunjungan_id = $('#BeriFeebackModal .modal-body #edit_id').val();
     var kunjungan_uid = $('#BeriFeebackModal .modal-body #edit_uid').val();
-    var feedback_nilai = $('#BeriFeebackModal .modal-body input[type="radio"][name="feedback_nilai"]:checked').val();
+    var feedback_nilai = $('#BeriFeebackModal .modal-body #feedback_nilai').val();
+    var feedback_sarpras = $('#BeriFeebackModal .modal-body #feedback_sarpras').val();
     var feedback_komentar = $('#BeriFeebackModal .modal-body #feedback_komentar').val();
-    if (feedback_nilai == "")
+    if (feedback_nilai == 0 || feedback_sarpras == 0)
     {
         $('#BeriFeebackModal .modal-body #feedback_error').text('Berikan nilai untuk layanan kami');
         return false;
@@ -102,6 +143,7 @@ $('#BeriFeebackModal .modal-footer #simpanFeedback').on('click', function(e) {
                 kunjungan_id: kunjungan_id,
                 kunjungan_uid: kunjungan_uid,
                 feedback_nilai: feedback_nilai,
+                feedback_sarpras: feedback_sarpras,
                 feedback_komentar: feedback_komentar
             },
             cache: false,
@@ -231,6 +273,19 @@ $('#ViewFeedbackModal').on('show.bs.modal', function (event) {
                     teks +='<span class="fa fa-star"></span>';
                 }
             }
+            //feedback sarpras
+                var sarpras_feedback = d.data.kunjungan_sarpras_feedback;
+                var teks_sarpras = "";
+                for (i = 1; i < 7; i++) {
+                    if (i <= sarpras_feedback)
+                    {
+                        teks_sarpras += '<span class="fa fa-star text-warning"></span>';
+                    }
+                    else
+                    {
+                        teks_sarpras +='<span class="fa fa-star"></span>';
+                    }
+                }
             if (d.data.kunjungan_tanggal_feedback == null)
             {
                 var tanggal_feedback = "<i>---tidak tersedia----</i>";
@@ -249,6 +304,7 @@ $('#ViewFeedbackModal').on('show.bs.modal', function (event) {
                 var ip_feedback = d.data.kunjungan_ip_feedback;
             }
             $('#ViewFeedbackModal .modal-body #kunjungan_nilai_feedback').html(teks)
+            $('#ViewFeedbackModal .modal-body #kunjungan_sarpras_feedback').html(teks_sarpras)
             $('#ViewFeedbackModal .modal-body #kunjungan_komentar_feedback').html(d.data.kunjungan_komentar_feedback)
             $('#ViewFeedbackModal .modal-body #kunjungan_tanggal_feedback').html(tanggal_feedback)
             $('#ViewFeedbackModal .modal-body #kunjungan_ip_feedback').html(ip_feedback)

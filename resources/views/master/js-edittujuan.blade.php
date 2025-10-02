@@ -6,10 +6,12 @@ $('#EditTujuanModal').on('show.bs.modal', function (event) {
     var kode = button.data('kode')
     var inisial = button.data('inisial')
     var nama = button.data('nama')
+    var tipe = button.data('tipe')
     $('#EditTujuanModal .modal-body #edit_id').text(id);
     $('#EditTujuanModal .modal-body #edit_kode').text(kode);
     $('#EditTujuanModal .modal-body #edit_tujuan_inisial').val(inisial);
     $('#EditTujuanModal .modal-body #edit_tujuan_nama').val(nama);
+    $('#EditTujuanModal .modal-body #edit_tujuan_tipe').val(tipe);
     $('#EditTujuanModal .modal-body #edit_tujuan_id').val(id);
 });
 //batas
@@ -19,6 +21,7 @@ $('#EditTujuanModal .modal-footer #updatetujuan').on('click', function(e) {
     var id = $('#EditTujuanModal .modal-body #edit_tujuan_id').val();
     var inisial = $('#EditTujuanModal .modal-body #edit_tujuan_inisial').val();
     var nama = $('#EditTujuanModal .modal-body #edit_tujuan_nama').val();
+    var tipe = $('#EditTujuanModal .modal-body #edit_tujuan_tipe').val();
 
     if (inisial == "")
     {
@@ -40,6 +43,11 @@ $('#EditTujuanModal .modal-footer #updatetujuan').on('click', function(e) {
          $('#EditTujuanModal .modal-body #edit_tujuan_error').text('nama tidak boleh kosong');
         return false;
     }
+    else if (tipe == "")
+    {
+         $('#EditTujuanModal .modal-body #edit_tujuan_error').text('tipe tidak boleh kosong');
+        return false;
+    }
     else
     {
         $.ajaxSetup({
@@ -54,6 +62,7 @@ $('#EditTujuanModal .modal-footer #updatetujuan').on('click', function(e) {
                     edit_tujuan_id: id,
                     edit_tujuan_inisial: inisial,
                     edit_tujuan_nama: nama,
+                    edit_tujuan_tipe: tipe,
                 },
                 cache: false,
                 dataType: 'json',

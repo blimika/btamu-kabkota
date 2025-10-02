@@ -61,6 +61,7 @@
                                             <th>kode</th>
                                             <th>inisial</th>
                                             <th>nama</th>
+                                            <th>tipe</th>
                                             <th>kunjungan</th>
                                             <th>aksi</th>
                                         </tr>
@@ -89,6 +90,15 @@
                                     <label for="tujuan_nama">Nama</label>
                                     <input type="text" class="form-control" name="tujuan_nama" id="tujuan_nama" aria-describedby="tujuan_nama" placeholder="Masukan Nama Tujuan Lengkap">
                                     <small id="tujuan_nama_teks" class="form-text text-muted">nama tujuan lengkap</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tujuan_nama">Tipe</label>
+                                    <select class="form-control" name="tujuan_tipe" id="tujuan_tipe">
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="kunjungan">Kunjungan</option>
+                                        <option value="permintaan">Permintaan</option>
+                                    </select>
+                                    <small id="tujuan_tipe_teks" class="form-text text-muted">Pilih salah satu tipe tujuan</small>
                                 </div>
                                 <button type="submit" id="simpanTujuan" class="btn btn-primary">Simpan</button>
                             </form>
@@ -157,6 +167,9 @@
                     },
                     {
                         data: 'tujuan_nama'
+                    },
+                    {
+                        data: 'tujuan_tipe'
                     },
                     {
                         data: 'kunjungan',

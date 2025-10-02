@@ -177,7 +177,7 @@
                 //hapus tamu
                 $(".hapusmember").click(function (e) {
                     e.preventDefault();
-                    var id = $(this).data('id');
+                    var uid = $(this).data('uid');
                     var nama = $(this).data('nama');
                     Swal.fire({
                                 title: 'Akan dihapus?',
@@ -199,7 +199,7 @@
                                         url : '{{route('petugas.hapus')}}',
                                         method : 'post',
                                         data: {
-                                            id: id
+                                            uid: uid
                                         },
                                         cache: false,
                                         dataType: 'json',

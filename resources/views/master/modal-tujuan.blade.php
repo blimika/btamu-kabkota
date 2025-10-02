@@ -28,6 +28,16 @@
                             <input type="text" class="form-control" id="edit_tujuan_nama" name="edit_tujuan_inisial" />
                         </div>
                     </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2">Tipe</label>
+                        <div class="input-group col-md-10">
+                            <select class="form-control" id="edit_tujuan_tipe" name="edit_tujuan_tipe">
+                                <option value="">Pilih Tipe</option>
+                                <option value="kunjungan">Kunjungan</option>
+                                <option value="permintaan">Permintaan</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <span id="edit_tujuan_error" class="text-danger"></span>
                     </div>

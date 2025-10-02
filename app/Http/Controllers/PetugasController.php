@@ -217,7 +217,7 @@ class PetugasController extends Controller
                         <a class="dropdown-item ubahflagmember" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-flagmember="'.$record->user_flag.'">Ubah Flag</a>
                         '.$link_aktivasi.'
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item hapusmember" href="#" data-id="'.$record->id.'" data-nama="'.$record->name.'">Hapus</a>
+                        <a class="dropdown-item hapusmember" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'">Hapus</a>
                     </div>
                 </div>
                 ';
@@ -484,6 +484,65 @@ class PetugasController extends Controller
                     'message'=>'Password berhasil diganti, anda akan otomatis logout, dan masuk dengan password baru'
                 );
             }
+        }
+        return Response()->json($arr);
+    }
+    public function hapus(Request $request)
+    {
+        if (Auth::User()->user_level != 'admin') {
+            $arr = array(
+                'status'=>false,
+                'hasil'=>'Anda tidak memiliki akses untuk menghapus'
+            );
+            return Response()->json($arr);
+        }
+        $data = User::where('user_uid',$request->uid)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data petugas tidak tersedia'
+        );
+        if ($data)
+        {
+            if ($data->username == 'admin')
+            {
+                $arr = array(
+                    'status'=>false,
+                    'hasil'=>'Admin default tidak bisa dihapus'
+                );
+            }
+            elseif (Auth::User()->username == $data->username)
+            {
+                $arr = array(
+                    'status'=>false,
+                    'hasil'=>'Tidak bisa menghapus username sendiri'
+                );
+            }
+            elseif (Auth::User()->user_level == 'admin' && $data->user_level == 'admin')
+            {
+                $arr = array(
+                    'status'=>false,
+                    'hasil'=>'Admin tidak bisa menghapus admin'
+                );
+            }
+            else
+            {
+                $nama = $data->name;
+                $namafile_photo = $data->user_foto;
+                $data->delete();
+                if ($data->user_foto != NULL)
+                {
+                    if (Storage::disk('public')->exists($namafile_photo))
+                    {
+                        Storage::disk('public')->delete($namafile_photo);
+                    }
+
+                }
+                $arr = array(
+                    'status'=>true,
+                    'hasil'=>'Data petugas an. '.$nama.' berhasil dihapus'
+                );
+            }
+
         }
         return Response()->json($arr);
     }

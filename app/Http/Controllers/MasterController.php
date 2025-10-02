@@ -375,7 +375,8 @@ class MasterController extends Controller
         ->when($searchValue, function ($q) use ($searchValue) {
             return $q->where('m_tujuan.tujuan_kode', 'like', '%' .$searchValue . '%')
                          ->orWhere('m_tujuan.tujuan_inisial', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%');
+                         ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%')
+                         ->orWhere('m_tujuan.tujuan_tipe', 'like', '%' . $searchValue . '%');
         })
         ->count();
 
@@ -385,7 +386,8 @@ class MasterController extends Controller
             ->when($searchValue, function ($q) use ($searchValue) {
                 return $q->where('m_tujuan.tujuan_kode', 'like', '%' .$searchValue . '%')
                             ->orWhere('m_tujuan.tujuan_inisial', 'like', '%' . $searchValue . '%')
-                            ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%');
+                            ->orWhere('m_tujuan.tujuan_nama', 'like', '%' . $searchValue . '%')
+                            ->orWhere('m_tujuan.tujuan_tipe', 'like', '%' . $searchValue . '%');
             })
             ->select('m_tujuan.*','kunjungan.*')
             ->skip($start)
@@ -402,6 +404,7 @@ class MasterController extends Controller
             $inisial = $record->tujuan_inisial;
             $nama = $record->tujuan_nama;
             $kunjungan = $record->jumlah_kunjungan;
+            $tipe = $record->tujuan_tipe;
             if (Auth::user()->user_level == 'admin')
             {
                 if ($record->tujuan_kode <= 2)
@@ -417,7 +420,7 @@ class MasterController extends Controller
                             </button>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'"
-                                data-inisial="'.$record->tujuan_inisial.'" data-nama="'.$record->tujuan_nama.'" data-toggle="modal" data-target="#EditTujuanModal">Edit</a>
+                                data-inisial="'.$record->tujuan_inisial.'" data-nama="'.$record->tujuan_nama.'" data-tipe="'.$record->tujuan_tipe.'" data-toggle="modal" data-target="#EditTujuanModal">Edit</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item hapustujuan" href="#" data-id="'.$record->id.'" data-kode="'.$record->tujuan_kode.'" data-inisial="'.$record->tujuan_inisial.'" data-nama="'.$record->tujuan_nama.'" data-kunjungan="'.$record->jumlah_kunjungan.'">Hapus</a>
                             </div>
@@ -435,6 +438,7 @@ class MasterController extends Controller
                 "tujuan_kode"=>$kode,
                 "tujuan_inisial"=>$inisial,
                 "tujuan_nama"=> $nama,
+                "tujuan_tipe"=>$tipe,
                 "kunjungan"=>$kunjungan,
                 "aksi"=>$aksi
             );
@@ -491,6 +495,7 @@ class MasterController extends Controller
                     $data->tujuan_kode = trim($request->tujuan_kode);
                     $data->tujuan_inisial = trim($request->tujuan_inisial);
                     $data->tujuan_nama = trim($request->tujuan_nama);
+                    $data->tujuan_tipe = $request->tujuan_tipe;
                     $data->save();
 
                     $arr = array(
@@ -800,6 +805,7 @@ class MasterController extends Controller
             {
                 $data->tujuan_inisial = trim($request->edit_tujuan_inisial);
                 $data->tujuan_nama = trim($request->edit_tujuan_nama);
+                $data->tujuan_tipe = $request->edit_tujuan_tipe;
                 $data->update();
 
                 $arr = array(

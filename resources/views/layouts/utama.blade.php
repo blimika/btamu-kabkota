@@ -15,22 +15,26 @@
     <link href="{{asset('dist/css/style.min.css')}}" rel="stylesheet">
     <style type="text/css">
     @import url(https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700);
-        .starfeedback > input {display: none;}  /* Remove radio buttons */
-        .starfeedback > label:before {
-        content: "\f005"; /* Star */
-        margin: 2px;
-        font-size: 3em;
-        font-family: FontAwesome;
-        display: inline-block;
+        /* star feedback gemini */
+       .rating-stars {
+            display: inline-block;
+            position: relative;
+            z-index: 10;
         }
-        .starfeedback > label
-        {
-        color: #222222; /* Start color when not clicked */
+        .rating-stars i {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #d3d3d3;
+            transition: color 0.2s;
         }
-        .starfeedback > input:checked ~ label
-        { color: #ffca08 ; } /* Set yellow color when star checked */
-        .starfeedback > input:hover ~ label
-        { color: #ffca08 ;  } /* Set yellow color when star hover */
+        .rating-stars i.selected {
+            color: #ffc107;
+        }
+        .rating-display {
+            font-size: 0.8rem;
+            margin-top: 8px;
+            color: #6c757d; /* Warna abu-abu Bootstrap */
+        }
     </style>
     <link href="{{asset('assets/node_modules/sweetalert2/dist/sweetalert2.min.css')}}" rel="stylesheet">
     <link href="{{asset('assets/node_modules/bootstrap-datepicker/bootstrap-datepicker.min.css')}}" rel="stylesheet" type="text/css" />
@@ -52,7 +56,7 @@
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
-            <p class="loader__label">Bukutamu - {{ENV('NAMA_SATKER')}}</p>
+            <p class="loader__label">{{ENV('NAMA_APLIKASI')}} - {{ENV('NAMA_SATKER')}}</p>
         </div>
     </div>
     <!-- ============================================================== -->

@@ -4,6 +4,7 @@ $('#simpanTujuan').on('click', function(e) {
         var tujuan_kode = $('#tujuan_kode').val();
         var tujuan_inisial = $('#tujuan_inisial').val();
         var tujuan_nama = $('#tujuan_nama').val();
+        var tujuan_tipe = $('#tujuan_tipe').val();
         var len = tujuan_inisial.length;
         if (tujuan_kode == "")
             {
@@ -59,6 +60,15 @@ $('#simpanTujuan').on('click', function(e) {
                     });
                 return false;
             }
+        else if (tujuan_tipe == "")
+            {
+                Swal.fire({
+                    type: 'error',
+                    title: 'error',
+                    text: 'Tipe harus terisi'
+                    });
+                return false;
+            }
         else
         {
             //valid format
@@ -75,6 +85,7 @@ $('#simpanTujuan').on('click', function(e) {
                 tujuan_kode: tujuan_kode,
                 tujuan_inisial: tujuan_inisial,
                 tujuan_nama: tujuan_nama,
+                tujuan_tipe: tujuan_tipe
             },
             cache: false,
             dataType: 'json',

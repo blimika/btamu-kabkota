@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use App\Helpers\Generate;
 
 class MasterTabel extends Seeder
 {
@@ -13,13 +14,13 @@ class MasterTabel extends Seeder
     public function run()
     {
         DB::table('m_tujuan')->insert([
-            ['id'=>1, 'tujuan_kode' => 1, 'tujuan_inisial'=>'KTR', 'tujuan_nama' => 'Kantor'],
-            ['id'=>2, 'tujuan_kode' => 2, 'tujuan_inisial'=>'PST', 'tujuan_nama' => 'Pelayanan Statistik Terpadu'],
-            ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'MPP', 'tujuan_nama' => 'Mall Pelayanan Publik'],
-            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik'],
-            ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail'],
-            ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp'],
-            ['id'=>7, 'tujuan_kode' => 7, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya'],
+            ['id'=>1, 'tujuan_kode' => 1, 'tujuan_inisial'=>'KTR', 'tujuan_nama' => 'Kantor', 'tujuan_tipe' => 'kunjungan'],
+            ['id'=>2, 'tujuan_kode' => 2, 'tujuan_inisial'=>'PST', 'tujuan_nama' => 'Pelayanan Statistik Terpadu', 'tujuan_tipe' => 'kunjungan'],
+            ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'MPP', 'tujuan_nama' => 'Mall Pelayanan Publik', 'tujuan_tipe' => 'kunjungan'],
+            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>7, 'tujuan_kode' => 7, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya', 'tujuan_tipe' => 'permintaan'],
         ]);
         DB::table('m_pendidikan')->insert([
             ['id'=>1, 'pendidikan_kode' => 1, 'pendidikan_nama' => '<=SMA Sederajat'],
@@ -62,7 +63,7 @@ class MasterTabel extends Seeder
             ['id' => 12, 'bulan_nama_pendek' => 'Des', 'bulan_nama' => 'Desember'],
         ]);
         DB::table('users')->insert([
-            'user_uid' => 'A1B2C3',
+            'user_uid' => Generate::Kode(6),
             'name' => 'Admin Sistem',
             'username' => 'admin',
             'email' => 'admin@statsntb.id',
