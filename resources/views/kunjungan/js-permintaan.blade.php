@@ -205,6 +205,19 @@ $('#newPermintaanSave').on('click', function(e) {
                 });
             return false;
     }
+    else if (kunjungan_tujuan == 1)
+        {
+            var layanan_kantor_kode = $('#layanan_kantor_kode').val();
+            if (layanan_kantor_kode == "")
+            {
+                Swal.fire({
+                    type: 'error',
+                    title: 'error',
+                    text: 'Karena tujuan Kantor maka Pilih salah satu layanan yang digunakan'
+                    });
+                return false;
+            }
+        }
     else if (kunjungan_tujuan == 2)
     {
         var layanan_pst = $('#layananpst_kode').val();

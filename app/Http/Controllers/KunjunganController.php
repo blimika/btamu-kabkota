@@ -224,7 +224,7 @@ class KunjunganController extends Controller
             }
             //batas antrian
             //proses jenis kunjungan perorangan / kelompok
-            if ($request->jenis_kunjungan == 2) {
+            if ($request->jenis_kunjungan == 'kelompok') {
                 $jumlah_tamu = $request->jumlah_tamu;
                 $laki = $request->tamu_laki;
                 $wanita = $request->tamu_wanita;
@@ -1559,7 +1559,7 @@ class KunjunganController extends Controller
     public function TambahPermintaan()
     {
         $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
-        $Tujuan = Tujuan::where('tujuan_kode','>','2')->orderBy('tujuan_kode', 'asc')->get();
+        $Tujuan = Tujuan::orderBy('tujuan_kode', 'asc')->get();
         $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
         $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
         return view('kunjungan.permintaan',[
@@ -1663,9 +1663,36 @@ class KunjunganController extends Controller
             //masukkan ke tabel kunjungan
             //cek dulu antrian ada sesuai layanan
             //kalo pst cek layanan pst juga
-            $data_antrian = Kunjungan::where([['kunjungan_tanggal', Carbon::parse($request->kunjungan_tanggal)->format('Y-m-d')], ['kunjungan_tujuan',$request->kunjungan_tujuan]])->orderBy('kunjungan_nomor_antrian', 'desc')->first();
-            $data_layanan_utama = Tujuan::where('tujuan_kode',$request->kunjungan_tujuan)->first();
-            $nomor_antrian_inisial = $data_layanan_utama->tujuan_inisial;
+            if ($request->kunjungan_tujuan == 1)
+            {
+                //kantor
+                $data_antrian = Kunjungan::where([['kunjungan_tanggal', Carbon::today()->format('Y-m-d')],['kunjungan_tujuan',$request->kunjungan_tujuan], ['kunjungan_layanan_kantor', $request->layanan_kantor_kode]])->orderBy('kunjungan_nomor_antrian', 'desc')->first();
+                $data_layanan_utama = LayananKantor::where('layanan_kantor_kode',$request->layanan_kantor_kode)->first();
+                $nomor_antrian_inisial = $data_layanan_utama->layanan_kantor_inisial;
+                $layanan_pst = 99;
+                $layanan_kantor = $request->layanan_kantor_kode;
+            }
+            elseif ($request->kunjungan_tujuan == 2)
+            {
+                //pst
+                $data_antrian = Kunjungan::where([['kunjungan_tanggal', Carbon::today()->format('Y-m-d')],['kunjungan_tujuan',$request->kunjungan_tujuan], ['kunjungan_layanan_pst', $request->layananpst_kode]])->orderBy('kunjungan_nomor_antrian', 'desc')->first();
+                $data_layanan_utama = LayananPst::where('layanan_pst_kode',$request->layananpst_kode)->first();
+                $nomor_antrian_inisial = $data_layanan_utama->layanan_pst_inisial;
+                $layanan_pst = $request->layananpst_kode;
+                $layanan_kantor = 99;
+            }
+            else
+            {
+                //selain kantor dan pst
+                $data_antrian = Kunjungan::where([['kunjungan_tanggal', Carbon::today()->format('Y-m-d')], ['kunjungan_tujuan',$request->kunjungan_tujuan]])->orderBy('kunjungan_nomor_antrian', 'desc')->first();
+                $layanan_pst = 99;
+                $layanan_kantor = 99;
+                $data_layanan_utama = Tujuan::where('tujuan_kode',$request->kunjungan_tujuan)->first();
+                $nomor_antrian_inisial = $data_layanan_utama->tujuan_inisial;
+            }
+            //$data_antrian = Kunjungan::where([['kunjungan_tanggal', Carbon::parse($request->kunjungan_tanggal)->format('Y-m-d')], ['kunjungan_tujuan',$request->kunjungan_tujuan]])->orderBy('kunjungan_nomor_antrian', 'desc')->first();
+            //$data_layanan_utama = Tujuan::where('tujuan_kode',$request->kunjungan_tujuan)->first();
+            //$nomor_antrian_inisial = $data_layanan_utama->tujuan_inisial;
             if ($data_antrian) {
                 //kalo sudah ada antrian
                 $nomor_selanjutnya = $data_antrian->kunjungan_nomor_antrian + 1;
@@ -1702,6 +1729,8 @@ class KunjunganController extends Controller
             $newdata->kunjungan_keperluan = $request->kunjungan_keperluan;
             $newdata->kunjungan_jenis = 'perorangan'; //perorangan
             $newdata->kunjungan_tujuan = $request->kunjungan_tujuan;
+            $newdata->kunjungan_layanan_pst = $layanan_pst;
+            $newdata->kunjungan_layanan_kantor = $layanan_kantor;
             if ($namafile_kunjungan != NULL) {
                 $newdata->kunjungan_foto = $namafile_kunjungan;
             }
@@ -1722,6 +1751,7 @@ class KunjunganController extends Controller
             $data->pengunjung_total_kunjungan = $total_kunjungan + 1;
             $data->update();
             //inisiasi email
+
             if ($newdata->kunjungan_tujuan == 1)
             {
                 $layanan = $newdata->Tujuan->tujuan_nama .' - '. $newdata->LayananKantor->layanan_kantor_nama;
@@ -1757,7 +1787,7 @@ class KunjunganController extends Controller
             $pesan_error = "Data kunjungan an. <strong><i>" . trim($request->pengunjung_nama) . "</i></strong> berhasil ditambahkan";
             $warna_error = "success";
         }
-        Session::flash('message_header', $header_error);
+        //Session::flash('message_header', $header_error);
         Session::flash('message', $pesan_error);
         Session::flash('message_type', $warna_error);
         return redirect()->route('depan');

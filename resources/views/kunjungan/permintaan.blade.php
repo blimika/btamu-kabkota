@@ -129,9 +129,17 @@ $( document ).ready(function() {
 
 $('#kunjungan_tujuan').change(function(){
     var kunjungan_tujuan = $('#kunjungan_tujuan').val();
-    if (kunjungan_tujuan == 2)
+    if (kunjungan_tujuan == 1)
+    {
+        $('#PSTLayanan').hide();
+        $('#LayananKantor').show();
+        $('#tujuan_label').text("Tujuan");
+        $('#keperluan_label').text("Keperluan");
+    }
+    else if (kunjungan_tujuan == 2)
     {
         $('#PSTLayanan').show();
+        $('#LayananKantor').hide();
         $('#tujuan_label').text("Tujuan");
         $('#keperluan_label').text("Data yang dicari");
     }

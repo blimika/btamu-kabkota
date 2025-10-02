@@ -25,9 +25,9 @@ Route::get('/kunjungan/tambah', 'KunjunganController@tambah')->name('kunjungan.t
 Route::post('/kunjungan/simpan', 'KunjunganController@simpan')->name('kunjungan.simpan');
 Route::get('/permintaan/tambah', 'KunjunganController@TambahPermintaan')->name('permintaan.tambah');
 Route::post('/permintaan/simpan', 'KunjunganController@simpanPermintaan')->name('permintaan.simpan');
+//webapi
+Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
 Route::group(['middleware' => 'ip.or.login'], function () {
-    //webapi
-    Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
     //whatsapp
     Route::get('/whatsapp', 'WhatsappController@WhatsappList')->name('whatsapp');
     Route::post('/cron/notif', 'WhatsappController@NotifJaga')->name('cron.notif');
