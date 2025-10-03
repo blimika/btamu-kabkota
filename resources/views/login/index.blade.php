@@ -9,8 +9,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon.png">
-    <title>Bukutamu - {{ENV('NAMA_SATKER')}}</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('assets/images/'.ENV('APP_FAVICON'))}}">
+    <title>{{ENV('NAMA_APLIKASI')}} - {{ENV('NAMA_SATKER')}}</title>
 
     <!-- page css -->
     <link href="{{asset('dist/css/pages/login-register-lock.css')}}" rel="stylesheet">
@@ -33,7 +33,7 @@
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
-            <p class="loader__label">Bukutamu - {{ENV('APP_NAMA_SATKER')}}</p>
+            <p class="loader__label">{{ENV('NAMA_APLIKASI')}}- {{ENV('APP_NAMA_SATKER')}}</p>
         </div>
     </div>
     <!-- ============================================================== -->

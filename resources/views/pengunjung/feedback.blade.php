@@ -32,7 +32,6 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h3 class="card-title text-center">Feedback Pengunjung</h3>
                 @if ($data->isEmpty())
                     <div class="row">
                         <div class="col-lg-12">
@@ -40,112 +39,18 @@
                         </div>
                     </div>
                 @else
-                    <div class="row">
-                    <div class="col-lg-3 col-md-12 border-right p-l-0">
-                        <center class="m-t-30 m-b-40 p-t-20 p-b-20">
-                            <font class="display-3">{{number_format($data->average('kunjungan_nilai_feedback'),2, '.', '')}}</font>
-                            <div class="m-b-10">
-                                {{--Start Rating--}}
-                                @for ($i = 0; $i < 6; $i++)
-                                @if (floor($data->average('kunjungan_nilai_feedback')) - $i >= 1)
-                                    {{--Full Start--}}
-                                    <i class="fa fa-star text-warning"> </i>
-                                @elseif ($data->average('kunjungan_nilai_feedback') - $i > 0)
-                                    {{--Half Start--}}
-                                    <i class="fas fa-star-half-alt text-warning"></i>
-                                @else
-                                    {{--Empty Start--}}
-                                    <i class="far fa-star text-warning"> </i>
-                                @endif
-                                @endfor
-                                {{--End Rating--}}
-                            </div>
-                            <h6 class="text-muted"><i class="fas fa-user"></i> {{$data->count()}} total</h6>
-                        </center>
-                        <hr>
+                <h3 class="font-bold text-center p-b-20">Feedback dari Pengunjung</h3>
+                <div class="row m-b-20">
+                    <div class="col-lg-6 col-md-12 col-xs-12">
+                        <h4 class="card-title text-center">Rating Petugas</h4>
+                        @include('pengunjung.nilai')
                     </div>
-                    <div class="col-9">
-                        <div class="row">
-                            <div class="col-lg-1 col-md-2">
-                                <span class="float-right">
-                                    6 <span class="fa fa-star text-warning"></span>
-                                </span>
-                            </div>
-                            <div class="col-lg-11 col-md-10">
-                                <div class="progress ">
-                                    <div class="progress-bar bg-success wow animated progress-animated" style="width: {{number_format(($data->where('kunjungan_nilai_feedback','6')->count()/$data->count())*100,2,".",",")}}%; height:20px;" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row m-t-10">
-                            <div class="col-lg-1 col-md-2">
-                                <span class="float-right">
-                                    5 <span class="fa fa-star text-warning"></span>
-                                </span>
-                            </div>
-                            <div class="col-lg-11 col-md-10">
-                                <div class="progress ">
-                                    <div class="progress-bar bg-info wow animated progress-animated" style="width: {{number_format(($data->where('kunjungan_nilai_feedback','5')->count()/$data->count())*100,2,".",",")}}%; height:20px;" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row m-t-10">
-                            <div class="col-lg-1 col-md-2">
-                                <span class="float-right">
-                                    4 <span class="fa fa-star text-warning"></span>
-                                </span>
-                            </div>
-                            <div class="col-lg-11 col-md-10">
-                                <div class="progress ">
-                                    <div class="progress-bar bg-warning wow animated progress-animated" style="width: {{number_format(($data->where('kunjungan_nilai_feedback','4')->count()/$data->count())*100,2,".",",")}}%; height:20px;" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row m-t-10">
-                            <div class="col-lg-1 col-md-2">
-                                <span class="float-right">
-                                    3 <span class="fa fa-star text-warning"></span>
-                                </span>
-                            </div>
-                            <div class="col-lg-11 col-md-10">
-                                <div class="progress ">
-                                    <div class="progress-bar bg-primary wow animated progress-animated" style="width: {{number_format(($data->where('kunjungan_nilai_feedback','3')->count()/$data->count())*100,2,".",",")}}%; height:20px;" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row m-t-10">
-                            <div class="col-lg-1 col-md-2">
-                                <span class="float-right">
-                                    2 <span class="fa fa-star text-warning"></span>
-                                </span>
-                            </div>
-                            <div class="col-lg-11 col-md-10">
-                                <div class="progress ">
-                                    <div class="progress-bar bg-inverse wow animated progress-animated" style="width: {{number_format(($data->where('kunjungan_nilai_feedback','2')->count()/$data->count())*100,2,".",",")}}%; height:20px;" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row m-t-10">
-                            <div class="col-lg-1 col-md-2">
-                                <span class="float-right">
-                                    1 <span class="fa fa-star text-warning"></span>
-                                </span>
-                            </div>
-                            <div class="col-lg-11 col-md-10">
-                                <div class="progress ">
-                                    <div class="progress-bar bg-danger wow animated progress-animated" style="width: {{number_format(($data->where('kunjungan_nilai_feedback','1')->count()/$data->count())*100,2,".",",")}}%; height:20px;" role="progressbar" aria-valuenow="0%" aria-valuemin="0%" aria-valuemax="100%">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-lg-6 col-md-12 col-xs-12">
+                        <h4 class="card-title text-center">Rating Sarana & Prasarana</h4>
+                        @include('pengunjung.sarpras')
                     </div>
-                    </div>
-                    @if (Auth::user())
+                </div>
+                @if (Auth::user())
                 <!--data feedback--->
                 <div class="table-responsive m-t-40">
                     <table id="dTabel" class="tabeldata display table table-hover table-striped table-bordered" cellspacing="0" width="100%">
@@ -155,6 +60,8 @@
                                 <th>Tanggal</th>
                                 <th>Nama</th>
                                 <th>Layanan</th>
+                                <th>Nilai Petugas</th>
+                                <th>Nilai Sarpras</th>
                                 <th>Komentar</th>
                                 <th>Petugas</th>
                                 <th>Aksi</th>
@@ -213,6 +120,8 @@
                     {data: 'kunjungan_tanggal'},
                     {data: 'pengunjung_nama'},
                     {data: 'kunjungan_tujuan'},
+                    {data: 'kunjungan_nilai_feedback'},
+                    {data: 'kunjungan_sarpras_feedback'},
                     {data: 'kunjungan_komentar_feedback'},
                     {data: 'kunjungan_petugas_id'},
                     {data: 'aksi',orderable: false},

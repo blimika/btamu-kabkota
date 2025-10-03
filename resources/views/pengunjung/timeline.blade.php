@@ -123,14 +123,14 @@
                                             <dd class="col-sm-9"><i>{{$item->kunjungan_tindak_lanjut}}</i></dd>
                                             <dt class="col-sm-3">Petugas</dt>
                                             <dd class="col-sm-9">
-                                                @if($item->kunjungan_petugas_id > 0)
-                                                {{$item->Petugas->name}}
+                                                @if($item->kunjungan_petugas_uid)
+                                                    {{$item->Petugas->name}}
                                                @endif
                                                 </dd>
                                             <hr style="width: 100%; color: black; height: 1px;" />
-                                            <dt class="col-sm-3">Nilai Feedback</dt>
+                                            <dt class="col-sm-3">Nilai Petugas</dt>
                                             <dd class="col-sm-9">
-                                                @if ($item->kunjungan_flag_feedback == 2)
+                                                @if ($item->kunjungan_flag_feedback == 'sudah')
                                                     @for ($i = 1; $i < 7; $i++)
                                                         @if ($i <= $item->kunjungan_nilai_feedback)
                                                             <span class="fa fa-star text-warning"></span>
@@ -141,7 +141,20 @@
                                                 @else
                                                     <i>--- belum tersedia ----</i>
                                                 @endif
-
+                                            </dd>
+                                            <dt class="col-sm-3">Nilai Fasilitas</dt>
+                                            <dd class="col-sm-9">
+                                                @if ($item->kunjungan_flag_feedback == 'sudah')
+                                                    @for ($i = 1; $i < 7; $i++)
+                                                        @if ($i <= $item->kunjungan_sarpras_feedback)
+                                                            <span class="fa fa-star text-warning"></span>
+                                                        @else
+                                                            <span class="fa fa-star"></span>
+                                                        @endif
+                                                    @endfor
+                                                @else
+                                                    <i>--- belum tersedia ----</i>
+                                                @endif
                                             </dd>
                                             <dt class="col-sm-3">Komentar</dt>
                                             <dd class="col-sm-9"><i>{{$item->kunjungan_komentar_feedback}}</i></dd>

@@ -34,7 +34,31 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
-
+                    <div class="row">
+                        <div class="col-lg-8">
+                            Petugas Hari {{Tanggal::HariPanjang(\Carbon\Carbon::now())}} :
+                            <br />
+                            <span class="badge badge-success">
+                                @if ($PetugasJaga->tanggal_petugas1_uid)
+                                    {{$PetugasJaga->Petugas1->name}}
+                                @else
+                                    -
+                                @endif
+                            </span>
+                            <span class="badge badge-info">
+                                @if ($PetugasJaga->tanggal_petugas2_uid)
+                                    {{$PetugasJaga->Petugas2->name}}
+                                @else
+                                    -
+                                @endif
+                            </span>
+                        </div>
+                        <div class="col-lg-4 text-right">
+                            @if (Auth::User()->user_level == 'admin')
+                                <a href="#" class="btn btn-info kirimnotifjaga">Kirim Notif</a>
+                            @endif
+                        </div>
+                    </div>
                     <!--batas-->
                     <center id="preloading">
                         <button class="btn btn-success" type="button" disabled>
@@ -715,7 +739,7 @@
                             }
                         });
                         $.ajax({
-                            url: '{{ route("cron.notif") }}',
+                            url: '{{ route("petugas.notifikasi") }}',
                             method: 'post',
                             data: {
                             },
@@ -780,6 +804,45 @@
             var jam = hours+':'+minutes;
             return jam;
         }
+        // --- FUNGSI UTAMA UNTUK INTERAKSI BINTANG ---
+        function refreshStars(starGroup, ratingValue) {
+            starGroup.children('i.fa-star').each(function(index) {
+                if (index < ratingValue) {
+                        $(this).addClass('selected fas').removeClass('far');
+                } else {
+                        $(this).removeClass('selected fas').addClass('far');
+                }
+            });
+        }
+
+        $('.rating-stars i').on('mouseover', function() {
+            var hoverValue = parseInt($(this).data('value'));
+            var starGroup = $(this).parent();
+            refreshStars(starGroup, hoverValue);
+        });
+
+        $('.rating-stars').on('mouseleave', function() {
+            var hiddenInput = $(this).next('input[type="hidden"]');
+            var savedRating = parseInt(hiddenInput.val());
+            refreshStars($(this), savedRating);
+        });
+
+        $('.rating-stars i').on('click', function() {
+            var clickedValue = parseInt($(this).data('value'));
+            var starGroup = $(this).parent();
+            var hiddenInput = starGroup.next('input[type="hidden"]');
+            // TEMUKAN DISPLAY YANG SESUAI
+            var displayElement = starGroup.siblings('.rating-display').find('strong');
+
+            // SIMPAN NILAI
+            hiddenInput.val(clickedValue);
+
+            // UPDATE TAMPILAN ANGKA
+            displayElement.text(clickedValue);
+
+            // UPDATE TAMPILAN BINTANG
+            refreshStars(starGroup, clickedValue);
+        });
     </script>
     @include('kunjungan.js-kunjungan')
     @include('kunjungan.js-feedback')

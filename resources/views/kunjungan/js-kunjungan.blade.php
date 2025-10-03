@@ -120,12 +120,27 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
                         rating_layanan +='<span class="fa fa-star"></span>';
                     }
                 }
+
+                var sarpras_feedback = d.data.kunjungan_sarpras_feedback;
+                var rating_sarpras = "";
+                for (i = 1; i < 7; i++) {
+                    if (i <= sarpras_feedback)
+                    {
+                        rating_sarpras += '<span class="fa fa-star text-warning"></span>';
+                    }
+                    else
+                    {
+                        rating_sarpras +='<span class="fa fa-star"></span>';
+                    }
+                }
             }
             else
             {
                 var rating_layanan = "<i>--belum tersedia--</i>";
+                var sarpras_feedback = "<i>--belum tersedia--</i>";
             }
             $('#ViewKunjunganModal .modal-body #rating_layanan').html(rating_layanan)
+            $('#ViewKunjunganModal .modal-body #rating_sarpras').html(rating_sarpras)
             $('#ViewKunjunganModal .modal-body #petugas_layanan').html(petugas_pelayanan)
             $('#ViewKunjunganModal .modal-body #kunjungan_keperluan').html(d.data.kunjungan_keperluan)
             $('#ViewKunjunganModal .modal-body #kunjungan_tindak_lanjut').html(d.data.kunjungan_tindak_lanjut)

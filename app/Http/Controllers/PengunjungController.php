@@ -566,29 +566,43 @@ class PengunjungController extends Controller
                 $warna_tujuan = 'badge-primary';
             }
             $tujuan = '<span class="badge '.$warna_tujuan.' badge-pill">' . $item->tujuan_inisial . '</span>';
-            $bintang='';
+            $nilai_petugas='';
             for ($i = 1; $i < 7; $i++)
             {
                 if ($i <= $item->kunjungan_nilai_feedback)
                 {
-                    $bintang .= '<span class="fa fa-star text-warning"></span>';
+                    $nilai_petugas .= '<span class="fa fa-star text-warning"></span>';
                 }
                 else
                 {
-                    $bintang .= ' <span class="fa fa-star"></span>';
+                    $nilai_petugas .= ' <span class="fa fa-star"></span>';
+                }
+            }
+            $nilai_sarpras='';
+            for ($i = 1; $i < 7; $i++)
+            {
+                if ($i <= $item->kunjungan_sarpras_feedback)
+                {
+                    $nilai_sarpras .= '<span class="fa fa-star text-warning"></span>';
+                }
+                else
+                {
+                    $nilai_sarpras .= ' <span class="fa fa-star"></span>';
                 }
             }
             if ($item->kunjungan_tujuan == 2)
             {
                 $layanan_utama = $tujuan .' '.$layanan_utama;
             }
-            $komentar_feedback = '<p><i>'.$item->kunjungan_komentar_feedback .'</i></p> <p class="p-t-10">'.$bintang.'</p>';
+            $komentar_feedback = '<i>'.$item->kunjungan_komentar_feedback .'</i>';
             //batas
             $data_arr[] = array(
                 "kunjungan_uid" => $item->kunjungan_uid,
                 "kunjungan_tanggal" => $item->kunjungan_tanggal,
                 "pengunjung_nama" => $item->pengunjung_nama .'<br />'.$jk,
                 "kunjungan_tujuan" => $layanan_utama,
+                "kunjungan_nilai_feedback" => $nilai_petugas,
+                "kunjungan_sarpras_feedback" => $nilai_sarpras,
                 "kunjungan_komentar_feedback"=>$komentar_feedback,
                 "kunjungan_petugas_id" => $petugas,
                 "aksi" => $aksi

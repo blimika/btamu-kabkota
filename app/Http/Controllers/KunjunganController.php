@@ -373,8 +373,7 @@ class KunjunganController extends Controller
                             .'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10)
                             .'Terimakasih,'.chr(10)
                             .$this->nama_aplikasi.chr(10)
-                            .$this->nama_satker.chr(10)
-                            .$this->alamat_satker;
+                            .$this->nama_satker;
                             //penjaga pst 1
                             if ($petugas_jaga->tanggal_petugas1_uid != null)
                             {
@@ -1183,18 +1182,17 @@ class KunjunganController extends Controller
             $recipients = $data->Pengunjung->pengunjung_nomor_hp;
             $recipients = $this->cek_nomor_hp($recipients);
             $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10)
-                .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke '.$this->nama_satker.' pada hari *'.Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y').'*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10)
+                .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke '.$this->nama_satker.' pada hari *'.Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y').'*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10)
                 .'#Detil Kunjungan'.chr(10)
                 .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
                 .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
                 .'Email : *'.$body->pengunjung_email.'*'.chr(10)
                 .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
-                .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10)
+                .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10)
                 .'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik. Link feedback ada dibagian bawah pesan ini.'.chr(10).chr(10)
                 .route('kunjungan.feedback',$data->kunjungan_uid).chr(10).chr(10)
                 .$this->nama_aplikasi.chr(10)
-                .$this->nama_satker.chr(10)
-                .$this->alamat_satker;
+                .$this->nama_satker.chr(10);
              //input ke log pesan
             $new_wa = new Whatsapp();
             $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
@@ -1511,18 +1509,17 @@ class KunjunganController extends Controller
                 $recipients = $data->Pengunjung->pengunjung_nomor_hp;
                 $recipients = $this->cek_nomor_hp($recipients);
                 $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10)
-                .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke '.$this->nama_satker.' pada hari *'.Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y').'*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10)
+                .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke '.$this->nama_satker.' pada hari *'.Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y').'*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10)
                 .'#Detil Kunjungan'.chr(10)
                 .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
                 .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
                 .'Email : *'.$body->pengunjung_email.'*'.chr(10)
                 .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
-                .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10)
+                .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10)
                 .'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik. Link feedback ada dibagian bawah pesan ini.'.chr(10).chr(10)
-                .route('kunjungan.feedback',$data->kunjungan_uid).chr(10).chr(10)
+                .'Link: '.route('kunjungan.feedback',$data->kunjungan_uid).chr(10).chr(10)
                 .$this->nama_aplikasi.chr(10)
-                .$this->nama_satker.chr(10)
-                .$this->alamat_satker;
+                .$this->nama_satker.chr(10);
                 //simpan ke tabael m_whatsapp
                 $new_wa = new Whatsapp();
                 $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
@@ -1753,39 +1750,7 @@ class KunjunganController extends Controller
             $total_kunjungan = $data->pengunjung_total_kunjungan;
             $data->pengunjung_total_kunjungan = $total_kunjungan + 1;
             $data->update();
-            //inisiasi email
 
-            if ($newdata->kunjungan_tujuan == 1)
-            {
-                $layanan = $newdata->Tujuan->tujuan_nama .' - '. $newdata->LayananKantor->layanan_kantor_nama;
-            }
-            elseif ($newdata->kunjungan_tujuan == 2)
-            {
-                $layanan = $newdata->Tujuan->tujuan_nama .' - '. $newdata->LayananPst->layanan_pst_nama;
-            }
-            else
-            {
-                $layanan = $newdata->Tujuan->tujuan_nama;
-            }
-            $body = new \stdClass();
-            $body->kunjungan_uid = $newdata->kunjungan_uid;
-            $body->pengunjung_nama = $newdata->Pengunjung->pengunjung_nama;
-            $body->pengunjung_email = $newdata->Pengunjung->pengunjung_email;
-            $body->pengunjung_nomor_hp = $newdata->Pengunjung->pengunjung_nomor_hp;
-            $body->kunjungan_tanggal = \Carbon\Carbon::parse($newdata->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y');
-            $body->layanan = $layanan;
-            $body->nomor_antrian = $newdata->kunjungan_teks_antrian;
-            $body->nama_aplikasi = $this->nama_aplikasi;
-            $body->nama_satker = $this->nama_satker;
-            $body->alamat_satker = $this->alamat_satker;
-            //cek email valid apa tidak
-            if (filter_var($newdata->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
-            {
-                if (ENV('APP_KIRIM_MAIL') == true) {
-                    Mail::to($newdata->Pengunjung->pengunjung_email)->send(new KirimAntrian($body));
-                }
-                //batas
-            }
             $header_error = "<strong>Terimakasih</strong>";
             $pesan_error = "Data kunjungan an. <strong><i>" . trim($request->pengunjung_nama) . "</i></strong> berhasil ditambahkan";
             $warna_error = "success";

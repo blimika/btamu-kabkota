@@ -13,12 +13,7 @@
         var jam = hours+':'+minutes;
         return jam;
     }
-    $('#BeriFeebackModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget) // Button that triggered the modal
-        var uid = button.data('uid')
-        //load dulu transaksinya
-        // --- FUNGSI UTAMA UNTUK INTERAKSI BINTANG ---
-
+    // --- FUNGSI UTAMA UNTUK INTERAKSI BINTANG ---
         function refreshStars(starGroup, ratingValue) {
             starGroup.children('i.fa-star').each(function(index) {
                 if (index < ratingValue) {
@@ -57,6 +52,10 @@
             // UPDATE TAMPILAN BINTANG
             refreshStars(starGroup, clickedValue);
         });
+    $('#BeriFeebackModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var uid = button.data('uid')
+        //load dulu transaksinya
         $.ajax({
             url : '{{route("webapi")}}/',
             method : 'get',
@@ -317,9 +316,17 @@
                 {
                     var ip_feedback = d.data.kunjungan_ip_feedback;
                 }
+                if (d.data.kunjungan_komentar_feedback == null)
+                {
+                    var komentar_feedback = "-";
+                }
+                else
+                {
+                    var komentar_feedback = "<i>"+d.data.kunjungan_komentar_feedback+"</i>";
+                }
                 $('#ViewFeedbackModal .modal-body #kunjungan_nilai_feedback').html(teks)
                 $('#ViewFeedbackModal .modal-body #kunjungan_sarpras_feedback').html(teks_sarpras)
-                $('#ViewFeedbackModal .modal-body #kunjungan_komentar_feedback').html(d.data.kunjungan_komentar_feedback)
+                $('#ViewFeedbackModal .modal-body #kunjungan_komentar_feedback').html(komentar_feedback)
                 $('#ViewFeedbackModal .modal-body #kunjungan_tanggal_feedback').html(tanggal_feedback)
                 $('#ViewFeedbackModal .modal-body #kunjungan_ip_feedback').html(ip_feedback)
                 }

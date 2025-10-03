@@ -30,7 +30,7 @@ Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
 Route::group(['middleware' => 'ip.or.login'], function () {
     //whatsapp
     Route::get('/whatsapp', 'WhatsappController@WhatsappList')->name('whatsapp');
-    Route::post('/cron/notif', 'WhatsappController@NotifJaga')->name('cron.notif');
+    Route::post('/whatsapp/notifikasi', 'WhatsappController@NotifJaga')->name('petugas.notifikasi');
     Route::post('/wa/import', 'WhatsappController@WhatsappImport')->name('wa.import');
     //timeline
     Route::get('/timeline/{uid}', 'PengunjungController@Timeline')->name('timeline');

@@ -78,6 +78,7 @@
                                         @else
                                             @if ($item->kunjungan_tujuan == 1)
                                                 <span class="badge badge-danger badge-pill">{{$item->Tujuan->tujuan_nama}}
+                                                </span> <span class="badge badge-info badge-pill">{{$item->LayananKantor->layanan_kantor_nama}}
                                                 </span>
                                             @elseif($item->kunjungan_tujuan == 3)
                                                 <span class="badge badge-warning badge-pill">{{$item->Tujuan->tujuan_nama}}

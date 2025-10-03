@@ -1,18 +1,30 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Console\Commands;
 
-use Illuminate\Http\Request;
-use App\Services\WhatsAppService;
-use App\Tanggal;
-use App\Whatsapp;
+use Illuminate\Console\Command;
 use Carbon\Carbon;
+use App\User;
 use App\Helpers\Generate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use App\Kunjungan;
+use App\Tujuan;
+use App\LayananPst;
+use App\LayananKantor;
+use App\Tanggal;
+use App\Whatsapp;
+use App\Services\WhatsAppService;
 
-class WhatsappController extends Controller
+class InfoPetugas extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
     protected $whatsappService;
     protected $cek_nomor_hp;
     protected $link_skd;
@@ -21,16 +33,36 @@ class WhatsappController extends Controller
     protected $alamat_satker;
     protected $link_feedback;
 
+    protected $signature = 'info:petugas';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Notifikasi ke WA Petugas Jaga';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
     public function __construct(WhatsAppService $whatsappService)
     {
+        parent::__construct();
+        $this->whatsappService = $whatsappService;
         $this->link_skd = env('APP_LINK_SKD');
         $this->nama_aplikasi = ENV('NAMA_APLIKASI');
         $this->nama_satker = ENV('NAMA_SATKER');
         $this->alamat_satker = ENV('ALAMAT_SATKER');
-        $this->whatsappService = $whatsappService;
-        $this->link_feedback = ENV('APP_URL').'/k/f/';
     }
-     private function cek_nomor_hp($nomor)
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    private function cek_nomor_hp($nomor)
     {
         // Mengecek apakah nomor diawali dengan '0'
         if (substr($nomor, 0, 1) === '0') {
@@ -50,25 +82,15 @@ class WhatsappController extends Controller
         }
         return $nomorhp;
     }
-    public function index()
+    public function handle()
     {
-        $data = Whatsapp::orderBy('created_at','desc')->take(100)->get();
-        return view('whatsapp.index',[
-                    'data'=>$data
-                ]);
-    }
-    public function NotifJaga(Request $request)
-    {
-        $arr = array(
-            'status' => false,
-            'message' => 'WhatsApp Api Gateway Error'
-        );
+       //ambil jadwal dulu
         $data = Tanggal::where('tanggal_angka',Carbon::today()->format('Y-m-d'))->first();
         if ($data)
         {
             if ($data->tanggal_jenis == 'kerja')
             {
-                if ($data->tanggal_petugas1_uid != null && $data->tanggal_petugas2_uid)
+                if ($data->tanggal_petugas1_uid != null && $data->tanggal_petugas2_uid != null)
                 {
                     //$data1 = User::where('id',$data->petugas1_id)->first();
                     $hp_petugas1 = $data->Petugas1->user_telepon;
@@ -78,15 +100,15 @@ class WhatsappController extends Controller
                     $recipients2 = $this->cek_nomor_hp($hp_petugas2);
                     $message1 = '#Hai *'.$data->Petugas1->name.'*'.chr(10).chr(10)
                     .'Selamat pagi,'.chr(10)
-                    .'Pengingat tugas jaga PST hari ini,'.chr(10)
-                    .'*'.\Carbon\Carbon::parse($data->tanggal)->isoFormat('dddd, D MMMM Y').'*'.chr(10).chr(10)
+                    .'Pengingat tugas jaga Layanan hari ini,'.chr(10)
+                    .'*'.\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y').'*'.chr(10).chr(10)
                     .'Terimakasih dan selamat bertugas'.chr(10).chr(10)
                     .$this->nama_aplikasi.chr(10)
                     .$this->nama_satker;
                     $message2 = '#Hai *'.$data->Petugas2->name.'*'.chr(10).chr(10)
                     .'Selamat pagi,'.chr(10)
-                    .'Pengingat tugas jaga PST hari ini,'.chr(10)
-                    .'*'.\Carbon\Carbon::parse($data->tanggal)->isoFormat('dddd, D MMMM Y').'*'.chr(10).chr(10)
+                    .'Pengingat tugas jaga Layanan hari ini,'.chr(10)
+                    .'*'.\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y').'*'.chr(10).chr(10)
                     .'Terimakasih dan selamat bertugas'.chr(10).chr(10)
                     .$this->nama_aplikasi.chr(10)
                     .$this->nama_satker;
@@ -145,35 +167,24 @@ class WhatsappController extends Controller
                             $new_wa2->update();
                         }
                     }
-                    $arr = array(
-                        'status' => true,
-                        'message' => "Notifikasi sudah dikirimkan ke petugas jaga"
-                    );
+
+                    $error = "Notifikasi sudah dikirimkan ke petugas jaga";
                 }
                 else
                 {
-                    $arr = array(
-                        'status' => false,
-                        'message' => "Data petugas jaga masih kosong, belum ada jadwal"
-                    );
+                     $error = "Data petugas jaga masih kosong, belum ada jadwal";
                 }
             }
             else
             {
-                $arr = array(
-                        'status' => false,
-                        'message' => "Hari libur : ".$data->tanggal_deskripsi
-                    );
+                $error = "Hari libur : ".$data->tanggal_deskripsi;
             }
 
         }
         else
         {
-            $arr = array(
-                'status' => false,
-                'message' => "Data petugas belum tersedia"
-            );
+            $error = "Data petugas belum tersedia";
         }
-        return Response()->json($arr);
+        $this->info($error);
     }
 }
