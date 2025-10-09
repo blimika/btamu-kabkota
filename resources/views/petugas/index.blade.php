@@ -57,7 +57,6 @@
                             <thead>
                                 <tr>
                                     <th>UID</th>
-                                    <th>Photo</th>
                                     <th>Nama</th>
                                     <th>Username</th>
                                     <th>E-Mail</th>
@@ -141,7 +140,6 @@
              ajax: "{{route('petugas.pagelist')}}",
              columns: [
                 { data: 'user_uid' },
-                { data: 'user_foto', orderable: false },
                 { data: 'name' },
                 { data: 'username' },
                 { data: 'email' },
@@ -238,26 +236,34 @@
                             })
                 });
                 //batas hapus
-                //ubah flag member
+                //ubah flag petugas
                 //ubah kunjungan depan
-                    $(".ubahflagmember").click(function (e) {
+                    $(".ubahflagpetugas").click(function (e) {
                         e.preventDefault();
                         var id = $(this).data('id');
+                        var uid = $(this).data('uid');
                         var nama = $(this).data('nama');
-                        var flagmember = $(this).data('flagmember');
+                        var flag_petugas = $(this).data('flag');
                         var flag_nama;
-                        if (flagmember == 0)
+                        var flag_lama;
+                        var flag;
+                        if (flag_petugas == 'aktif')
                         {
                             //akan diubah ke
-                            flag_nama = "Aktif";
+                            flag_nama = "Tidak Aktif";
+                            flag_lama = "Aktif";
+                            flag = 'tidak_aktif';
                         }
                         else
                         {
-                            flag_nama = "Nonaktif";
+                            flag_nama = "Aktif";
+                            flag = 'aktif';
+                            flag_lama = "Tidak Aktif";
+
                         }
                         Swal.fire({
                                     title: 'Akan diubah?',
-                                    text: "Data petugas an. "+nama+" akan diubah ke "+flag_nama,
+                                    text: "Flag petugas an. "+nama+" dari "+flag_lama+" akan diubah ke "+flag_nama,
                                     type: 'warning',
                                     showCancelButton: true,
                                     confirmButtonColor: '#3085d6',
@@ -275,7 +281,10 @@
                                             url : '{{route('petugas.ubahflag')}}',
                                             method : 'post',
                                             data: {
-                                                id: id
+                                                uid: uid,
+                                                flag: flag,
+                                                nama: nama
+
                                             },
                                             cache: false,
                                             dataType: 'json',
@@ -284,7 +293,7 @@
                                                 {
                                                     Swal.fire(
                                                         'Berhasil!',
-                                                        ''+data.hasil+'',
+                                                        ''+data.message+'',
                                                         'success'
                                                     ).then(function() {
                                                         $('#dTabel').DataTable().ajax.reload(null,false);
@@ -294,7 +303,7 @@
                                                 {
                                                     Swal.fire(
                                                         'Error!',
-                                                        ''+data.hasil+'',
+                                                        ''+data.message+'',
                                                         'error'
                                                     );
                                                 }
@@ -303,7 +312,7 @@
                                             error: function(){
                                                 Swal.fire(
                                                     'Error',
-                                                    'Koneksi Error '+data.hasil+'',
+                                                    'Koneksi Error '+data.message+'',
                                                     'error'
                                                 );
                                             }

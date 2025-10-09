@@ -141,6 +141,7 @@ class PetugasController extends Controller
         $totalRecordswithFilter = User::select('count(*) as allcount')
             ->where('users.name', 'like', '%' .$searchValue . '%')
             ->orWhere('user_level','like','%' .$searchValue . '%')
+            ->orWhere('user_flag','like','%' .$searchValue . '%')
             ->orWhere('username','like','%' .$searchValue . '%')
             ->count();
 
@@ -149,6 +150,7 @@ class PetugasController extends Controller
             ->where('users.name', 'like', '%' .$searchValue . '%')
             ->orWhere('user_level','like','%' .$searchValue . '%')
             ->orWhere('username','like','%' .$searchValue . '%')
+            ->orWhere('user_flag','like','%' .$searchValue . '%')
             ->select('users.*')
             ->skip($start)
             ->take($rowperpage)
@@ -162,43 +164,30 @@ class PetugasController extends Controller
             $name = $record->name;
             $username = $record->username;
             $user_foto = $record->user_foto;
-            $user_level = $record->user_level;
+            //$user_level = $record->user_level;
             $email = $record->email;
             $email_ganti = $record->email_ganti;
             $user_telepon = $record->user_telepon;
-            $user_flag = $record->user_flag;
+            //$user_flag = $record->user_flag;
             $email_kodever = $record->email_kodever;
             $user_last_login = $record->user_last_login;
             $user_last_ip = $record->user_last_ip;
+            if ($record->user_flag == 'aktif')
+            {
+                $user_flag = '<span class="label label-success">'.$record->user_flag.'</span>';
+            }
+            else
+            {
+                $user_flag = '<span class="label label-danger">'.$record->user_flag.'</span>';
+            }
 
-            if ($record->user_foto != NULL)
+            if ($record->user_level == 'admin')
             {
-                if (Storage::disk('public')->exists($record->user_foto))
-                {
-                    $user_foto = '<a class="image-popup" href="'.asset('storage'.$record->user_foto).'" title="Nama : '.$record->name.'">
-                <img src="'.asset('storage'.$record->user_foto).'" class="img-circle" width="60" height="60" class="img-responsive" />
-            </a>';
-                }
-                else
-                {
-                    $user_foto = '<a class="image-popup" href="https://placehold.co/480x360/0022FF/FFFFFF/?text=photo+tidak+ada" title="Nama : '.$record->name.'">
-                    <img src="https://placehold.co/480x360/0022FF/FFFFFF/?text=photo+tidak+ada" alt="image"  class="img-circle" width="60" height="60" />
-                    </a>';
-                }
+                $user_level = '<span class="label label-info">'.$record->user_level.'</span>';
             }
             else
             {
-                $user_foto = '<a class="image-popup" href="https://placehold.co/480x360/0022FF/FFFFFF/?text=photo+tidak+ada" title="Nama : '.$record->name.'">
-                <img src="https://placehold.co/480x360/0022FF/FFFFFF/?text=photo+tidak+ada" alt="image"  class="img-circle" width="60" height="60" />
-                </a>';
-            }
-            if ($record->flag == 0)
-            {
-                $link_aktivasi = '<a class="dropdown-item kirimaktivasi" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-flagmember="'.$record->user_flag.'">Kirim Aktivasi</a>';
-            }
-            else
-            {
-                $link_aktivasi='';
+                $user_level = '<span class="label label-danger">'.$record->user_level.'</span>';
             }
 
             if (Auth::user()->user_level == 'admin')
@@ -214,8 +203,7 @@ class PetugasController extends Controller
                         <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-toggle="modal" data-target="#EditPetugasModal">Edit</a>
                         <a class="dropdown-item" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-username="'.$record->username.'" data-toggle="modal" data-target="#GantiPasswdModal">Ganti Password</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item ubahflagmember" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-flagmember="'.$record->user_flag.'">Ubah Flag</a>
-                        '.$link_aktivasi.'
+                        <a class="dropdown-item ubahflagpetugas" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'" data-flag="'.$record->user_flag.'">Ubah Flag</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item hapusmember" href="#" data-id="'.$record->id.'" data-uid="'.$record->user_uid.'" data-nama="'.$record->name.'">Hapus</a>
                     </div>
@@ -226,6 +214,7 @@ class PetugasController extends Controller
             {
                 $aksi ="";
             }
+
             $data_arr[] = array(
                 "id" => $id,
                 "name"=>$name,
@@ -237,7 +226,6 @@ class PetugasController extends Controller
                 "user_uid"=>$user_uid,
                 "user_last_login"=>$user_last_login,
                 "user_last_ip"=>$user_last_ip,
-                "user_foto"=>$user_foto,
                 "aksi"=>$aksi
             );
         }
@@ -371,7 +359,7 @@ class PetugasController extends Controller
             {
                 $arr = array(
                     'status'=>false,
-                    'message'=>'Superadmin tidak ganti password melalui menu ini, harus melalui menu profil'
+                    'message'=>'Admin tidak ganti password melalui menu ini, harus melalui menu profil'
                 );
             }
             elseif (Auth::User()->username == $data->username)
@@ -543,6 +531,61 @@ class PetugasController extends Controller
                 );
             }
 
+        }
+        return Response()->json($arr);
+    }
+    public function UbahFlag(Request $request)
+    {
+        if (Auth::User()->user_level != 'admin') {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Anda tidak memiliki akses untuk mengubah flag petugas'
+            );
+            return Response()->json($arr);
+        }
+        $data = User::where('user_uid',$request->uid)->first();
+        $arr = array(
+            'status'=>false,
+            'message'=>'Data petugas tidak tersedia'
+        );
+
+        if ($data)
+        {
+            if (Auth::User()->username == $data->username)
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Tidak bisa mengubah flag sendiri'
+                );
+            }
+            else
+            {
+                $nama = $request->nama;
+                $flag_sblm = $data->user_flag;
+                if ($flag_sblm == 'aktif')
+                {
+                    $flag_baru = 'tidak_aktif';
+                    $flag_sblm_nama = 'Aktif';
+                    $flag_baru_nama = 'Tidak Aktif';
+                    $email_kodever = Str::random(10);
+                }
+                else
+                {
+                    $flag_baru = 'aktif';
+                    $flag_sblm_nama = 'Tidak Aktif';
+                    $flag_baru_nama = 'Aktif';
+                    $email_kodever = 0;
+                }
+                //update
+                $data->user_flag = $flag_baru;
+                $data->email_kodever = $email_kodever;
+                $data->email_verified_at = Carbon::parse(NOW())->format('Y-m-d H:i:s');
+                $data->update();
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Flag petugas an. '. $nama .' sudah diubah ke '. $flag_baru_nama
+                );
+            }
         }
         return Response()->json($arr);
     }

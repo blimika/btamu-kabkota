@@ -1,5 +1,5 @@
 <script>
-$('#BeriFeebackModal').on('show.bs.modal', function (event) {
+$('#BeriFeedBackModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var uid = button.data('uid')
     //load dulu transaksinya
@@ -16,15 +16,15 @@ $('#BeriFeebackModal').on('show.bs.modal', function (event) {
             if (d.status == true)
             {
                 //value
-            $('#BeriFeebackModal .modal-body #edit_uid').val(d.data.kunjungan_uid)
-            $('#BeriFeebackModal .modal-body #edit_id').val(d.data.kunjungan_id)
-            $('#BeriFeebackModal .modal-body #kunjungan_id').text('#'+d.data.kunjungan_id)
-            $('#BeriFeebackModal .modal-body #kunjungan_uid').text(d.data.kunjungan_uid)
-            $('#BeriFeebackModal .modal-body #pengunjung_nama').text(d.data.pengunjung.pengunjung_nama)
-            $('#BeriFeebackModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
-            $('#BeriFeebackModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
+            $('#BeriFeedBackModal .modal-body #edit_uid').val(d.data.kunjungan_uid)
+            $('#BeriFeedBackModal .modal-body #edit_id').val(d.data.kunjungan_id)
+            $('#BeriFeedBackModal .modal-body #kunjungan_id').text('#'+d.data.kunjungan_id)
+            $('#BeriFeedBackModal .modal-body #kunjungan_uid').text(d.data.kunjungan_uid)
+            $('#BeriFeedBackModal .modal-body #pengunjung_nama').text(d.data.pengunjung.pengunjung_nama)
+            $('#BeriFeedBackModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
+            $('#BeriFeedBackModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
 
-            $('#BeriFeebackModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
+            $('#BeriFeedBackModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
             if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
                 var warna_flag_antrian = 'badge-danger';
@@ -37,32 +37,32 @@ $('#BeriFeebackModal').on('show.bs.modal', function (event) {
             {
                 var warna_flag_antrian = 'badge-success';
             }
-            $('#BeriFeebackModal .modal-body #kunjungan_flag_antrian').html('<span class="badge '+warna_flag_antrian+' badge-pill">'+d.data.kunjungan_flag_antrian+'</span>')
+            $('#BeriFeedBackModal .modal-body #kunjungan_flag_antrian').html('<span class="badge '+warna_flag_antrian+' badge-pill">'+d.data.kunjungan_flag_antrian+'</span>')
             if (d.data.kunjungan_jenis == 'perorangan')
             {
                 //perorangan
-                $('#BeriFeebackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-info badge-pill">'+d.data.kunjungan_jenis+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-info badge-pill">'+d.data.kunjungan_jenis+'</span>')
             }
             else
             {
-                $('#BeriFeebackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
             }
 
             if (d.data.kunjungan_tujuan == 1)
             {
-                $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
             }
             else if (d.data.kunjungan_tujuan == 2)
             {
-                $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
             }
             else
             {
-                $('#BeriFeebackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
             }
-            $('#BeriFeebackModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
-            $('#BeriFeebackModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
-            $('#BeriFeebackModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
+            $('#BeriFeedBackModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
+            $('#BeriFeedBackModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
+            $('#BeriFeedBackModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
             }
             else
             {
@@ -76,16 +76,16 @@ $('#BeriFeebackModal').on('show.bs.modal', function (event) {
     });
 });
 //feedback di simpan
-$('#BeriFeebackModal .modal-footer #simpanFeedback').on('click', function(e) {
+$('#BeriFeedBackModal .modal-footer #simpanFeedback').on('click', function(e) {
     e.preventDefault();
-    var kunjungan_id = $('#BeriFeebackModal .modal-body #edit_id').val();
-    var kunjungan_uid = $('#BeriFeebackModal .modal-body #edit_uid').val();
-    var feedback_nilai = $('#BeriFeebackModal .modal-body #feedback_nilai').val();
-    var feedback_sarpras = $('#BeriFeebackModal .modal-body #feedback_sarpras').val();
-    var feedback_komentar = $('#BeriFeebackModal .modal-body #feedback_komentar').val();
+    var kunjungan_id = $('#BeriFeedBackModal .modal-body #edit_id').val();
+    var kunjungan_uid = $('#BeriFeedBackModal .modal-body #edit_uid').val();
+    var feedback_nilai = $('#BeriFeedBackModal .modal-body #feedback_nilai').val();
+    var feedback_sarpras = $('#BeriFeedBackModal .modal-body #feedback_sarpras').val();
+    var feedback_komentar = $('#BeriFeedBackModal .modal-body #feedback_komentar').val();
     if (feedback_nilai == 0 || feedback_sarpras == 0)
     {
-        $('#BeriFeebackModal .modal-body #feedback_error').text('Berikan nilai untuk layanan kami');
+        $('#BeriFeedBackModal .modal-body #feedback_error').text('Berikan nilai untuk layanan kami');
         return false;
     }
     else
@@ -116,11 +116,11 @@ $('#BeriFeebackModal .modal-footer #simpanFeedback').on('click', function(e) {
                         ''+data.message+'',
                         'success'
                     ).then(function() {
-                        $('#BeriFeebackModal .modal-body #formBeriFeedback')[0].reset();
-                        refreshStars($('#BeriFeebackModal .modal-body #feedback_nilai'), 0);
-                        refreshStars($('#BeriFeebackModal .modal-body #feedback_sarpras'), 0);
-                        $('#BeriFeebackModal .modal-body #displayPetugas').text(0);
-                        $('#BeriFeebackModal .modal-body #displaySarpras').text(0);
+                        $('#BeriFeedBackModal .modal-body #formBeriFeedback')[0].reset();
+                        refreshStars($('#BeriFeedBackModal .modal-body #feedback_nilai'), 0);
+                        refreshStars($('#BeriFeedBackModal .modal-body #feedback_sarpras'), 0);
+                        $('#BeriFeedBackModal .modal-body #displayPetugas').text(0);
+                        $('#BeriFeedBackModal .modal-body #displaySarpras').text(0);
                         $('#dTabel').DataTable().ajax.reload(null,false);
                     });
                 }

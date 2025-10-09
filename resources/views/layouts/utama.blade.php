@@ -80,7 +80,7 @@
             </div>
         </div>
         <footer class="footer">
-            © 2020 - {!! date('Y') !!} <span class="text-success">BPS Provinsi Nusa Tenggara Barat</span>
+            © 2020 - {!! date('Y') !!} <span class="text-success"><a href="https://ntb.bps.go.id" target="_blank">BPS Provinsi Nusa Tenggara Barat</a></span>
             <span class="float-right">Created by <a href="https://ig.dyatmika.com" class="text-success" target="_blank">Blimika</a></span>
         </footer>
         <!-- ============================================================== -->
@@ -111,5 +111,4 @@
 
     @show
 </body>
-
 </html>

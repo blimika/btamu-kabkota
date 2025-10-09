@@ -56,7 +56,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/petugas/simpan', 'PetugasController@simpan')->name('petugas.simpan');
     Route::post('/petugas/hapus', 'PetugasController@hapus')->name('petugas.hapus');
     Route::get('/petugas/pagelist', 'PetugasController@PageListPetugas')->name('petugas.pagelist');
-    Route::post('/petugas/ubahflag', 'PetugasController@UbahFlagMember')->name('petugas.ubahflag');
+    Route::post('/petugas/ubahflag', 'PetugasController@UbahFlag')->name('petugas.ubahflag');
     Route::post('/petugas/admgantipasswd', 'PetugasController@AdmGantiPasswd')->name('petugas.admgantipasswd');
     Route::post('/petugas/updatedata', 'PetugasController@UpdatePetugasData')->name('petugas.updatedata');
     Route::get('/petugas/penilaian', 'PetugasController@Penilaian')->name('petugas.nilai');

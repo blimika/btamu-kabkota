@@ -1,5 +1,5 @@
 <!--isi feedback modal--->
-<div class="modal fade" id="BeriFeebackModal" tabindex="-1" role="dialog" aria-labelledby="vcenter">
+<div class="modal fade" id="BeriFeedBackModal" tabindex="-1" role="dialog" aria-labelledby="vcenter">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-info">

@@ -307,7 +307,7 @@ class KunjunganController extends Controller
                 $recipients = $newdata->Pengunjung->pengunjung_nomor_hp;
                 $recipients = $this->cek_nomor_hp($recipients);
                 $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10).
-                'Terimakasih, telah berkunjung ke BPS Provinsi Nusa Tenggara Barat.'.chr(10)
+                'Terimakasih, telah berkunjung ke '.$this->nama_satker.'.'.chr(10)
                 .'Berikut nomor antrian Anda!'.chr(10).chr(10)
                 .'#Detil Kunjungan'.chr(10)
                 .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
@@ -767,7 +767,7 @@ class KunjunganController extends Controller
                     }
                     else
                     {
-                        $tombol_feedback = '<button type="button" class="btn btn-rounded btn-danger btn-xs tombolfeedback m-t-5" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '" data-toggle="modal" data-target="#BeriFeebackModal"><span data-toggle="tooltip" data-placement="top" title="Belum memberikan feedback"><i class="fas fa-question"></i> feedback</span></button>';
+                        $tombol_feedback = '<button type="button" class="btn btn-rounded btn-danger btn-xs tombolfeedback m-t-5" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '" data-toggle="modal" data-target="#BeriFeedBackModal"><span data-toggle="tooltip" data-placement="top" title="Belum memberikan feedback"><i class="fas fa-question"></i> feedback</span></button>';
                     }
                 }
                 //batas
@@ -973,7 +973,7 @@ class KunjunganController extends Controller
                 $recipients = $data->Pengunjung->pengunjung_nomor_hp;
                 $recipients = $this->cek_nomor_hp($recipients);
                 $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10)
-                .'Terimakasih, telah berkunjung ke BPS Provinsi Nusa Tenggara Barat.'.chr(10)
+                .'Terimakasih, telah berkunjung ke '.$this->nama_satker.'.'.chr(10)
                 .'Berikut nomor antrian Anda!'.chr(10).chr(10)
                 .'#Detil Kunjungan'.chr(10)
                 .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
