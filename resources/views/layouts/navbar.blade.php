@@ -64,6 +64,8 @@
                     </li>
                     <li> <a class="waves-effect waves-dark" href="{{route('master.akses')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Daftar Akses</span></a>
                     </li>
+                    <li> <a class="waves-effect waves-dark" href="{{route('data.index')}}" aria-expanded="false"><i class="fa fa-database"></i><span class="hide-menu">Data</span></a>
+                    </li>
                     <li> <a class="waves-effect waves-dark" href="{{route('whatsapp.index')}}" aria-expanded="false"><i class="fab fa-whatsapp"></i><span class="hide-menu">Whatsapp</span></a>
                     </li>
                 @endif

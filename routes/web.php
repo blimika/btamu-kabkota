@@ -94,4 +94,6 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/pengunjung/pagelistfeedback', 'PengunjungController@PageListFeedback')->name('pengunjung.pagelistfeedback');
     //whatsapp
     Route::get('/whatsapp/index', 'WhatsappController@index')->name('whatsapp.index');
+    //data
+    Route::get('/data/index', 'DataController@index')->name('data.index');
 });
