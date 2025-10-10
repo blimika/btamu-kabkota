@@ -96,4 +96,5 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/whatsapp/index', 'WhatsappController@index')->name('whatsapp.index');
     //data
     Route::get('/data/index', 'DataController@index')->name('data.index');
+    Route::post('/petugas/sinkron', 'DataController@SinkronPetugas')->name('petugas.sinkron');
 });

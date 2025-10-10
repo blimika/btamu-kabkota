@@ -34,31 +34,43 @@
                     <h4 class="card-title">Database </h4>
                     Jumlah record masing-masing tabel pada aplikasi
                     <div class="row">
-                    <div class="col-lg-8 col-xs-12">
+                    <div class="col-lg-10 col-xs-12">
                     <div class="table-responsive m-t-20">
                         <table id="dTabel" class="table table-striped" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
                                     <th>Nama Tabel</th>
                                     <th>Jumlah Record</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>Pengunjung</td>
-                                    <td></td>
+                                    <td>{{$pengunjung}}</td>
+                                    <td>
+                                        <a href="{{ route('petugas.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
+                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
+                                        <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Kunjungan</td>
-                                    <td></td>
+                                    <td>{{$kunjungan}}</td>
+                                    <td>
+                                        <a href="{{ route('petugas.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
+                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
+                                        <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>Petugas</td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>Jadwal</td>
-                                    <td></td>
+                                    <td>{{$petugas}}</td>
+                                    <td>
+                                        <a href="{{ route('petugas.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
+                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
+                                        <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -70,6 +82,7 @@
         </div>
     </div>
 </div>
+    @include('data.modal-import')
 @endsection
 
 @section('css')

@@ -22,7 +22,7 @@
         @if (Session::has('message'))
         <div class="alert alert-{{ Session::get('message_type') }}" id="waktu2" style="margin-top:10px;">
             @if (Session::has('message_header'))
-            <h4 class="alert-heading">{!! Session::get('message_header') !!}</h4>
+                <h4 class="alert-heading">{!! Session::get('message_header') !!}</h4>
             @endif
             {!! Session::get('message') !!}
         </div>
@@ -56,6 +56,7 @@
                         <div class="col-lg-4 text-right">
                             @if (Auth::User()->user_level == 'admin')
                                 <a href="#" class="btn btn-info kirimnotifjaga">Kirim Notif</a>
+                                <a href="#" class="btn btn-danger sinkronpetugas">Sinkron Petugas</a>
                             @endif
                         </div>
                     </div>
@@ -740,6 +741,76 @@
                         });
                         $.ajax({
                             url: '{{ route("petugas.notifikasi") }}',
+                            method: 'post',
+                            data: {
+                            },
+                            cache: false,
+                            dataType: 'json',
+                            beforeSend: function() {
+                                Swal.fire({
+                                    title: "Processing...",
+                                    html: "Silakan tunggu sampai proses selesai.",
+                                    allowEscapeKey: false,
+                                    allowOutsideClick: false,
+                                    onOpen: () => {
+                                    swal.showLoading();
+                                    }
+                                });
+                            },
+                            success: function(data) {
+                                if (data.status == true) {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Berhasil!',
+                                        '' + data.message + '',
+                                        'success'
+                                    );
+                                } else {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Error!',
+                                        '' + data.message + '',
+                                        'error'
+                                    );
+                                }
+
+                            },
+                            error: function() {
+                                Swal.hideLoading();
+                                Swal.fire(
+                                    'Error',
+                                    'Koneksi Error',
+                                    'error'
+                                );
+                            }
+
+                        });
+
+                    }
+                })
+            });
+            $('.sinkronpetugas').click(function(e){
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Sinkron Data Petugas?',
+                    text: "mensinkronkan data petugas dengan kunjungan",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Kirim'
+                }).then((result) => {
+                    if (result.value) {
+                        //response ajax disini
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $(
+                                    'meta[name="csrf-token"]').attr(
+                                    'content')
+                            }
+                        });
+                        $.ajax({
+                            url: '{{ route("petugas.sinkron") }}',
                             method: 'post',
                             data: {
                             },

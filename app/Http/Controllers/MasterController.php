@@ -56,8 +56,8 @@ class MasterController extends Controller
             [
                 //'tahun_matrik' => null,
                 'tanggal' => 'Format : YYYY-MM-DD',
-                'petugas1_uid' => 'hanya kode uid 6 karakter',
-                'petugas2_uid' => 'hanya kode uid 6 karakter',
+                'petugas1_username' => 'hanya username petugas',
+                'petugas2_username' => 'hanya username petugas',
             ]
         ];
         $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';

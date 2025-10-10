@@ -22,8 +22,9 @@ class ImportJadwalPetugas implements ToCollection, WithHeadingRow, WithBatchInse
     {
         foreach ($rows as $row)
         {
-            $cek_user1 = User::where('user_uid',trim($row['petugas1_uid']))->first();
-            $cek_user2 = User::where('user_uid',trim($row['petugas2_uid']))->first();
+            //petugas username
+            $cek_user1 = User::where('username',trim($row['petugas1_username']))->first();
+            $cek_user2 = User::where('username',trim($row['petugas2_username']))->first();
             $data = Tanggal::where([['tanggal_angka',$row['tanggal']],['tanggal_jenis','kerja']])->first();
             if ($data)
             {
