@@ -38,20 +38,24 @@
                         <div class="col-lg-8">
                             Petugas Hari {{Tanggal::HariPanjang(\Carbon\Carbon::now())}} :
                             <br />
-                            <span class="badge badge-success">
-                                @if ($PetugasJaga->tanggal_petugas1_uid)
-                                    {{$PetugasJaga->Petugas1->name}}
-                                @else
-                                    -
-                                @endif
-                            </span>
-                            <span class="badge badge-info">
-                                @if ($PetugasJaga->tanggal_petugas2_uid)
-                                    {{$PetugasJaga->Petugas2->name}}
-                                @else
-                                    -
-                                @endif
-                            </span>
+                            @if ($PetugasJaga->tanggal_jenis == 'kerja')
+                                <span class="badge badge-success">
+                                    @if ($PetugasJaga->tanggal_petugas1_uid)
+                                        {{$PetugasJaga->Petugas1->name}}
+                                    @else
+                                        -
+                                    @endif
+                                </span>
+                                <span class="badge badge-info">
+                                    @if ($PetugasJaga->tanggal_petugas2_uid)
+                                        {{$PetugasJaga->Petugas2->name}}
+                                    @else
+                                        -
+                                    @endif
+                                </span>
+                            @else
+                                <span class="label label-danger">Hari libur ({{$PetugasJaga->tanggal_deskripsi}})</span>
+                            @endif
                         </div>
                         <div class="col-lg-4 text-right">
                             @if (Auth::User()->user_level == 'admin')

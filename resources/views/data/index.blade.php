@@ -49,7 +49,7 @@
                                     <td>Pengunjung</td>
                                     <td>{{$pengunjung}}</td>
                                     <td>
-                                        <a href="{{ route('petugas.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
+                                        <a href="{{ route('pengunjung.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
                                         <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>
@@ -58,7 +58,7 @@
                                     <td>Kunjungan</td>
                                     <td>{{$kunjungan}}</td>
                                     <td>
-                                        <a href="{{ route('petugas.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
+                                        <a href="{{ route('kunjungan.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
                                         <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>

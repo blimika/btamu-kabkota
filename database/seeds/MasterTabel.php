@@ -16,11 +16,13 @@ class MasterTabel extends Seeder
         DB::table('m_tujuan')->insert([
             ['id'=>1, 'tujuan_kode' => 1, 'tujuan_inisial'=>'KTR', 'tujuan_nama' => 'Kantor', 'tujuan_tipe' => 'kunjungan'],
             ['id'=>2, 'tujuan_kode' => 2, 'tujuan_inisial'=>'PST', 'tujuan_nama' => 'Pelayanan Statistik Terpadu', 'tujuan_tipe' => 'kunjungan'],
-            ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'MPP', 'tujuan_nama' => 'Mall Pelayanan Publik', 'tujuan_tipe' => 'kunjungan'],
-            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'MPP', 'tujuan_nama' => 'Mall Pelayanan Publik', 'tujuan_tipe' => 'kunjungan'],
             ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail', 'tujuan_tipe' => 'permintaan'],
             ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp', 'tujuan_tipe' => 'permintaan'],
             ['id'=>7, 'tujuan_kode' => 7, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya', 'tujuan_tipe' => 'permintaan'],
+
+
         ]);
         DB::table('m_pendidikan')->insert([
             ['id'=>1, 'pendidikan_kode' => 1, 'pendidikan_nama' => '<=SMA Sederajat'],

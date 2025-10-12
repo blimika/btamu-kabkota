@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FormatPengunjung;
 use App\Pengunjung;
 use Illuminate\Http\Request;
 use App\Pendidikan;
@@ -619,5 +620,23 @@ class PengunjungController extends Controller
 
         echo json_encode($response);
         exit;
+    }
+    public function Format()
+    {
+        $fileName = 'format-pengunjung-';
+        $data = [
+            [
+                'nomor_hp' => 'nomor  hp format 08xxxxx',
+                'nama_lengkap'=> 'nama lengkap',
+                'jenis_kelamin' => 'laki_laki/perempuan',
+                'tahun_lahir' => 'tahun lahir, 4 digit',
+                'email' => 'format email@gmail.com',
+                'pendidikan' => '1 <== SMA, 2 Diploma, 3 Sarjana, 4 Magister, 5 Doktor',
+                'pekerjaan' => 'isikan detil pekerjaannya',
+                'alamat' => 'alamat pengunjung',
+            ]
+        ];
+        $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new FormatPengunjung($data), $namafile);
     }
 }

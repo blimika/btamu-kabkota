@@ -48,8 +48,22 @@ class DataController extends Controller
     }
     /*
     kode import
+sebelum insert
+1. ALTER TABLE `m_pengunjung_lama` ADD `pengunjung_jenis_kelamin` ENUM('laki_laki','perempuan') NOT NULL DEFAULT 'laki_laki' AFTER `pengunjung_jk`;
     insert into m_pengunjung (pengunjung_uid,pengunjung_nama,pengunjung_nomor_hp,pengunjung_tahun_lahir, pengunjung_jenis_kelamin, pengunjung_pekerjaan, pengunjung_pendidikan, pengunjung_email,pengunjung_alamat,pengunjung_foto_profil,created_at, updated_at)
 select pengunjung_uid,pengunjung_nama,pengunjung_nomor_hp,pengunjung_tahun_lahir, pengunjung_jenis_kelamin, pengunjung_pekerjaan, pengunjung_pendidikan, pengunjung_email,pengunjung_alamat,pengunjung_foto_profil,created_at, updated_at from m_pengunjung_lama;
+
+sebelum insert
+1. ALTER TABLE `m_new_kunjungan` ADD `kunjungan_jenis_baru` ENUM('perorangan','kelompok') NOT NULL DEFAULT 'perorangan' AFTER `kunjungan_jenis`;
+2. ALTER TABLE `m_new_kunjungan` ADD `kunjungan_flag_feedback_baru` ENUM('belum','sudah') NOT NULL DEFAULT 'belum' AFTER `kunjungan_flag_feedback`;
+3. ALTER TABLE `m_new_kunjungan` ADD `kunjungan_flag_antrian_baru` ENUM('ruang_tunggu','dalam_layanan','selesai') NOT NULL DEFAULT 'ruang_tunggu' AFTER `kunjungan_flag_antrian`;
+4. ALTER TABLE `m_kunjungan` ADD `kunjungan_petugas_username` VARCHAR(50) NULL DEFAULT NULL AFTER `kunjungan_petugas_uid`;
+5. update m_new_kunjungan set kunjungan_jenis_baru='kelompok' where kunjungan_jenis='2';
+6. update m_new_kunjungan set kunjungan_flag_feedback_baru='sudah' where kunjungan_flag_feedback='2';
+7. update m_new_kunjungan set kunjungan_flag_antrian_baru='dalam_layanan' where kunjungan_flag_antrian='2';
+8. update m_new_kunjungan set kunjungan_flag_antrian_baru='selesai' where kunjungan_flag_antrian='3';
+9. update m_kunjungan set kunjungan_petugas_username='admin' where kunjungan_petugas_uid is null;
+
 
     INSERT INTO `m_kunjungan` (`kunjungan_id`, `pengunjung_uid`, `kunjungan_uid`, `kunjungan_tanggal`, `kunjungan_keperluan`, `kunjungan_tindak_lanjut`, `kunjungan_jenis`, `kunjungan_tujuan`, `kunjungan_layanan_pst`, `kunjungan_layanan_kantor`, `kunjungan_foto`, `kunjungan_jumlah_orang`, `kunjungan_jumlah_pria`, `kunjungan_jumlah_wanita`, `kunjungan_flag_feedback`, `kunjungan_nilai_feedback`, `kunjungan_komentar_feedback`, `kunjungan_ip_feedback`, `kunjungan_agent_feedback`, `kunjungan_tanggal_feedback`, `kunjungan_nomor_antrian`, `kunjungan_teks_antrian`, `kunjungan_loket_petugas`, `kunjungan_flag_antrian`, `kunjungan_jam_datang`, `kunjungan_jam_pulang`, `kunjungan_petugas_username`, `created_at`, `updated_at`)
 select `kunjungan_id`, `pengunjung_uid`, `kunjungan_uid`, `kunjungan_tanggal`, `kunjungan_keperluan`, `kunjungan_tindak_lanjut`, `kunjungan_jenis_baru`, `kunjungan_tujuan`, `kunjungan_pst`, `kunjungan_kantor`, `kunjungan_foto`, `kunjungan_jumlah_orang`, `kunjungan_jumlah_pria`, `kunjungan_jumlah_wanita`, `kunjungan_flag_feedback_baru`, `kunjungan_nilai_feedback`, `kunjungan_komentar_feedback`, `kunjungan_ip_feedback`, `kunjungan_agent_feedback`, `kunjungan_tanggal_feedback`, `kunjungan_nomor_antrian`, `kunjungan_teks_antrian`, `kunjungan_loket_petugas`, `kunjungan_flag_antrian_baru`, `kunjungan_jam_datang`, `kunjungan_jam_pulang`, `kunjungan_petugas_username`, `created_at`, `updated_at` from m_new_kunjungan;
@@ -86,6 +100,7 @@ select `kunjungan_id`, `pengunjung_uid`, `kunjungan_uid`, `kunjungan_tanggal`, `
                         if ($data_petugas)
                         {
                             $item_base->kunjungan_petugas_uid = $data_petugas->user_uid;
+                            $item_base->kunjungan_sarpras_feedback = $item_base->kunjungan_nilai_feedback;
                             $item_base->update();
                             $j++;
                         }

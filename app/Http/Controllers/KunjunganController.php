@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FormatKunjungan;
 use Illuminate\Http\Request;
 use App\Pendidikan;
 use App\Kunjungan;
@@ -476,6 +477,7 @@ class KunjunganController extends Controller
                 $data->kunjungan_sarpras_feedback = $request->feedback_sarpras;
                 $data->kunjungan_komentar_feedback = $request->feedback_komentar;
                 $data->kunjungan_ip_feedback = $request->getClientIp();
+                $data->kunjungan_agent_feedback = $request->header('User-Agent');
                 $data->kunjungan_tanggal_feedback = now();
                 $data->update();
 
@@ -1033,7 +1035,9 @@ class KunjunganController extends Controller
     public function NewFeedback($uid)
     {
         $data = Kunjungan::where('kunjungan_uid',$uid)->first();
-        return view('feedback.index',['data'=>$data]);
+        return view('feedback.index',[
+            'data'=>$data
+        ]);
     }
     public function MulaiLayanan(Request $request)
     {
@@ -1809,5 +1813,34 @@ class KunjunganController extends Controller
             }
         }
         return Response()->json($arr);
+    }
+    public function Format()
+    {
+        $fileName = 'format-kunjungan-';
+        $data = [
+            [
+                'nomor_hp' => 'nomor  hp format 08xxxxx',
+                'nama_lengkap'=> 'nama lengkap',
+                'jenis_kelamin' => 'laki_laki/perempuan',
+                'tahun_lahir' => 'tahun lahir, 4 digit',
+                'email' => 'format email@gmail.com',
+                'pendidikan' => '1 <== SMA, 2 Diploma, 3 Sarjana, 4 Magister, 5 Doktor',
+                'pekerjaan' => 'isikan detil pekerjaannya',
+                'alamat' => 'alamat pengunjung',
+                'tanggal' => 'tanggal kunjungan: format tahun-bulan-tanggal',
+                'jenis' => 'jenis kunjungan: perorangan/kelompok',
+                'keperluan' => 'isikan keperluaan kunjungan',
+                'tujuan' => '1: kantor, 2:pst, 3: pojok, 4: mpp, 5: email',
+                'layanan_pst' => 'jika tujuan kode 2: kode 1: perpus, 2: produk berbayar, 3:konsultasi, 4: romantik',
+                'layanan_kantor' => 'jika tujuan kode 1: 1 - 99',
+                'jam_mulai' => 'format 24jam: 08:00',
+                'jam_selesai' => 'format 24jam: 15:30',
+                'nilai_feedback' => 'dalam angka 1-6',
+                'nilai_sarpras' => 'dalam angka 1-6',
+                'petugas' => 'hanya usernamenya',
+            ]
+        ];
+        $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';
+        return Excel::download(new FormatKunjungan($data), $namafile);
     }
 }

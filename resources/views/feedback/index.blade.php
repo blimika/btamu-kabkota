@@ -61,6 +61,36 @@
                                         <dt class="col-lg-3 col-md-3 col-xs-12">Petugas yang melayani</dt>
                                         <dd class="col-lg-9 col-sm-9">{{ $data->Petugas->name}}</dd>
                                     @endif
+                                    @if ($data->kunjungan_flag_feedback == 'sudah')
+                                        <dt class="col-lg-3 col-md-3 col-xs-12">Rating Petugas</dt>
+                                        <dd class="col-lg-9 col-sm-9">
+                                            @for ($i = 1; $i < 7; $i++)
+                                                @if ($i <= $data->kunjungan_nilai_feedback)
+                                                    <span class="fa fa-star text-warning"></span>
+                                                @else
+                                                    <span class="fa fa-star"></span>
+                                                @endif
+                                            @endfor
+                                        </dd>
+                                        <dt class="col-lg-3 col-md-3 col-xs-12">Rating Fasilitas</dt>
+                                        <dd class="col-lg-9 col-sm-9">
+                                            @for ($i = 1; $i < 7; $i++)
+                                                @if ($i <= $data->kunjungan_sarpras_feedback)
+                                                    <span class="fa fa-star text-warning"></span>
+                                                @else
+                                                    <span class="fa fa-star"></span>
+                                                @endif
+                                            @endfor
+                                        </dd>
+                                        <dt class="col-lg-3 col-md-3 col-xs-12">Komentar</dt>
+                                        <dd class="col-lg-9 col-sm-9">
+                                            @if ($data->kunjungan_komentar_feedback)
+                                                <i>{{$data->kunjungan_komentar_feedback}}</i>
+                                            @else
+                                                -
+                                            @endif
+                                        </dd>
+                                    @endif
                                 </dl>
                             </p>
                             <!--- sudah selesai dilayani--->
@@ -70,7 +100,9 @@
                             </p>
                             <p>
                                 @if ($data->kunjungan_flag_feedback == 'sudah')
-                                    <button type="button" class="btn btn-rounded btn-info m-t-5" data-uid="{{$data->kunjungan_uid}}" data-nama="{{$data->Pengunjung->pengunjung_nama}}" data-tanggal="{{$data->kunjungan_tanggal}}" data-toggle="modal" data-target="#ViewFeedbackModal"><span data-toggle="tooltip" data-placement="top" title="Sudah memberikan feedback"><i class="fas fa-check-circle"></i> feedback</span></button>
+                                    <button type="button" class="btn btn-rounded btn-info m-t-5" data-uid="{{$data->kunjungan_uid}}" data-nama="{{$data->Pengunjung->pengunjung_nama}}" data-tanggal="{{$data->kunjungan_tanggal}}" data-toggle="modal" data-target="#ViewFeedbackModal"><span data-toggle="tooltip" data-placement="top" title="Sudah memberikan feedback"><i class="fas fa-check-circle"></i></span></button>
+
+                                    <button type="button" class="btn btn-danger tombolfeedback m-t-5" data-uid="{{$data->kunjungan_uid}}" data-nama="{{$data->Pengunjung->pengunjung_nama}}" data-tanggal="{{$data->kunjungan_tanggal}}" data-toggle="modal" data-target="#BeriFeebackModal"><span data-toggle="tooltip" data-placement="top" title="Edit feedback"><i class="fa fa-pencil"></i> Edit</span></button>
                                 @else
                                     <button type="button" class="btn btn-rounded btn-danger tombolfeedback m-t-5" data-uid="{{$data->kunjungan_uid}}" data-nama="{{$data->Pengunjung->pengunjung_nama}}" data-tanggal="{{$data->kunjungan_tanggal}}" data-toggle="modal" data-target="#BeriFeebackModal"><span data-toggle="tooltip" data-placement="top" title="Belum memberikan feedback"><i class="fas fa-question"></i> feedback</span></button>
                                 @endif
@@ -85,7 +117,6 @@
                                 {{ENV('NAMA_APLIKASI')}} <br />
                                 {{ENV('NAMA_SATKER')}}<br />
                                 {{ENV('ALAMAT_SATKER')}}
-
                             </p>
                         @else
                             Data kunjungan tidak valid
