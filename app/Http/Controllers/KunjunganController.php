@@ -1837,6 +1837,7 @@ class KunjunganController extends Controller
                 'jam_selesai' => 'format 24jam: 15:30',
                 'nilai_feedback' => 'dalam angka 1-6',
                 'nilai_sarpras' => 'dalam angka 1-6',
+                'komentar_feedback' => 'isikan strip (-) jika kosong',
                 'petugas' => 'hanya usernamenya',
             ]
         ];

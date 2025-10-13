@@ -50,7 +50,7 @@
                                     <td>{{$pengunjung}}</td>
                                     <td>
                                         <a href="{{ route('pengunjung.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
-                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
+                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPengunjungModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>
                                 </tr>
@@ -59,7 +59,7 @@
                                     <td>{{$kunjungan}}</td>
                                     <td>
                                         <a href="{{ route('kunjungan.format') }}" class="btn btn-info"><i class="ti-export"></i> &nbsp;Format</a>
-                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
+                                        <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportKunjunganModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>
                                 </tr>
@@ -82,7 +82,8 @@
         </div>
     </div>
 </div>
-    @include('data.modal-import')
+    @include('data.modal-importpetugas')
+    @include('data.modal-pengunjungimport')
 @endsection
 
 @section('css')
@@ -118,4 +119,6 @@
      <!-- Magnific popup JavaScript -->
      <script src="{{asset('assets/node_modules/Magnific-Popup-master/dist/jquery.magnific-popup.min.js')}}"></script>
      <script src="{{asset('assets/node_modules/Magnific-Popup-master/dist/jquery.magnific-popup-init.js')}}"></script>
+     @include('data.js-importpetugas')
+     @include('data.js-importpengunjung')
 @stop

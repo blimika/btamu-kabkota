@@ -53,6 +53,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/k/p/{uid}', 'KunjunganController@PrintNomorAntrian')->name('kunjungan.printantrian');
     Route::post('/kunjungan/petugassimpan', 'KunjunganController@PetugasSimpan')->name('kunjungan.petugassimpan');
     Route::get('/kunjungan/format', 'KunjunganController@Format')->name('kunjungan.format');
+
     //petugas
     Route::get('/petugas/index', 'PetugasController@index')->name('petugas.index');
     Route::post('/petugas/simpan', 'PetugasController@simpan')->name('petugas.simpan');
@@ -95,6 +96,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/pengunjung/hapus', 'PengunjungController@hapus')->name('pengunjung.hapus');
     Route::get('/pengunjung/pagelistfeedback', 'PengunjungController@PageListFeedback')->name('pengunjung.pagelistfeedback');
     Route::get('/pengunjung/format', 'PengunjungController@Format')->name('pengunjung.format');
+    Route::post('/pengunjung/import', 'PengunjungController@Import')->name('pengunjung.import');
     //whatsapp
     Route::get('/whatsapp/index', 'WhatsappController@index')->name('whatsapp.index');
     //data

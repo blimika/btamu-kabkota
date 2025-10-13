@@ -639,4 +639,23 @@ class PengunjungController extends Controller
         $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';
         return Excel::download(new FormatPengunjung($data), $namafile);
     }
+    public function Import(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Import data tidak berhasil',
+            'data'=>false,
+        );
+
+        if ($request->hasFile('file_import')) {
+            $file = $request->file('file_import'); //GET FILE
+            Excel::import(new ImportPetugas, $file); //IMPORT FILE
+            $arr = array(
+                'status'=>true,
+                'message'=>'Import data berhasil',
+                'data'=>true,
+            );
+        }
+        return Response()->json($arr);
+    }
 }

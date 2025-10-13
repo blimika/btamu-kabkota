@@ -101,6 +101,7 @@ class TabelMaster extends Migration
             $table->dateTime('kunjungan_jam_datang')->nullable();
             $table->dateTime('kunjungan_jam_pulang')->nullable();
             $table->string('kunjungan_petugas_uid',6)->nullable();
+            $table->string('kunjungan_petugas_username',50)->nullable();
             $table->timestamps();
         });
         Schema::create('m_whatsapp', function (Blueprint $table) {
