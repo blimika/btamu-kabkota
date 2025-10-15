@@ -136,8 +136,10 @@
                     <dd class="col-sm-8"><span id="kunjungan_komentar_feedback"></span></dd>
                     <dt class="col-sm-4">Tanggal isi</dt>
                     <dd class="col-sm-8"><span id="kunjungan_tanggal_feedback"></span></dd>
-                    <dt class="col-sm-4">IP</dt>
+                    <dt class="col-sm-4">IP Address</dt>
                     <dd class="col-sm-8"><span id="kunjungan_ip_feedback"></span></dd>
+                    <dt class="col-sm-4">Browser</dt>
+                    <dd class="col-sm-8"><span id="kunjungan_agent_feedback"></span></dd>
                 </dl>
             </div>
             <div class="modal-footer">

@@ -276,11 +276,20 @@ $('#ViewFeedbackModal').on('show.bs.modal', function (event) {
             {
                 var komentar_feedback = "<i>"+d.data.kunjungan_komentar_feedback+"</i>";
             }
+            if (d.data.kunjungan_agent_feedback == null)
+            {
+                var agent_feedback = "<i>---tidak tersedia----</i>";
+            }
+            else
+            {
+                var agent_feedback = "<i>"+d.data.kunjungan_agent_feedback+"</i>";
+            }
             $('#ViewFeedbackModal .modal-body #kunjungan_nilai_feedback').html(teks)
             $('#ViewFeedbackModal .modal-body #kunjungan_sarpras_feedback').html(teks_sarpras)
             $('#ViewFeedbackModal .modal-body #kunjungan_komentar_feedback').html(komentar_feedback)
             $('#ViewFeedbackModal .modal-body #kunjungan_tanggal_feedback').html(tanggal_feedback)
             $('#ViewFeedbackModal .modal-body #kunjungan_ip_feedback').html(ip_feedback)
+            $('#ViewFeedbackModal .modal-body #kunjungan_agent_feedback').html(agent_feedback)
             }
             else
             {

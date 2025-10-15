@@ -157,7 +157,13 @@
                                                 @endif
                                             </dd>
                                             <dt class="col-sm-3">Komentar</dt>
-                                            <dd class="col-sm-9"><i>{{$item->kunjungan_komentar_feedback}}</i></dd>
+                                            <dd class="col-sm-9">
+                                                @if ($item->kunjungan_komentar_feedback)
+                                                    <i>{{$item->kunjungan_komentar_feedback}}</i>
+                                                @else
+                                                    -
+                                                @endif
+                                            </dd>
                                             <dt class="col-sm-3">Tanggal</dt>
                                             <dd class="col-sm-9">
                                                 @if ($item->kunjungan_tanggal_feedback)
@@ -166,10 +172,18 @@
                                                     <i>--- belum tersedia ----</i>
                                                 @endif
                                             </dd>
-                                            <dt class="col-sm-3">IP</dt>
+                                            <dt class="col-sm-3">IP Address</dt>
                                             <dd class="col-sm-9">
                                                 @if ($item->kunjungan_ip_feedback)
                                                     {{$item->kunjungan_ip_feedback}}
+                                                @else
+                                                    <i>--- tidak tersedia ----</i>
+                                                @endif
+                                            </dd>
+                                            <dt class="col-sm-3">Browser</dt>
+                                            <dd class="col-sm-9">
+                                                @if ($item->kunjungan_agent_feedback)
+                                                    {{$item->kunjungan_agent_feedback}}
                                                 @else
                                                     <i>--- tidak tersedia ----</i>
                                                 @endif

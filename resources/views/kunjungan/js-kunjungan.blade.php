@@ -133,17 +133,59 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
                         rating_sarpras +='<span class="fa fa-star"></span>';
                     }
                 }
+                var warna_flag_feedback = 'badge-success';
+                var teks_flag_feedback = 'sudah';
             }
             else
             {
                 var rating_layanan = "<i>--belum tersedia--</i>";
-                var sarpras_feedback = "<i>--belum tersedia--</i>";
+                var rating_sarpras = "<i>--belum tersedia--</i>";
+                var warna_flag_feedback = 'badge-danger';
+                var teks_flag_feedback = 'belum';
+            }
+            if (d.data.kunjungan_tanggal_feedback == null)
+            {
+                var tanggal_feedback = "<i>---tidak tersedia----</i>";
+            }
+            else
+            {
+                //var tanggal_feedback = moment(d.data.kunjungan_tanggal_feedback);
+                var tanggal_feedback = moment(d.data.kunjungan_tanggal_feedback).locale('id').format('LLLL');
+            }
+            if (d.data.kunjungan_ip_feedback == null)
+            {
+                var ip_feedback = "<i>---tidak tersedia----</i>";
+            }
+            else
+            {
+                var ip_feedback = d.data.kunjungan_ip_feedback;
+            }
+            if (d.data.kunjungan_komentar_feedback == null)
+            {
+                var komentar_feedback = "-";
+            }
+            else
+            {
+                var komentar_feedback = "<i>"+d.data.kunjungan_komentar_feedback+"</i>";
+            }
+            if (d.data.kunjungan_agent_feedback == null)
+            {
+                var agent_feedback = "<i>---tidak tersedia----</i>";
+            }
+            else
+            {
+                var agent_feedback = "<i>"+d.data.kunjungan_agent_feedback+"</i>";
             }
             $('#ViewKunjunganModal .modal-body #rating_layanan').html(rating_layanan)
             $('#ViewKunjunganModal .modal-body #rating_sarpras').html(rating_sarpras)
+            $('#ViewKunjunganModal .modal-body #kunjungan_flag_feedback').html('<span class="badge '+warna_flag_feedback+' badge-pill">'+teks_flag_feedback+'</span>')
             $('#ViewKunjunganModal .modal-body #petugas_layanan').html(petugas_pelayanan)
             $('#ViewKunjunganModal .modal-body #kunjungan_keperluan').html(d.data.kunjungan_keperluan)
             $('#ViewKunjunganModal .modal-body #kunjungan_tindak_lanjut').html(d.data.kunjungan_tindak_lanjut)
+            $('#ViewKunjunganModal .modal-body #kunjungan_komentar_feedback').html(komentar_feedback)
+            $('#ViewKunjunganModal .modal-body #kunjungan_tanggal_feedback').html(tanggal_feedback)
+            $('#ViewKunjunganModal .modal-body #kunjungan_ip_feedback').html(ip_feedback)
+            $('#ViewKunjunganModal .modal-body #kunjungan_agent_feedback').html(agent_feedback)
             }
             else
             {
