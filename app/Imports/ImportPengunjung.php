@@ -26,19 +26,34 @@ class ImportPengunjung implements ToCollection, WithHeadingRow, WithBatchInserts
             $cekdata = Pengunjung::where('pengunjung_nomor_hp',$row['nomor_hp'])->first();
             if (!$cekdata)
                 {
-                    $data = new User();
-                    $data->user_uid = Generate::Kode(6);
-                    $data->username = $row['username'];
-                    $data->name = $row['name'];
-                    $data->email = $row['email'];
-                    $data->password = bcrypt($row['password']);
-                    $data->user_level = $row['user_level'];
-                    $data->user_telepon = $row['user_telepon'];
-                    $data->ganti_email = $row['email'];
-                    $data->email_kodever = '0';
-                    $data->user_flag = 'aktif';
+                    $data = new Pengunjung();
+                    $data->pengunjung_uid = Generate::Kode(6);
+                    $data->pengunjung_nama = $row['nama_lengkap'];
+                    $data->pengunjung_nomor_hp = $row['nomor_hp'];
+                    $data->pengunjung_tahun_lahir = $row['tahun_lahir'];
+                    $data->pengunjung_jenis_kelamin = $row['jenis_kelamin'];
+                    $data->pengunjung_pekerjaan = $row['pekerjaan'];
+                    $data->pengunjung_pendidikan = $row['pendidikan'];
+                    $data->pengunjung_email = $row['email'];
+                    $data->pengunjung_alamat = $row['alamat'];
+                    $data->pengunjung_total_kunjungan = 0;
+                    //$data->pengunjung_user_uid = 0; kedepan untuk member
                     $data->save();
                 }
+            else
+            {
+                //update datanya aja
+                $data = Pengunjung::where('pengunjung_nomor_hp',$row['nomor_hp'])->first();
+                $data->pengunjung_nama = $row['nama_lengkap'];
+                $data->pengunjung_nomor_hp = $row['nomor_hp'];
+                $data->pengunjung_tahun_lahir = $row['tahun_lahir'];
+                $data->pengunjung_jenis_kelamin = $row['jenis_kelamin'];
+                $data->pengunjung_pekerjaan = $row['pekerjaan'];
+                $data->pengunjung_pendidikan = $row['pendidikan'];
+                $data->pengunjung_email = $row['email'];
+                $data->pengunjung_alamat = $row['alamat'];
+                $data->update();
+            }
         }
     }
     public function batchSize(): int

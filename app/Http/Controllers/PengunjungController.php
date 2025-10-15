@@ -14,6 +14,7 @@ use App\Tanggal;
 use App\Whatsapp;
 use Carbon\Carbon;
 use App\Helpers\Generate;
+use App\Imports\ImportPengunjung;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -649,10 +650,10 @@ class PengunjungController extends Controller
 
         if ($request->hasFile('file_import')) {
             $file = $request->file('file_import'); //GET FILE
-            Excel::import(new ImportPetugas, $file); //IMPORT FILE
+            Excel::import(new ImportPengunjung, $file); //IMPORT FILE
             $arr = array(
                 'status'=>true,
-                'message'=>'Import data berhasil',
+                'message'=>'Import data pengunjung berhasil',
                 'data'=>true,
             );
         }

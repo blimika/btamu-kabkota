@@ -42,6 +42,9 @@
                                     <th>Nama Tabel</th>
                                     <th>Jumlah Record</th>
                                     <th>Aksi</th>
+                                    @if ($petugas_old > 0)
+                                        <th colspan="2">Khusus Provinsi</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -53,6 +56,12 @@
                                         <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPengunjungModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>
+                                    @if ($pengunjung_old > 0)
+                                        <td>{{$pengunjung_old}}</td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="sinkronpengunjung btn btn-info" ><i class="fas fa-sync"></i> Sinkron Pengunjung</a>
+                                        </td>
+                                    @endif
                                 </tr>
                                 <tr>
                                     <td>Kunjungan</td>
@@ -62,6 +71,14 @@
                                         <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportKunjunganModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>
+                                    @if ($kunjungan_old > 0)
+                                        <td>{{$kunjungan_old}}</td>
+                                        <td>
+                                            @if ($pengunjung > 0)
+                                                <a href="javascript:void(0)" class="sinkronkunjungan btn btn-warning" ><i class="fas fa-sync"></i> Sinkron Kunjungan</a>
+                                            @endif
+                                        </td>
+                                    @endif
                                 </tr>
                                 <tr>
                                     <td>Petugas</td>
@@ -71,6 +88,10 @@
                                         <a href="javascript:void(0)" class="btn btn-success m-l-15" data-toggle="modal" data-target="#ImportPetugasModal"><i class="ti-import"></i> Import</a>
                                         <a href="{{ route('petugas.format') }}" class="btn btn-danger m-l-15"><i class="ti-export"></i> &nbsp;Export</a>
                                     </td>
+                                    @if ($petugas_old > 0)
+                                        <td>{{$petugas_old}}</td>
+                                        <td><a href="javascript:void(0)" class="sinkronpetugas btn btn-danger" ><i class="fas fa-sync"></i> Sinkron Petugas</a></td>
+                                    @endif
                                 </tr>
                             </tbody>
                         </table>
@@ -84,6 +105,7 @@
 </div>
     @include('data.modal-importpetugas')
     @include('data.modal-pengunjungimport')
+    @include('data.modal-kunjunganimport')
 @endsection
 
 @section('css')
@@ -121,4 +143,225 @@
      <script src="{{asset('assets/node_modules/Magnific-Popup-master/dist/jquery.magnific-popup-init.js')}}"></script>
      @include('data.js-importpetugas')
      @include('data.js-importpengunjung')
+     @include('data.js-importkunjungan')
+     <script>
+        $('.sinkronpetugas').click(function(e){
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Sinkron Data Petugas?',
+                    text: "mensinkronkan data petugas ke sistem baru",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sinkron'
+                }).then((result) => {
+                    if (result.value) {
+                        //response ajax disini
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $(
+                                    'meta[name="csrf-token"]').attr(
+                                    'content')
+                            }
+                        });
+                        $.ajax({
+                            url: '{{ route("data.sinkronpetugas") }}',
+                            method: 'post',
+                            data: {
+                            },
+                            cache: false,
+                            dataType: 'json',
+                            beforeSend: function() {
+                                Swal.fire({
+                                    title: "Processing...",
+                                    html: "Silakan tunggu sampai proses selesai.",
+                                    allowEscapeKey: false,
+                                    allowOutsideClick: false,
+                                    onOpen: () => {
+                                    swal.showLoading();
+                                    }
+                                });
+                            },
+                            success: function(data) {
+                                if (data.status == true) {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Berhasil!',
+                                        '' + data.message + '',
+                                        'success'
+                                    ).then(function() {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Error!',
+                                        '' + data.message + '',
+                                        'error'
+                                    );
+                                }
+
+                            },
+                            error: function() {
+                                Swal.hideLoading();
+                                Swal.fire(
+                                    'Error',
+                                    'Koneksi Error',
+                                    'error'
+                                );
+                            }
+
+                        });
+
+                    }
+                })
+            });
+            //pengunjung
+            $('.sinkronpengunjung').click(function(e){
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Sinkron Data Pengunjung?',
+                    text: "mensinkronkan data pengunjung ke sistem baru",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sinkron'
+                }).then((result) => {
+                    if (result.value) {
+                        //response ajax disini
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $(
+                                    'meta[name="csrf-token"]').attr(
+                                    'content')
+                            }
+                        });
+                        $.ajax({
+                            url: '{{ route("data.sinkronpengunjung") }}',
+                            method: 'post',
+                            data: {
+                            },
+                            cache: false,
+                            dataType: 'json',
+                            beforeSend: function() {
+                                Swal.fire({
+                                    title: "Processing...",
+                                    html: "Silakan tunggu sampai proses selesai.",
+                                    allowEscapeKey: false,
+                                    allowOutsideClick: false,
+                                    onOpen: () => {
+                                    swal.showLoading();
+                                    }
+                                });
+                            },
+                            success: function(data) {
+                                if (data.status == true) {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Berhasil!',
+                                        '' + data.message + '',
+                                        'success'
+                                    ).then(function() {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Error!',
+                                        '' + data.message + '',
+                                        'error'
+                                    );
+                                }
+
+                            },
+                            error: function() {
+                                Swal.hideLoading();
+                                Swal.fire(
+                                    'Error',
+                                    'Koneksi Error',
+                                    'error'
+                                );
+                            }
+
+                        });
+
+                    }
+                })
+            });
+            //kunjungan
+            $('.sinkronkunjungan').click(function(e){
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Sinkron Data Kunjungan?',
+                    text: "mensinkronkan data kunjungan ke sistem baru",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sinkron'
+                }).then((result) => {
+                    if (result.value) {
+                        //response ajax disini
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $(
+                                    'meta[name="csrf-token"]').attr(
+                                    'content')
+                            }
+                        });
+                        $.ajax({
+                            url: '{{ route("data.sinkronkunjungan") }}',
+                            method: 'post',
+                            data: {
+                            },
+                            cache: false,
+                            dataType: 'json',
+                            beforeSend: function() {
+                                Swal.fire({
+                                    title: "Processing...",
+                                    html: "Silakan tunggu sampai proses selesai.",
+                                    allowEscapeKey: false,
+                                    allowOutsideClick: false,
+                                    onOpen: () => {
+                                    swal.showLoading();
+                                    }
+                                });
+                            },
+                            success: function(data) {
+                                if (data.status == true) {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Berhasil!',
+                                        '' + data.message + '',
+                                        'success'
+                                    ).then(function() {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.hideLoading();
+                                    Swal.fire(
+                                        'Error!',
+                                        '' + data.message + '',
+                                        'error'
+                                    );
+                                }
+
+                            },
+                            error: function() {
+                                Swal.hideLoading();
+                                Swal.fire(
+                                    'Error',
+                                    'Koneksi Error',
+                                    'error'
+                                );
+                            }
+
+                        });
+
+                    }
+                })
+            });
+     </script>
 @stop

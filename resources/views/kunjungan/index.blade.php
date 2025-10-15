@@ -38,23 +38,25 @@
                         <div class="col-lg-8">
                             Petugas Hari {{Tanggal::HariPanjang(\Carbon\Carbon::now())}} :
                             <br />
-                            @if ($PetugasJaga->tanggal_jenis == 'kerja')
-                                <span class="badge badge-success">
-                                    @if ($PetugasJaga->tanggal_petugas1_uid)
-                                        {{$PetugasJaga->Petugas1->name}}
-                                    @else
-                                        -
-                                    @endif
-                                </span>
-                                <span class="badge badge-info">
-                                    @if ($PetugasJaga->tanggal_petugas2_uid)
-                                        {{$PetugasJaga->Petugas2->name}}
-                                    @else
-                                        -
-                                    @endif
-                                </span>
-                            @else
-                                <span class="label label-danger">Hari libur ({{$PetugasJaga->tanggal_deskripsi}})</span>
+                            @if ($PetugasJaga)
+                                @if ($PetugasJaga->tanggal_jenis == 'kerja')
+                                    <span class="badge badge-success">
+                                        @if ($PetugasJaga->tanggal_petugas1_uid)
+                                            {{$PetugasJaga->Petugas1->name}}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                    <span class="badge badge-info">
+                                        @if ($PetugasJaga->tanggal_petugas2_uid)
+                                            {{$PetugasJaga->Petugas2->name}}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
+                                @else
+                                    <span class="label label-danger">Hari libur ({{$PetugasJaga->tanggal_deskripsi}})</span>
+                                @endif
                             @endif
                         </div>
                         <div class="col-lg-4 text-right">
@@ -74,11 +76,11 @@
                     <center id="pesanerror">
                         <div class="alert alert-success m-5"><span id="tekserror"></span></div>
                     </center>
-                    <div class="m-t-40">
+                    <div class="table-responsive m-t-40">
                         <h4 class="card-title text-center">
                             Data Kunjungan
                         </h4>
-                        <table id="dTabel" class="tabeldata display table table-hover table-striped table-bordered">
+                        <table id="dTabel" class="table tabeldata display table-hover table-striped table-bordered">
                             <thead>
                                 <tr>
                                     <th>UID</th>
@@ -87,6 +89,7 @@
                                     <th>Keperluan</th>
                                     <th>Tindak Lanjut</th>
                                     <th>Antrian</th>
+                                    <th>Datang</th>
                                     <th>Mulai</th>
                                     <th>Akhir</th>
                                     <th>Petugas</th>
@@ -169,6 +172,7 @@
                     {data: 'kunjungan_keperluan'},
                     {data: 'kunjungan_tindak_lanjut'},
                     {data: 'kunjungan_teks_antrian'},
+                    {data: 'created_at'},
                     {data: 'kunjungan_jam_datang'},
                     {data: 'kunjungan_jam_pulang'},
                     {data: 'kunjungan_petugas_uid'},
@@ -180,7 +184,7 @@
                 buttons: [
                     'copy', 'excel', 'print'
                 ],
-                responsive: false,
+                responsive: true,
                 "fnDrawCallback": function() {
                     $('.image-popup').magnificPopup({
                         type: 'image',

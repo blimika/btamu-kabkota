@@ -1,11 +1,9 @@
 <script>
     //import excel jadwal petugas
-    $('#ImportPetugasModal .modal-footer #BtnImportPetugas').on('click', function(e) {
+    $('#ImportKunjunganModal .modal-footer #BtnImportKunjungan').on('click', function(e) {
         e.preventDefault();
-        //var file_import_jadwal = $('#ImportJadwalModal .modal-body #file_import_jadwal')[0].files[0];
-
         var formData = new FormData();
-        formData.append('file_import', $('#ImportPetugasModal .modal-body #file_import')[0].files[0]);
+        formData.append('file_import', $('#ImportKunjunganModal .modal-body #file_import')[0].files[0]);
         //ajax upload file
         $.ajaxSetup({
             headers: {
@@ -13,7 +11,7 @@
             }
         });
         $.ajax({
-            url: '{{ route('petugas.import') }}',
+            url: '{{ route('kunjungan.import') }}',
             method: 'post',
             data: formData,
             async: false,

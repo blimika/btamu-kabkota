@@ -14,20 +14,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'DashboardController@index')->name('depan');
-Route::get('/display/antrian', 'KunjunganController@DisplayAntrian')->name('display.antrian');
 Route::get('/login', 'PetugasController@showLoginForm')->name('login');
 Route::post('/login', 'PetugasController@login')->name('login.proses');
 Route::get('/logout', 'PetugasController@logout')->name('logout');
 //feedback
 Route::post('/feedbacksave', 'KunjunganController@FeedbackSave')->name('feedbacksave');
 Route::get('/k/f/{uid}', 'KunjunganController@NewFeedback')->name('kunjungan.feedback');
-Route::get('/kunjungan/tambah', 'KunjunganController@tambah')->name('kunjungan.tambah');
-Route::post('/kunjungan/simpan', 'KunjunganController@simpan')->name('kunjungan.simpan');
-Route::get('/permintaan/tambah', 'KunjunganController@TambahPermintaan')->name('permintaan.tambah');
-Route::post('/permintaan/simpan', 'KunjunganController@simpanPermintaan')->name('permintaan.simpan');
 //webapi
 Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
 Route::group(['middleware' => 'ip.or.login'], function () {
+    Route::get('/display/antrian', 'KunjunganController@DisplayAntrian')->name('display.antrian');
+    Route::get('/kunjungan/tambah', 'KunjunganController@tambah')->name('kunjungan.tambah');
+    Route::post('/kunjungan/simpan', 'KunjunganController@simpan')->name('kunjungan.simpan');
+    Route::get('/permintaan/tambah', 'KunjunganController@TambahPermintaan')->name('permintaan.tambah');
+    Route::post('/permintaan/simpan', 'KunjunganController@simpanPermintaan')->name('permintaan.simpan');
     //whatsapp
     Route::get('/whatsapp', 'WhatsappController@WhatsappList')->name('whatsapp');
     Route::post('/whatsapp/notifikasi', 'WhatsappController@NotifJaga')->name('petugas.notifikasi');
@@ -53,7 +53,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/k/p/{uid}', 'KunjunganController@PrintNomorAntrian')->name('kunjungan.printantrian');
     Route::post('/kunjungan/petugassimpan', 'KunjunganController@PetugasSimpan')->name('kunjungan.petugassimpan');
     Route::get('/kunjungan/format', 'KunjunganController@Format')->name('kunjungan.format');
-
+    Route::post('/kunjungan/import', 'KunjunganController@Import')->name('kunjungan.import');
     //petugas
     Route::get('/petugas/index', 'PetugasController@index')->name('petugas.index');
     Route::post('/petugas/simpan', 'PetugasController@simpan')->name('petugas.simpan');
@@ -102,4 +102,7 @@ Route::group(['middleware' => ['auth']], function () {
     //data
     Route::get('/data/index', 'DataController@index')->name('data.index');
     Route::post('/petugas/sinkron', 'DataController@SinkronPetugas')->name('petugas.sinkron');
+    Route::post('/data/sinkronpetugas', 'DataController@SinkronPetugasProvinsi')->name('data.sinkronpetugas');
+    Route::post('/data/sinkronpengunjung', 'DataController@SinkronPengunjungProvinsi')->name('data.sinkronpengunjung');
+    Route::post('/data/sinkronkunjungan', 'DataController@SinkronKunjunganProvinsi')->name('data.sinkronkunjungan');
 });

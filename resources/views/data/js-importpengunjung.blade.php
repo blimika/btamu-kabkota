@@ -13,7 +13,7 @@
             }
         });
         $.ajax({
-            url: '{{ route('petugas.import') }}',
+            url: '{{ route('pengunjung.import') }}',
             method: 'post',
             data: formData,
             async: false,

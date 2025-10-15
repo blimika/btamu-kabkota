@@ -405,7 +405,7 @@ class PetugasController extends Controller
     }
     public function profil()
     {
-        $data = Kunjungan::where('kunjungan_petugas_uid',Auth::user()->user_uid)->take(10)->get();
+        $data = Kunjungan::where('kunjungan_petugas_uid',Auth::user()->user_uid)->orderBy('created_at','desc')->take(10)->get();
         return view('petugas.profil',[
             'data' => $data
         ]);

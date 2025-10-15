@@ -14,6 +14,7 @@ use App\Whatsapp;
 use App\Pengunjung;
 use Carbon\Carbon;
 use App\Helpers\Generate;
+use App\Imports\ImportKunjungan;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -75,21 +76,28 @@ class KunjunganController extends Controller
     {
         //cek hari dulu
         $cek_hari = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
-        if ($cek_hari->tanggal_jenis == 'kerja' or ENV('APP_CEK_LIBUR') == false) {
-            $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
-            $Tujuan = Tujuan::where('tujuan_tipe','kunjungan')->orderBy('tujuan_kode', 'asc')->get();
-            $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
-            $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
-            return view('kunjungan.tambah',[
-                'Pendidikan' => $Pendidikan,
-                'LayananPst'=>$LayananPst,
-                'LayananKantor'=>$LayananKantor,
-                'Tujuan'=>$Tujuan
-                ]);
+        if ($cek_hari)
+        {
+            if ($cek_hari->tanggal_jenis == 'kerja' or ENV('APP_CEK_LIBUR') == false) {
+                $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
+                $Tujuan = Tujuan::where('tujuan_tipe','kunjungan')->orderBy('tujuan_kode', 'asc')->get();
+                $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
+                $LayananKantor = LayananKantor::orderBy('layanan_kantor_kode', 'asc')->get();
+                return view('kunjungan.tambah',[
+                    'Pendidikan' => $Pendidikan,
+                    'LayananPst'=>$LayananPst,
+                    'LayananKantor'=>$LayananKantor,
+                    'Tujuan'=>$Tujuan
+                    ]);
+            }
+            else
+            {
+                return view('kunjungan.libur', ['tanggal' => $cek_hari]);
+            }
         }
         else
         {
-            return view('kunjungan.libur', ['tanggal' => $cek_hari]);
+            return view('kunjungan.tanggalkosong');
         }
     }
     public function simpan(Request $request)
@@ -792,6 +800,13 @@ class KunjunganController extends Controller
                     } else {
                         $akhir = '<span class="badge badge-success badge-pill">' . Carbon::parse($item->kunjungan_jam_pulang)->format('H:i') . '</span>';
                     }
+
+                     if ($item->created_at == "") {
+                        $jam_dibuat = '';
+                    }
+                    else {
+                        $jam_dibuat = '<span class="badge badge-danger badge-pill">' . Carbon::parse($item->created_at)->format('H:i') . '</span>';
+                    }
                 //batas
                 //petugas
                     //petugas
@@ -892,6 +907,7 @@ class KunjunganController extends Controller
                     "kunjungan_tindak_lanjut" => $tindak_lanjut,
                     "kunjungan_tujuan" => $layanan_utama,
                     "kunjungan_teks_antrian" => $item->kunjungan_teks_antrian .'<br />'.$flag_antrian_teks,
+                    "created_at" => $jam_dibuat,
                     "kunjungan_jam_datang" => $mulai,
                     "kunjungan_jam_pulang" => $akhir,
                     "kunjungan_petugas_uid" => $petugas .'<br />'.$tombol_feedback,
@@ -1828,11 +1844,10 @@ class KunjunganController extends Controller
                 'pekerjaan' => 'isikan detil pekerjaannya',
                 'alamat' => 'alamat pengunjung',
                 'tanggal' => 'tanggal kunjungan: format tahun-bulan-tanggal',
-                'jenis' => 'jenis kunjungan: perorangan/kelompok',
                 'keperluan' => 'isikan keperluaan kunjungan',
                 'tujuan' => '1: kantor, 2:pst, 3: pojok, 4: mpp, 5: email',
-                'layanan_pst' => 'jika tujuan kode 2: kode 1: perpus, 2: produk berbayar, 3:konsultasi, 4: romantik',
-                'layanan_kantor' => 'jika tujuan kode 1: 1 - 99',
+                'layanan_pst' => 'jika tujuan kode 2: kode 1: perpus, 2: produk berbayar, 3:konsultasi, 4: romantik, isikan 99 jika kosong',
+                'layanan_kantor' => 'jika tujuan kode 1: 1 - 99 bukan layanan kantor tujuannya',
                 'jam_mulai' => 'format 24jam: 08:00',
                 'jam_selesai' => 'format 24jam: 15:30',
                 'nilai_feedback' => 'dalam angka 1-6',
@@ -1843,5 +1858,24 @@ class KunjunganController extends Controller
         ];
         $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';
         return Excel::download(new FormatKunjungan($data), $namafile);
+    }
+    public function Import(Request $request)
+    {
+        $arr = array(
+            'status'=>false,
+            'message'=>'Import data kunjungan tidak berhasil',
+            'data'=> null,
+        );
+
+        if ($request->hasFile('file_import')) {
+            $file = $request->file('file_import'); //GET FILE
+            Excel::import(new ImportKunjungan, $file); //IMPORT FILE
+            $arr = array(
+                'status'=>true,
+                'message'=> 'Data kunjungan berhasil di import',
+                'data'=> 'success',
+            );
+        }
+        return Response()->json($arr);
     }
 }
