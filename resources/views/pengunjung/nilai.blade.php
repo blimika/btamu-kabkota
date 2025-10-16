@@ -9,15 +9,10 @@
                     $totalStars = 6;
                 @endphp
                 @for ($i = 1; $i <= $totalStars; $i++)
-                    @if ($rating >= $i)
-                        {{--Full Start--}}
-                        <i class="fas fa-star" style="color: #ffc107;"></i>
-                    @elseif ($rating > ($i - 1))
-                        {{--Half Start--}}
-                        <i class="fas fa-star-half-alt" style="color: #ffc107;"></i>
+                    @if ((int) $rating >= $i)
+                        <span class="fa fa-star text-warning"></span>
                     @else
-                        {{--Empty Start--}}
-                        <i class="far fa-star" style="color: #e4e5e9;"></i>
+                        <span class="fa fa-star"></span>
                     @endif
                 @endfor
                 {{--End Rating--}}
