@@ -107,6 +107,8 @@
     <script src="{{asset('dist/js/custom.min.js')}}"></script>
     <script src="{{asset('assets/node_modules/bootstrap-datepicker/bootstrap-datepicker.min.js')}}"></script>
     <script src="{{asset('assets/node_modules/sweetalert2/dist/sweetalert2.all.min.js')}}"></script>
+    <!---moment.js url--->
+    <script src="{{asset('dist/js/moment-with-locales.min.js')}}"></script>
     @section('js')
 
     @show
