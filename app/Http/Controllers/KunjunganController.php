@@ -1613,17 +1613,14 @@ class KunjunganController extends Controller
             $data->save();
             ///simpan foto
             $pengunjung_id = $data->pengunjung_id;
-            if (preg_match('/^data:image\/(\w+);base64,/', $request->foto)) {
+            if ($request->file('kunjungan_foto')->isValid()) {
+                //$file = $request->file('kunjungan_foto');
                 $namafile_kunjungan = '/img/kunjungan/kunjungan_' . $pengunjung_uid . '_' . $waktu_hari_ini . '.png';
-                $namafile_profil = '/img/profil/pengunjung_' . $pengunjung_uid . '.png';
-                $data_foto = substr($request->foto, strpos($request->foto, ',') + 1);
-                $data_foto = base64_decode($data_foto);
-                Storage::disk('public')->put($namafile_kunjungan, $data_foto);
-                Storage::disk('public')->put($namafile_profil, $data_foto);
-                //update link foto
-                $data->pengunjung_foto_profil = $namafile_profil;
-                $data->update();
-                //batas update
+                //$namafile_profil = '/img/profil/tamu_profil_' . $pengunjung_id . '.png';
+                $namafile_profil = NULL;
+                //upload foto permintaan saja
+                $request->file('kunjungan_foto')->storeAs('public',$namafile_kunjungan);
+                //Storage::putFileAs($namafile_kunjungan, $file);
             }
             else {
                 $namafile_kunjungan = NULL;
@@ -1635,19 +1632,21 @@ class KunjunganController extends Controller
             //data pengunjung sudah ada
             //apakah di update apa tidak
             //define foto kunjungan dulu
-            if (preg_match('/^data:image\/(\w+);base64,/', $request->foto)) {
-                $namafile_kunjungan = '/img/kunjungan/kunjungan_' . $request->pengunjung_uid . '_' . $waktu_hari_ini . '.png';
-                $namafile_profil = '/img/profil/pengunjung_' . $request->pengunjung_uid . '.png';
-                $data_foto = substr($request->foto, strpos($request->foto, ',') + 1);
-                $data_foto = base64_decode($data_foto);
-                Storage::disk('public')->put($namafile_kunjungan, $data_foto);
-                Storage::disk('public')->put($namafile_profil, $data_foto);
-            } else {
+            //apakah edit pengunjung
+            $data = Pengunjung::where('pengunjung_uid',$request->pengunjung_uid)->first();
+            if ($request->file('kunjungan_foto')->isValid()) {
+                //$file = $request->file('kunjungan_foto');
+                $namafile_kunjungan = '/img/kunjungan/kunjungan_' . $data->pengunjung_uid . '_' . $waktu_hari_ini . '.png';
+                //$namafile_profil = '/img/profil/tamu_profil_' . $pengunjung_id . '.png';
+                $namafile_profil = NULL;
+                //upload foto permintaan saja
+                $request->file('kunjungan_foto')->storeAs('public',$namafile_kunjungan);
+            }
+            else {
                 $namafile_kunjungan = NULL;
                 $namafile_profil = NULL;
             }
-            //apakah edit pengunjung
-            $data = Pengunjung::where('pengunjung_uid',$request->pengunjung_uid)->first();
+
             if ($request->edit_pengunjung == 1)
             {
                 //kalo di edit
