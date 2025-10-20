@@ -643,8 +643,8 @@ class MasterController extends Controller
                 "id" => $id,
                 "akses_ip"=>$ip,
                 "akses_flag"=> $flag,
-                "created_at"=>$created_at,
-                "updated_at"=>$updated_at,
+                "created_at"=>Tanggal::LengkapHariPendek($created_at),
+                "updated_at"=>Tanggal::LengkapHariPendek($updated_at),
                 "aksi"=>$aksi
             );
         }

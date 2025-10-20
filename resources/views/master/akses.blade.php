@@ -41,6 +41,8 @@
                                     <th>No</th>
                                     <th>IP</th>
                                     <th>Flag</th>
+                                    <th>Created</th>
+                                    <th>Update</th>
                                     <th>aksi</th>
                                 </tr>
                             </thead>
@@ -107,6 +109,8 @@
                 { data: 'id' },
                 { data: 'akses_ip' },
                 { data: 'akses_flag' },
+                { data: 'created_at' },
+                { data: 'updated_at' },
                 { data: 'aksi', orderable: false },
              ],
             dom: 'Bfrtip',

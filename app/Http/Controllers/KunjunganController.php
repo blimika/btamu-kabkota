@@ -1729,7 +1729,8 @@ class KunjunganController extends Controller
                 $wanita = 1;
             }
             //flag antrian langsung aja diubah
-            $jam_datang = Carbon::parse($request->kunjungan_tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
+            $waktuBaru = Carbon::now()->addMinutes(5)->format('H:i:s');
+            $jam_datang = Carbon::parse($request->kunjungan_tanggal .' '.$waktuBaru)->format('Y-m-d H:i:s');
             $jam_pulang = Carbon::parse($request->kunjungan_tanggal . ' 15:30:00')->format('Y-m-d H:i:s');
             if (Auth::user())
             {
