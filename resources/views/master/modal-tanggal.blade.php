@@ -89,7 +89,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="EditJadwal" tabindex="-1" role="dialog" aria-labelledby="vcenter">
+<div class="modal fade" id="EditJadwal" role="dialog" aria-labelledby="vcenter">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-success">
@@ -114,7 +114,7 @@
                     <div class="form-group row">
                         <label class="control-label col-md-3">Petugas 1</label>
                         <div class="input-group col-md-9">
-                            <select class="form-control" id="petugas1_uid" name="petugas1_uid" required>
+                            <select class="select2 form-control" style="width: 100%; height:36px;" id="petugas1_uid" name="petugas1_uid" required>
                                 <option value="0">Pilih Petugas 1</option>
                                 @foreach ($dataPetugas as $item1)
                                     <option value="{{ $item1->user_uid }}">{{ $item1->name }}</option>
@@ -125,7 +125,7 @@
                     <div class="form-group row">
                         <label class="control-label col-md-3">Petugas 2</label>
                         <div class="input-group col-md-9">
-                            <select class="form-control" id="petugas2_uid" name="petugas2_uid" required>
+                            <select class="select2 form-control" style="width: 100%; height:36px;" id="petugas2_uid" name="petugas2_uid" required>
                                 <option value="0">Pilih Petugas 2</option>
                                 @foreach ($dataPetugas as $item2)
                                     <option value="{{ $item2->user_uid }}">{{ $item2->name }}</option>

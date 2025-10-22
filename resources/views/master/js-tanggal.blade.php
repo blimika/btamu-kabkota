@@ -172,6 +172,7 @@
         var button = $(event.relatedTarget) // Button that triggered the modal
         var id = button.data('id')
         var tanggal = button.data('tanggal')
+        $("#EditJadwal .modal-body .select2").select2();
         $.ajax({
             url : '{{route("webapi")}}',
             method : 'get',
@@ -188,8 +189,8 @@
                     $('#EditJadwal .modal-body #edit_hari').text(d.data.tanggal_hari);
                     $('#EditJadwal .modal-body #edit_tanggal').text(d.data.tanggal_angka)
                     $('#EditJadwal .modal-body #edit_jenis').text(d.data.tanggal_jenis)
-                    $('#EditJadwal .modal-body #petugas1_uid').val(d.data.tanggal_petugas1_uid)
-                    $('#EditJadwal .modal-body #petugas2_uid').val(d.data.tanggal_petugas2_uid)
+                    $('#EditJadwal .modal-body #petugas1_uid').val(d.data.tanggal_petugas1_uid).trigger('change')
+                    $('#EditJadwal .modal-body #petugas2_uid').val(d.data.tanggal_petugas2_uid).trigger('change')
                 } else {
                     alert(d.message);
                 }
