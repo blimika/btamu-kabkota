@@ -38,6 +38,7 @@ class DashboardController extends Controller
         $feedback_sarpras = Kunjungan::where('kunjungan_flag_feedback','sudah')->average('kunjungan_sarpras_feedback');
         $feedback_ada_komentar = Kunjungan::where('kunjungan_flag_feedback','sudah')->where('kunjungan_komentar_feedback','!=',null)->count();
         //
+        $hasKunjungan = Kunjungan::exists();
         return view('depan',[
             'tahun'=>$tahun,
             'nama_bulan_pendek'=>$nama_bulan_pendek,
@@ -55,6 +56,7 @@ class DashboardController extends Controller
             'feedback_petugas' => $feedback_petugas,
             'feedback_sarpras' => $feedback_sarpras,
             'feedback_ada_komentar' => $feedback_ada_komentar,
+            'hasKunjungan' => $hasKunjungan,
         ]);
     }
 }

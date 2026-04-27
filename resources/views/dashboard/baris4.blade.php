@@ -42,7 +42,8 @@
             <div class="card-body">
                 <h5 class="card-title text-center">Kunjungan dan Feedback Status</h5>
                 <div id="" style="height: 300px;">
-                    <div class="row">
+                    @if ($hasKunjungan)
+                        <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-12 m-t-10 border-right border-bottom">
                             <h4 class="card-title text-center">Rating Petugas</h4>
                             <center class="m-t-10 m-b-10">
@@ -81,6 +82,11 @@
                             </div>
                         </div>
                     </div>
+                    @else
+                        <div class="text-center">
+                            <span class="badge badge-pill badge-dark"> Data kunjungan masih kosong</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
