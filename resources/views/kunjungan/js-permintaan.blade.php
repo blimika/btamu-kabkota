@@ -114,11 +114,82 @@ $('#edit_hp').click(function(){
     $('#edit_hp').prop('disabled', true);
     $('#edit_pengunjung').prop('value','1');
 });
+//jika file pdf terisi
+    $('#kunjungan_pdf').on('change', function() {
+        const files = this.files;
+        if (files.length === 0) {
+           Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'File PDF masih kosong'
+                });
+            return false;
+        }
+        const file = files[0];
+        if (file.type !== "application/pdf") {
+            Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'File surat permintaan harus berformat pdf'
+                });
+            $(this).val('');
+            return false;
+        }
+        const ukuranBytes = file.size; // Ukuran asli dalam Bytes
+        const ukuranMB = ukuranBytes / (1024 * 1024); // Konversi Byte ke Megabyte
+        const batasMaksimalMB = 3; // Tentukan batas maksimal (misal: 2 MB)
+        if (ukuranMB > batasMaksimalMB) {
+            Swal.fire({
+                    type: 'error',
+                    title: 'error',
+                    text: `Error: Ukuran file terlalu besar (${ukuranMB.toFixed(2)} MB). Maksimal ${batasMaksimalMB} MB!`
+                    });
+                $(this).val('');
+                return false;
+        }
+    });
 
+    //batasnya file pdf
 //cek form sebelum submit untuk checkbox
 $('#newPermintaanSave').on('click', function(e) {
     e.preventDefault();
     var pengunjung_baru = $('#pengunjung_baru').val();
+    var kunjungan_tanggal = $('#kunjungan_tanggal').val();
+    var nomor_hp = $('#nomor_hp').val();
+    const tanggalInput = new Date(kunjungan_tanggal);
+    const hariIni = new Date();
+    const tahunIni = hariIni.getFullYear();
+    const bulanIni = String(hariIni.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
+    const tanggalSkrg = String(hariIni.getDate()).padStart(2, '0');
+
+    const formatHariIni = `${tahunIni}-${bulanIni}-${tanggalSkrg}`;
+    if (kunjungan_tanggal == "")
+    {
+        Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'Tanggal permintaan harus terisi'
+                });
+            return false;
+    }
+    if (tanggalInput > hariIni)
+    {
+        Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'Tanggal permintaan tidak boleh lebih dari hari ini!'
+                });
+            return false;
+    }
+    if (nomor_hp == "")
+    {
+        Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'Nomor handphone harus terisi'
+                });
+            return false;
+    }
     //cek isian bila ada tamu baru / tamu di edit
     if (pengunjung_baru == 1)
     {
@@ -195,6 +266,16 @@ $('#newPermintaanSave').on('click', function(e) {
         }
     }
     //batasnya
+    //foto permintaan wajib terisi
+    const checkFoto = $('#kunjungan_foto').prop('files');
+    if (checkFoto.length === 0) {
+        Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'SC Permintaan Wajib terisi'
+                });
+            return false;
+    }
     var kunjungan_tujuan = $('#kunjungan_tujuan').val();
     if (kunjungan_tujuan == "")
     {

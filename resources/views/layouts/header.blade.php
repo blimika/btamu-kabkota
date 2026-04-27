@@ -8,12 +8,12 @@
                 <!-- Logo icon --><b>
                     <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
                     <!-- Dark Logo icon -->
-                    <img src="{{asset('assets/images/'.ENV('APP_LOGO'))}}" alt="Aplikasi" class="dark-logo" />
+                    <img src="{{asset('assets/images/'.env('APP_LOGO'))}}" alt="Aplikasi" class="dark-logo" />
                     <!-- Light Logo icon -->
-                    <img src="{{asset('assets/images/'.ENV('APP_LOGO'))}}" alt="Aplikasi" class="light-logo" />
+                    <img src="{{asset('assets/images/'.env('APP_LOGO'))}}" alt="Aplikasi" class="light-logo" />
                 </b>
                 <!--End Logo icon -->
-                <span class="hidden-xs" style=""><span class="font-bold" style="">{{ENV('APP_TEKS_1')}}</span>{{ENV('APP_TEKS_2')}}</span>
+                <span class="hidden-xs" style=""><span class="font-bold" style="">{{env('APP_TEKS_1')}}</span>{{env('APP_TEKS_2')}}</span>
             </a>
         </div>
         <!-- ============================================================== -->

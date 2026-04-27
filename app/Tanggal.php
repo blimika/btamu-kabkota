@@ -15,4 +15,8 @@ class Tanggal extends Model
     {
         return $this->belongsTo('App\User', 'tanggal_petugas2_uid', 'user_uid');
     }
+    public function Petugas3()
+    {
+        return $this->belongsTo('App\User', 'tanggal_petugas3_uid', 'user_uid');
+    }
 }

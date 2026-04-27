@@ -4,7 +4,7 @@ use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 use App\Helpers\Generate;
 
-class MasterTabel extends Seeder
+class MasterMataram extends Seeder
 {
     /**
      * Run the database seeds. Mall Pelayanan Publik
@@ -17,12 +17,9 @@ class MasterTabel extends Seeder
             ['id'=>1, 'tujuan_kode' => 1, 'tujuan_inisial'=>'KTR', 'tujuan_nama' => 'Kantor', 'tujuan_tipe' => 'kunjungan'],
             ['id'=>2, 'tujuan_kode' => 2, 'tujuan_inisial'=>'PST', 'tujuan_nama' => 'Pelayanan Statistik Terpadu', 'tujuan_tipe' => 'kunjungan'],
             ['id'=>3, 'tujuan_kode' => 3, 'tujuan_inisial'=>'POT', 'tujuan_nama' => 'Pojok Statistik', 'tujuan_tipe' => 'kunjungan'],
-            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'MPP', 'tujuan_nama' => 'Mall Pelayanan Publik', 'tujuan_tipe' => 'permintaan'],
-            ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail', 'tujuan_tipe' => 'permintaan'],
-            ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp', 'tujuan_tipe' => 'permintaan'],
-            ['id'=>7, 'tujuan_kode' => 7, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya', 'tujuan_tipe' => 'permintaan'],
-
-
+            ['id'=>4, 'tujuan_kode' => 4, 'tujuan_inisial'=>'EML', 'tujuan_nama' => 'E-Mail', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>5, 'tujuan_kode' => 5, 'tujuan_inisial'=>'WAP', 'tujuan_nama' => 'WhatsApp', 'tujuan_tipe' => 'permintaan'],
+            ['id'=>6, 'tujuan_kode' => 6, 'tujuan_inisial'=>'TEL', 'tujuan_nama' => 'Telepon/Lainnya', 'tujuan_tipe' => 'permintaan'],
         ]);
         DB::table('m_pendidikan')->insert([
             ['id'=>1, 'pendidikan_kode' => 1, 'pendidikan_nama' => '<=SMA Sederajat'],
@@ -33,10 +30,9 @@ class MasterTabel extends Seeder
         ]);
         DB::table('m_layanan_pst')->insert([
             ['id'=>1, 'layanan_pst_kode' => 1, 'layanan_pst_inisial'=>'PS', 'layanan_pst_nama' => 'Perpustakaan'],
-            ['id'=>2, 'layanan_pst_kode' => 2, 'layanan_pst_inisial'=>'PJ', 'layanan_pst_nama' => 'Produk Statistik Berbayar'],
-            ['id'=>3, 'layanan_pst_kode' => 3,  'layanan_pst_inisial'=>'KS', 'layanan_pst_nama' => 'Konsultasi Statistik'],
-            ['id'=>4, 'layanan_pst_kode' => 4,  'layanan_pst_inisial'=>'RS', 'layanan_pst_nama' => 'Rekomendasi Kegiatan Statistik'],
-            ['id'=>5, 'layanan_pst_kode' => 99, 'layanan_pst_inisial'=>'LA', 'layanan_pst_nama' => 'Lainnya'],
+            ['id'=>2, 'layanan_pst_kode' => 2,  'layanan_pst_inisial'=>'KS', 'layanan_pst_nama' => 'Konsultasi Statistik'],
+            ['id'=>3, 'layanan_pst_kode' => 3,  'layanan_pst_inisial'=>'RS', 'layanan_pst_nama' => 'Rekomendasi Kegiatan Statistik'],
+            ['id'=>4, 'layanan_pst_kode' => 99, 'layanan_pst_inisial'=>'LA', 'layanan_pst_nama' => 'Lainnya'],
         ]);
         DB::table('m_layanan_kantor')->insert([
             ['id'=>1, 'layanan_kantor_kode' => 1, 'layanan_kantor_inisial'=>'PG', 'layanan_kantor_nama' => 'Pengaduan'],
@@ -47,8 +43,6 @@ class MasterTabel extends Seeder
         DB::table('m_akses')->insert([
             ['id'=>1, 'akses_ip' => '127.0.0.1', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
             ['id'=>2, 'akses_ip' => '::1', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
-            ['id'=>3, 'akses_ip' => '36.95.114.173', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
-            ['id'=>4, 'akses_ip' => '36.95.114.170', 'akses_flag' => '1','created_at' => Carbon::now()->format('Y-m-d H:i:s'),'updated_at' => Carbon::now()->format('Y-m-d H:i:s')],
         ]);
         DB::table('m_bulan')->insert([
             ['id' => 1, 'bulan_nama_pendek' => 'Jan', 'bulan_nama' => 'Januari'],
@@ -68,11 +62,13 @@ class MasterTabel extends Seeder
             'user_uid' => Generate::Kode(6),
             'name' => 'Admin Sistem',
             'username' => 'admin',
-            'email' => 'admin@statsntb.id',
+            'email' => 'admin@bpskotamataram.id',
             'password' => bcrypt('1'),
             'user_level' => 'admin',
-            'user_telepon' => '081803635400',
-            'user_flag' => 'aktif'
+            'user_telepon' => '081139043333',
+            'user_flag' => 'aktif',
+            'created_at' => NOW(),
+            'updated_at' => NOW()
         ]);
     }
 }

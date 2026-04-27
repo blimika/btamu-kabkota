@@ -40,7 +40,12 @@
                     </center>
                     <div class="col-lg-12 m-t-40">
                         <div class="card-body b-l calender-sidebar">
-                            <div id="calendar"></div>
+                            @if (empty($data_jadwal))
+                                <div class="text-center">Data tanggal masih kosong</div>
+                            @else
+                                <div id="calendar"></div>
+                            @endif
+
                         </div>
                     </div>
                 </div>

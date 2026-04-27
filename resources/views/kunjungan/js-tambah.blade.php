@@ -6,100 +6,100 @@ function GetUmur(birthDateString) {
 }
 //cek nomor hp
 $('#cek_hp').click(function(){
-//set validasi_nomorhp = 1
-$('#validasi_nomorhp').val(1);
-var nomor = $("#nomor_hp").val();
-if (nomor == "")
-{
-    $('#nomor_hp_error').removeClass("has-danger");
-    $('#nomor_hp_error').addClass("has-danger");
-    Swal.fire({
-        type: 'error',
-        title: 'error',
-        text: 'Silakan isi nomor hp pengunjung'
-        });
-    return false;
-}
-else if (nomor.match(/[^\d+]/))
+    //set validasi_nomorhp = 1
+    $('#validasi_nomorhp').val(1);
+    var nomor = $("#nomor_hp").val();
+    if (nomor == "")
     {
+        $('#nomor_hp_error').removeClass("has-danger");
+        $('#nomor_hp_error').addClass("has-danger");
         Swal.fire({
             type: 'error',
             title: 'error',
-            text: 'Silakan masukkan nomor handphone hanya angka'
+            text: 'Silakan isi nomor hp pengunjung'
             });
         return false;
     }
-else
-{
-    $('#nomor_hp_error').removeClass("has-danger");
-    $('#nomor_hp_error').addClass("has-success");
-}
-$.ajax({
-url : '{{route("webapi")}}/',
-method : 'get',
-data: {
-    model: 'hp',
-    nomor: nomor
-},
-cache: false,
-dataType: 'json',
-success: function(d){
-
-    if (d.status==false) {
-        //buka semua inputan
-        $('#pengunjung_nama').prop('readonly', false);
-        $('#pengunjung_jk').prop('disabled', false);
-        $('#pengunjung_tahun_lahir').prop('readonly', false);
-        $('#pengunjung_pekerjaan').prop('readonly', false);
-        $('#pengunjung_pendidikan').prop('disabled', false);
-        $('#pengunjung_email').prop('readonly', false);
-        $('#pengunjung_alamat').prop('readonly', false);
-        $('#edit_hp').prop('disabled', true);
-
-        //kosongan isian
-        $('#pengunjung_uid').val("");
-        $('#pengunjung_nama').val("");
-        $('#pengunjung_jk').val("");
-        $('#pengunjung_tahun_lahir').val("");
-        $('#pengunjung_pekerjaan').val("");
-        $('#pengunjung_pendidikan').val("");
-        $('#pengunjung_email').val("");
-        $('#pengunjung_alamat').val("");
-        $('#edit_pengunjung').val(0);
-        $('#pengunjung_baru').prop('value','1');
+    else if (nomor.match(/[^\d+]/))
+        {
+            Swal.fire({
+                type: 'error',
+                title: 'error',
+                text: 'Silakan masukkan nomor handphone hanya angka'
+                });
+            return false;
+        }
+    else
+    {
+        $('#nomor_hp_error').removeClass("has-danger");
+        $('#nomor_hp_error').addClass("has-success");
     }
-    else {
-        //success / ada pengunjung
-        //inputan dia set readonly dulu
-        $('#pengunjung_nama').prop('readonly', true);
-        $('#pengunjung_jk').prop('disabled', true);
-        $('#pengunjung_tahun_lahir').prop('readonly', true);
-        $('#pengunjung_pekerjaan').prop('readonly', true);
-        $('#pengunjung_pendidikan').prop('disabled', true);
-        $('#pengunjung_email').prop('readonly', true);
-        $('#pengunjung_alamat').prop('readonly', true);
-        $('#edit_hp').prop('disabled', false);
+    $.ajax({
+    url : '{{route("webapi")}}/',
+    method : 'get',
+    data: {
+        model: 'hp',
+        nomor: nomor
+    },
+    cache: false,
+    dataType: 'json',
+    success: function(d){
 
-        //data di isikan di inputan
-        $('#pengunjung_id').val(d.data.pengunjung_id);
-        $('#pengunjung_uid').val(d.data.pengunjung_uid);
-        $('#pengunjung_nama').val(d.data.pengunjung_nama);
-        $('#pengunjung_jk').val(d.data.pengunjung_jenis_kelamin);
-        $('#pengunjung_tahun_lahir').val(d.data.pengunjung_tahun_lahir);
-        $('#pengunjung_pekerjaan').val(d.data.pengunjung_pekerjaan);
-        $('#pengunjung_pendidikan').val(d.data.pengunjung_pendidikan);
-        $('#pengunjung_email').val(d.data.pengunjung_email);
-        $('#pengunjung_alamat').val(d.data.pengunjung_alamat);
-        $('#edit_pengunjung').val(0);
-        $('#pengunjung_baru').prop('value','0');
+        if (d.status==false) {
+            //buka semua inputan
+            $('#pengunjung_nama').prop('readonly', false);
+            $('#pengunjung_jk').prop('disabled', false);
+            $('#pengunjung_tahun_lahir').prop('readonly', false);
+            $('#pengunjung_pekerjaan').prop('readonly', false);
+            $('#pengunjung_pendidikan').prop('disabled', false);
+            $('#pengunjung_email').prop('readonly', false);
+            $('#pengunjung_alamat').prop('readonly', false);
+            $('#edit_hp').prop('disabled', true);
 
+            //kosongan isian
+            $('#pengunjung_uid').val("");
+            $('#pengunjung_nama').val("");
+            $('#pengunjung_jk').val("");
+            $('#pengunjung_tahun_lahir').val("");
+            $('#pengunjung_pekerjaan').val("");
+            $('#pengunjung_pendidikan').val("");
+            $('#pengunjung_email').val("");
+            $('#pengunjung_alamat').val("");
+            $('#edit_pengunjung').val(0);
+            $('#pengunjung_baru').prop('value','1');
+        }
+        else {
+            //success / ada pengunjung
+            //inputan dia set readonly dulu
+            $('#pengunjung_nama').prop('readonly', true);
+            $('#pengunjung_jk').prop('disabled', true);
+            $('#pengunjung_tahun_lahir').prop('readonly', true);
+            $('#pengunjung_pekerjaan').prop('readonly', true);
+            $('#pengunjung_pendidikan').prop('disabled', true);
+            $('#pengunjung_email').prop('readonly', true);
+            $('#pengunjung_alamat').prop('readonly', true);
+            $('#edit_hp').prop('disabled', false);
+
+            //data di isikan di inputan
+            $('#pengunjung_id').val(d.data.pengunjung_id);
+            $('#pengunjung_uid').val(d.data.pengunjung_uid);
+            $('#pengunjung_nama').val(d.data.pengunjung_nama);
+            $('#pengunjung_jk').val(d.data.pengunjung_jenis_kelamin);
+            $('#pengunjung_tahun_lahir').val(d.data.pengunjung_tahun_lahir);
+            $('#pengunjung_pekerjaan').val(d.data.pengunjung_pekerjaan);
+            $('#pengunjung_pendidikan').val(d.data.pengunjung_pendidikan);
+            $('#pengunjung_email').val(d.data.pengunjung_email);
+            $('#pengunjung_alamat').val(d.data.pengunjung_alamat);
+            $('#edit_pengunjung').val(0);
+            $('#pengunjung_baru').prop('value','0');
+
+        }
+    },
+    error: function(){
+        alert("error koneksi");
     }
-},
-error: function(){
-    alert("error koneksi");
-}
 
-});
+    });
 });
 //batas
 //edit data pengunjung

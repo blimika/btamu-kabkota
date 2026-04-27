@@ -60,6 +60,8 @@
                     </ul>
                 </li>
                 @if (Auth::user()->user_level == 'admin')
+                    <li> <a class="waves-effect waves-dark" href="{{route('master.settings')}}" aria-expanded="false"><i class="ti-settings"></i><span class="hide-menu">Settings</span></a>
+                        </li>
                     <li> <a class="waves-effect waves-dark" href="{{route('master.tujuan')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Tujuan</span></a>
                     </li>
                     <li> <a class="waves-effect waves-dark" href="{{route('master.akses')}}" aria-expanded="false"><i class="ti-location-pin"></i><span class="hide-menu">Daftar Akses</span></a>

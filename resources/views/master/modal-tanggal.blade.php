@@ -133,6 +133,17 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-3">Petugas 3</label>
+                        <div class="input-group col-md-9">
+                            <select class="select2 form-control" style="width: 100%; height:36px;" id="petugas3_uid" name="petugas3_uid" required>
+                                <option value="0">Pilih Petugas 3</option>
+                                @foreach ($dataPetugas as $item3)
+                                    <option value="{{ $item3->user_uid }}">{{ $item3->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <span id="jadwal_error" class="text-danger"></span>
                     </div>

@@ -8,8 +8,8 @@
     <meta name="description" content="Aplikasi Bukutamu untuk Satker BPS Kabupaten Kota">
     <meta name="author" content="I Putu Dyatmika">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('assets/images/'.ENV('APP_FAVICON'))}}">
-    <title>{{ENV('NAMA_APLIKASI')}} - {{ENV('NAMA_SATKER')}}</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('assets/images/'.env('APP_FAVICON'))}}">
+    <title>{{env('NAMA_APLIKASI')}} - {{get_setting('NAMA_SATKER')}}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Custom CSS -->
     <link href="{{asset('dist/css/style.min.css')}}" rel="stylesheet">
@@ -56,7 +56,7 @@
     <div class="preloader">
         <div class="loader">
             <div class="loader__figure"></div>
-            <p class="loader__label">{{ENV('NAMA_APLIKASI')}} - {{ENV('NAMA_SATKER')}}</p>
+            <p class="loader__label">{{env('NAMA_APLIKASI')}} - {{get_setting('NAMA_SATKER')}}</p>
         </div>
     </div>
     <!-- ============================================================== -->
@@ -80,7 +80,7 @@
             </div>
         </div>
         <footer class="footer">
-            © 2020 - {!! date('Y') !!} <span class="text-success"><a href="https://ntb.bps.go.id" target="_blank">BPS Provinsi Nusa Tenggara Barat</a></span>
+            © 2020 - {!! date('Y') !!} <span><a href="{{get_setting('URL_SATKER')}}" class="text-success" target="_blank">{{env('NAMA_APLIKASI')}} - {{get_setting('NAMA_SATKER')}}</a></span>
             <span class="float-right">Created by <a href="https://ig.dyatmika.com" class="text-success" target="_blank">Blimika</a></span>
         </footer>
         <!-- ============================================================== -->

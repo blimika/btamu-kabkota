@@ -48,6 +48,10 @@
                     <dd class="col-sm-12"><span id="kunjungan_keperluan"></span></dd>
                     <dt class="col-sm-12">Tindak Lanjut</dt>
                     <dd class="col-sm-12"><i><span id="kunjungan_tindak_lanjut"></span></i></dd>
+                    <dt class="col-sm-4" id="filepdf" style="display: none;">File PDF</dt>
+                    <dd class="col-sm-8" id="filepdf" style="display: none;"><a href="" id="kunjungan_pdf" target="_blank" class="btn waves-effect btn-success btn-xs waves-light"><i class="fa fa-link"></i> Link PDF</a></dd>
+                    <dt class="col-sm-4">Responden SKD</dt>
+                    <dd class="col-sm-8"><span id="kunjungan_flag_skd"></span></dd>
                     <dt class="col-sm-4">Petugas Layanan</dt>
                     <dd class="col-sm-8"><span id="petugas_layanan"></span></dd>
                     <hr style="width: 100%; color: black; height: 1px;" />

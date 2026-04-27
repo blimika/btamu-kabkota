@@ -69,6 +69,15 @@
                                     <input type="file" class="dropify" data-height="400" id="kunjungan_foto" name="kunjungan_foto" data-max-file-size="2M" accept="image/*" required>
                                 </div>
                             </div>
+                            <h3 class="card-title">Surat Permintaan</h3>
+                            <h6 class="card-subtitle">Berupa pdf permintaan data </h6>
+                            <hr class="m-t-0 m-b-20">
+                            <div class="form-group row">
+                                <label class="control-label text-right col-md-3">File PDF (1 file)</label>
+                                <div class="col-md-9" id="pdf_error">
+                                    <input class="form-control border-black" type="file" id="kunjungan_pdf" name="kunjungan_pdf" accept="application/pdf">
+                                </div>
+                            </div>
                             <h3 class="card-title">Kanal Permintaan</h3>
                             <hr class="m-t-0 m-b-20">
                             @include('kunjungan.form-tujuan')

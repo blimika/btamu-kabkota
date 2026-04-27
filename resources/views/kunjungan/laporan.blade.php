@@ -31,8 +31,33 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    <!--form--filter-->
+                        <form class="form-horizontal">
+                            <div class="form-group row">
+                                <label for="tahun" class="col-sm-1 control-label">Filter : </label>
+                                <div class="col-md-4">
+                                    <select name="tahun" id="tahun" class="form-control">
+                                        <option value="0">Semua Tahun</option>
+                                     @foreach ($data_tahun as $iTahun)
+                                     <option value="{{$iTahun->tahun}}" @if (request('tahun')==$iTahun->tahun or $tahun==$iTahun->tahun)
+                                     selected
+                                    @endif>{{$iTahun->tahun}}</option>
+                                     @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-success">Filter</button>
+                                </div>
+                            </div>
+                        </form>
+                        <!--batas form filter-->
                     <h4 class="card-title text-center">
-                        Laporan Kunjungan dan Pengunjung Perbulan Tahun {{$tahun}}
+                        Laporan Kunjungan dan Pengunjung Perbulan @if ($tahun == '0')
+                            (Total)
+                        @else
+                         Tahun {{$tahun}}
+                        @endif
                     </h4>
                     <center id="preloading">
                         <button class="btn btn-success" type="button" disabled>

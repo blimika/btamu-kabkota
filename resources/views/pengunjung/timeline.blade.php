@@ -104,11 +104,7 @@
                                             @if ($item->kunjungan_foto != NULL)
                                                 @if (Storage::disk('public')->exists($item->kunjungan_foto))
                                                 <a class="image-popup-vertical-fit" href="{{asset('storage'.$item->kunjungan_foto)}}" title="Nama : {{$data->pengunjung_nama}}"> <img src="{{asset('storage'.$item->kunjungan_foto)}}" alt="user" /> </a>
-                                                @else
-                                                <img src="https://placehold.co/480x360/0022FF/FFFFFF/?text=photo+tidak+ada" alt="image" class="img-responsive"/>
                                                 @endif
-                                            @else
-                                            <img src="https://placehold.co/480x360/0022FF/FFFFFF/?text=photo+tidak+ada" alt="image" class="img-responsive"/>
                                             @endif
                                         </div>
                                         <dl class="row p-0">
@@ -121,6 +117,10 @@
                                             <dd class="col-sm-9">{{$item->kunjungan_keperluan}}</dd>
                                             <dt class="col-sm-3">Tindak Lanjut</dt>
                                             <dd class="col-sm-9"><i>{{$item->kunjungan_tindak_lanjut}}</i></dd>
+                                            @if ($item->kunjungan_pdf != null)
+                                                <dt class="col-sm-3">File PDF</dt>
+                                                <dd class="col-sm-9"><button type="button" class="btn btn-warning btn-xs m-t-5" data-id=" {{$item->kunjungan_id}}" data-uid="{{$item->kunjungan_uid}}" data-nama="{{$item->pengunjung_nama}}" data-tanggal="{{$item->kunjungan_tanggal}}" data-toggle="modal" data-target="#ViewPDFModal"><span data-toggle="tooltip" data-placement="top" title="File PDF Permintaan"><i class="fa fa-link"></i> File PDF</span></button></dd>
+                                            @endif
                                             <dt class="col-sm-3">Petugas</dt>
                                             <dd class="col-sm-9">
                                                 @if($item->kunjungan_petugas_uid)
@@ -203,7 +203,7 @@
         </div>
     </div>
 </div>
-
+@include('kunjungan.modal-pdf')
 @endsection
 
 @section('css')
@@ -247,4 +247,5 @@
     <!-- Magnific popup JavaScript -->
     <script src="{{asset('assets/node_modules/Magnific-Popup-master/dist/jquery.magnific-popup.min.js')}}"></script>
     <script src="{{asset('assets/node_modules/Magnific-Popup-master/dist/jquery.magnific-popup-init.js')}}"></script>
+    @include('kunjungan.js-viewpdf')
 @stop

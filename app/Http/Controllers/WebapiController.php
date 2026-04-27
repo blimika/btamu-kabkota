@@ -13,6 +13,7 @@ use App\Whatsapp;
 use App\Pengunjung;
 use Carbon\Carbon;
 use App\User;
+use App\Setting;
 use App\Services\WhatsAppService;
 
 class WebapiController extends Controller
@@ -29,7 +30,7 @@ class WebapiController extends Controller
         $arr = array(
             'status'=>false,
             'message'=>'Data tidak tersedia',
-            'data'=>'Webapi Bukutamu v4.0 (Kabkota)'
+            'data'=>'Webapi Bukutamu v4.5 (Provinsi/Kabkota)'
         );
         if ($request->model == "hp")
         {
@@ -116,7 +117,7 @@ class WebapiController extends Controller
         if ($request->model == "tanggal")
         {
             //member/users
-            $data = Tanggal::with('Petugas1','Petugas2')->where('id',$request->id)->first();
+            $data = Tanggal::with('Petugas1','Petugas2','Petugas3')->where('id',$request->id)->first();
             //$data = Pengunjung::with('Pendidikan','JenisKelamin','Member','Kunjungan','Kunjungan.Tujuan','Kunjungan.JenisKunjungan','Kunjungan.LayananUtama','Kunjungan.FlagAntrian')->where('pengunjung_uid',$request->uid)->first();
             if ($data)
             {
@@ -137,6 +138,26 @@ class WebapiController extends Controller
                 );
             }
 
+        }
+        if ($request->model == "setting")
+        {
+            $data = Setting::where('key',$request->key)->first();
+            if ($data)
+            {
+                $arr = array(
+                    'status'=>true,
+                    'message'=>'Data tersedia',
+                    'data'=>$data
+                );
+            }
+            else
+            {
+                $arr = array(
+                    'status'=>false,
+                    'message'=>'Data tidak tersedia',
+                    'data'=>null
+                );
+            }
         }
         return Response()->json($arr);
     }

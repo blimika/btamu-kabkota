@@ -22,6 +22,9 @@ Route::post('/feedbacksave', 'KunjunganController@FeedbackSave')->name('feedback
 Route::get('/k/f/{uid}', 'KunjunganController@NewFeedback')->name('kunjungan.feedback');
 //webapi
 Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
+Route::middleware(['webapi.key'])->group(function () {
+    //Route::post('/webapi/store', 'WebapiController@store');
+});
 Route::group(['middleware' => 'ip.or.login'], function () {
     Route::get('/display/antrian', 'KunjunganController@DisplayAntrian')->name('display.antrian');
     Route::get('/kunjungan/tambah', 'KunjunganController@tambah')->name('kunjungan.tambah');
@@ -88,6 +91,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/master/ubahflagakses', 'MasterController@UbahFLagAkses')->name('master.ubahflagakses');
     Route::post('/master/simpanakses', 'MasterController@SimpanAkses')->name('master.simpanakses');
     Route::post('/master/updateakses', 'MasterController@UpdateAkses')->name('master.updateakses');
+    //settings
+    Route::get('/master/settings', 'MasterController@settings')->name('master.settings');
+    Route::post('/master/updatesetting', 'MasterController@updateSetting')->name('master.updatesetting');
     //pengunjung
     Route::get('/pengunjung/index', 'PengunjungController@index')->name('pengunjung.index');
     Route::get('/pengunjung/pagelist', 'PengunjungController@PageList')->name('pengunjung.pagelist');

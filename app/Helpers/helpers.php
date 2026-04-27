@@ -864,4 +864,34 @@ class Generate {
         }
         return $arr;
     }
+    //baris 4 dashbaorad
+    public static function StatusKunjungan($kode)
+    {
+        //output persen
+        $jumlah_total = \App\Kunjungan::count();
+        $jumlah_kode = \App\Kunjungan::where('kunjungan_flag_antrian',$kode)->count();
+        if ($jumlah_total > 0)
+            {
+                //ada datanya
+                if ($kode == 'total') {
+                    $arr = '<span class="label label-danger">'.number_format($jumlah_total, 0, '.', '').' ('.number_format(($jumlah_total/$jumlah_total)*100, 2, '.', '').'%)</span>';
+                }
+                elseif ($kode =='ruang_tunggu') {
+                    $arr = '<span class="label label-info">'.number_format($jumlah_kode, 0, '.', '').' ('.number_format(($jumlah_kode/$jumlah_total)*100, 2, '.', '').'%)</span>';
+                } elseif ($kode =='dalam_layanan') {
+                    $arr = '<span class="label label-warning">'.number_format($jumlah_kode, 0, '.', '').' ('.number_format(($jumlah_kode/$jumlah_total)*100, 2, '.', '').'%)</span>';
+                }
+                else {
+                    $arr = '<span class="label label-success">'.number_format($jumlah_kode, 0, '.', '').' ('.number_format(($jumlah_kode/$jumlah_total)*100, 2, '.', '').'%)</span>';
+                }
+
+
+                //<span class="badge badge-pill badge-info text-white"> <i class="fa fa-star text-warning"></i> '.number_format($data->rata_nilai,2, '.', '').'</span>';
+            }
+        else
+            {
+                $arr = '<span class="badge badge-pill badge-dark"> Data kunjungan masih kosong</span>';
+            }
+        return $arr;
+    }
 }

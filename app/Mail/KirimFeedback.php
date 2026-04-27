@@ -30,7 +30,7 @@ class KirimFeedback extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->from(ENV('MAIL_USERNAME'),ENV('NAMA_APLIKASI'))
+        return $this->from(env('MAIL_USERNAME'),env('NAMA_APLIKASI'))
                     ->subject('[NOREPLY] Terima Kasih atas Kunjungan Anda!')
                     ->markdown('emails.feedback')->with('body',$this->body);
     }

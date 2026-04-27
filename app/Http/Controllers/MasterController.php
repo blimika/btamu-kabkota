@@ -7,6 +7,7 @@ use App\Helpers\Tanggal;
 use App\Tanggal as AppTanggal;
 use App\User;
 use Carbon\Carbon;
+use App\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,9 +26,9 @@ class MasterController extends Controller
     protected $cek_nomor_hp;
     public function __construct(WhatsAppService $whatsAppService)
     {
-        $this->nama_aplikasi = ENV('NAMA_APLIKASI');
-        $this->nama_satker = ENV('NAMA_SATKER');
-        $this->alamat_satker = ENV('ALAMAT_SATKER');
+        $this->nama_aplikasi = env('NAMA_APLIKASI');
+        $this->nama_satker = get_setting('NAMA_SATKER');
+        $this->alamat_satker = get_setting('ALAMAT_SATKER');
         $this->whatsAppService = $whatsAppService;
     }
     public function tanggal()
@@ -56,8 +57,9 @@ class MasterController extends Controller
             [
                 //'tahun_matrik' => null,
                 'tanggal' => 'Format : YYYY-MM-DD',
-                'petugas1_username' => 'hanya username petugas',
-                'petugas2_username' => 'hanya username petugas',
+                'petugas1_username' => 'hanya username petugas1',
+                'petugas2_username' => 'hanya username petugas2',
+                'petugas3_username' => 'hanya username petugas3',
             ]
         ];
         $namafile = $fileName . date('Y-m-d_H-i-s') . '.xlsx';
@@ -90,12 +92,15 @@ class MasterController extends Controller
         $totalRecordswithFilter = DB::table('m_tanggal')
         ->leftJoin(DB::Raw("(select user_uid as uid_petugas1, name as nama_petugas1, username as username_petugas1 from users) as petugas1"),'m_tanggal.tanggal_petugas1_uid','=','petugas1.uid_petugas1')
         ->leftJoin(DB::Raw("(select user_uid as uid_petugas2, name as nama_petugas2, username as username_petugas2 from users) as petugas2"),'m_tanggal.tanggal_petugas2_uid','=','petugas2.uid_petugas2')
+        ->leftJoin(DB::Raw("(select user_uid as uid_petugas3, name as nama_petugas3, username as username_petugas3 from users) as petugas3"),'m_tanggal.tanggal_petugas3_uid','=','petugas3.uid_petugas3')
         ->when($searchValue, function ($q) use ($searchValue) {
             return $q->where('m_tanggal.tanggal_angka', 'like', '%' .$searchValue . '%')
                          ->orWhere('nama_petugas1', 'like', '%' . $searchValue . '%')
                          ->orWhere('nama_petugas2', 'like', '%' . $searchValue . '%')
+                         ->orWhere('nama_petugas3', 'like', '%' . $searchValue . '%')
                          ->orWhere('username_petugas1', 'like', '%' . $searchValue . '%')
                          ->orWhere('username_petugas2', 'like', '%' . $searchValue . '%')
+                         ->orWhere('username_petugas3', 'like', '%' . $searchValue . '%')
                          ->orWhere('m_tanggal.tanggal_deskripsi', 'like', '%' . $searchValue . '%')
                          ->orWhere('m_tanggal.tanggal_hari', 'like', '%' . $searchValue . '%');
         })
@@ -108,19 +113,22 @@ class MasterController extends Controller
         $records = DB::table('m_tanggal')
              ->leftJoin(DB::Raw("(select user_uid as uid_petugas1, name as nama_petugas1, username as username_petugas1 from users) as petugas1"),'m_tanggal.tanggal_petugas1_uid','=','petugas1.uid_petugas1')
             ->leftJoin(DB::Raw("(select user_uid as uid_petugas2, name as nama_petugas2, username as username_petugas2 from users) as petugas2"),'m_tanggal.tanggal_petugas2_uid','=','petugas2.uid_petugas2')
+            ->leftJoin(DB::Raw("(select user_uid as uid_petugas3, name as nama_petugas3, username as username_petugas3 from users) as petugas3"),'m_tanggal.tanggal_petugas3_uid','=','petugas3.uid_petugas3')
             ->when($searchValue, function ($q) use ($searchValue) {
                 return $q->where('m_tanggal.tanggal_angka', 'like', '%' .$searchValue . '%')
                             ->orWhere('nama_petugas1', 'like', '%' . $searchValue . '%')
                             ->orWhere('nama_petugas2', 'like', '%' . $searchValue . '%')
+                            ->orWhere('nama_petugas3', 'like', '%' . $searchValue . '%')
                             ->orWhere('username_petugas1', 'like', '%' . $searchValue . '%')
                             ->orWhere('username_petugas2', 'like', '%' . $searchValue . '%')
+                            ->orWhere('username_petugas3', 'like', '%' . $searchValue . '%')
                             ->orWhere('m_tanggal.tanggal_deskripsi', 'like', '%' . $searchValue . '%')
                             ->orWhere('m_tanggal.tanggal_hari', 'like', '%' . $searchValue . '%');
             })
             ->when($tahun_filter > 0, function ($query) use ($tahun_filter) {
                 return $query->whereYear('m_tanggal.tanggal_angka',$tahun_filter);
             })
-            ->select('m_tanggal.*','petugas1.*','petugas2.*')
+            ->select('m_tanggal.*','petugas1.*','petugas2.*','petugas3.*')
             ->skip($start)
             ->take($rowperpage)
             ->orderBy($columnName,$columnSortOrder)
@@ -136,6 +144,7 @@ class MasterController extends Controller
             $deskripsi = $record->tanggal_deskripsi;
             $petugas1 = $record->nama_petugas1;
             $petugas2 = $record->nama_petugas2;
+            $petugas3 = $record->nama_petugas3;
             if (Auth::user()->user_level == 'admin')
                 {
                     if ($record->tanggal_jenis == 'kerja')
@@ -173,6 +182,7 @@ class MasterController extends Controller
                 "tanggal_deskripsi"=>$deskripsi,
                 "tanggal_petugas1"=>$petugas1,
                 "tanggal_petugas2"=>$petugas2,
+                "tanggal_petugas3"=>$petugas3,
                 "aksi"=>$aksi
             );
         }
@@ -192,6 +202,7 @@ class MasterController extends Controller
         $nama_hari_panjang = array (0=> "Minggu", 1=> "Senin", 2=> "Selasa", 3=> "Rabu", 4=> "Kamis", 5=> "Jumat", 6=> "Sabtu");
         $nama_hari_pendek = array (0=> "Mgg", 1=> "Sen", 2=> "Sel", 3=> "Rab", 4=> "Kam", 5=> "Jum", 6=> "Sab");
         $r = file_get_contents(env('APP_API_TANGGAL'));
+        //$r = file_get_contents(\get_setting('APP_API_TANGGAL'));
         $hari_libur = json_decode($r, true);
         $arr = array(
             'status'=>false,
@@ -314,11 +325,13 @@ class MasterController extends Controller
             {
                 $data1 = User::where('user_uid',$request->petugas1_uid)->first();
                 $data2 = User::where('user_uid',$request->petugas2_uid)->first();
+                $data3 = User::where('user_uid',$request->petugas3_uid)->first();
                 //update data
                 $data->tanggal_petugas1_uid = $request->petugas1_uid;
                 //$data->petugas1_username = $data1->username;
                 $data->tanggal_petugas2_uid = $request->petugas2_uid;
                 //$data->petugas2_username = $data2->username;
+                $data->tanggal_petugas3_uid = $request->petugas3_uid;
                 $data->update();
                 $arr = array(
                     'status'=>true,
@@ -514,38 +527,54 @@ class MasterController extends Controller
         //dd($data);
         foreach ($data as $item) {
             if ($item->tanggal_jenis == 'libur')
-            {
-                $arr[]=array (
-                    'title' => $item->tanggal_deskripsi,
-                    'start' => $item->tanggal_angka,
-                    'end' => $item->tanggal_angka,
-                    'className' => 'bg-danger'
-                );
-            }
+                {
+                    $arr[]=array (
+                        'title' => $item->tanggal_deskripsi,
+                        'start' => $item->tanggal_angka,
+                        'end' => $item->tanggal_angka,
+                        'className' => 'bg-danger'
+                    );
+                }
             else
-            {
-                if ($item->tanggal_petugas1_uid != null)
                 {
-                    $arr[]=array (
-                        'title' => $item->Petugas1->name,
-                        'start' => $item->tanggal_angka,
-                        'end' => $item->tanggal_angka,
-                        'className' => 'bg-success'
-                    );
+                    if ($item->tanggal_petugas1_uid != null)
+                    {
+                        $arr[]=array (
+                            'title' => $item->Petugas1->name,
+                            'start' => $item->tanggal_angka,
+                            'end' => $item->tanggal_angka,
+                            'className' => 'bg-success'
+                        );
+                    }
+                    if ($item->tanggal_petugas2_uid != null)
+                    {
+                        $arr[]=array (
+                            'title' => $item->Petugas2->name,
+                            'start' => $item->tanggal_angka,
+                            'end' => $item->tanggal_angka,
+                            'className' => 'bg-info'
+                        );
+                    }
+                    if ($item->tanggal_petugas3_uid != null)
+                    {
+                        $arr[]=array (
+                            'title' => $item->Petugas3->name,
+                            'start' => $item->tanggal_angka,
+                            'end' => $item->tanggal_angka,
+                            'className' => 'bg-primary'
+                        );
+                    }
                 }
-                if ($item->tanggal_petugas2_uid != null)
-                {
-                    $arr[]=array (
-                        'title' => $item->Petugas2->name,
-                        'start' => $item->tanggal_angka,
-                        'end' => $item->tanggal_angka,
-                        'className' => 'bg-info'
-                    );
-                }
-
-            }
         }
-        $data_jadwal = json_encode($arr);
+
+        if (isset($arr))
+            {
+                $data_jadwal = json_encode($arr);
+            }
+        else
+        {
+            $data_jadwal = "";
+        }
         return view('master.kalendar',['data_jadwal'=>$data_jadwal]);
     }
     public function akses()
@@ -813,6 +842,57 @@ class MasterController extends Controller
                     'message'=>'Tujuan ('.$request->edit_tujuan_nama.') sudah terupdate',
                 );
             }
+        }
+        return Response()->json($arr);
+    }
+    public function settings()
+    {
+        // Mengambil data dengan fungsi helper yang kita buat
+        /*
+        $data = [
+            'api_tanggal' => get_setting('APP_API_TANGGAL'),
+            'link_skd' => get_setting('APP_LINK_SKD'),
+            'whatsapp' => get_setting('WA_SATKER'),
+            'email'    => get_setting('EMAIL_SATKER'),
+            'nama'     => get_setting('NAMA_SATKER'),
+            'alamat'   => get_setting('ALAMAT_SATKER'),
+        ]; */
+        $data = Setting::get();
+        $fields = [
+            'APP_LINK_SKD'    => 'Link SKD',
+            'WA_SATKER'       => 'Nomor WhatsApp Satker',
+            'EMAIL_SATKER'    => 'Email Resmi Satker',
+            'NAMA_SATKER'     => 'Nama Satuan Kerja',
+            'ALAMAT_SATKER'   => 'Alamat Lengkap',
+            'URL_SATKER'      => 'Website Resmi',
+        ];
+        return view('master.settings',['data'=>$data,'fields'=>$fields]);
+    }
+    public function updateSetting(Request $request)
+    {
+        $data = Setting::where('id',$request->edit_id)->first();
+        $arr = array(
+            'status'=>false,
+            'hasil'=>'Data Setting ('.trim($request->edit_tujuan_nama).') tidak tersedia'
+        );
+        if ($data->value == $request->edit_value)
+        {
+            $arr = array(
+                'status'=>false,
+                'message'=>'Inisial ('.$request->edit_label.') tidak di update',
+            );
+        }
+        else
+        {
+            $key = $request->edit_key;
+            $data->value = trim($request->edit_value);
+            $data->update();
+            cache()->forget("setting.{$key}");
+            $arr = array(
+                'status'=>true,
+                'message'=>'Setting ('.$request->edit_label.') sudah terupdate',
+            );
+
         }
         return Response()->json($arr);
     }

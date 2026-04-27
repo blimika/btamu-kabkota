@@ -45,32 +45,37 @@ class KunjunganController extends Controller
 
     public function __construct(WhatsAppService $whatsappService)
     {
+        /*
         $this->link_skd = env('APP_LINK_SKD');
-        $this->nama_aplikasi = ENV('NAMA_APLIKASI');
-        $this->nama_satker = ENV('NAMA_SATKER');
-        $this->alamat_satker = ENV('ALAMAT_SATKER');
+        $this->nama_aplikasi = env('NAMA_APLIKASI');
+        $this->nama_satker = env('NAMA_SATKER');
+        $this->alamat_satker = env('ALAMAT_SATKER');
+        */
+        $this->nama_aplikasi = env('NAMA_APLIKASI');
+        $this->link_skd = get_setting('APP_LINK_SKD');
+        $this->nama_satker = get_setting('NAMA_SATKER');
+        $this->alamat_satker = get_setting('ALAMAT_SATKER');
         $this->whatsappService = $whatsappService;
-        $this->link_feedback = ENV('APP_URL').'/k/f/';
+        $this->link_feedback = env('APP_URL').'/k/f/';
     }
     private function cek_nomor_hp($nomor)
     {
-        // Mengecek apakah nomor diawali dengan '0'
-        if (substr($nomor, 0, 1) === '0') {
-            // Jika ya, kembalikan nomor tanpa awalan '0'
-            $nomorhp = "62".substr($nomor, 1);
+        // 1. Bersihkan semua karakter selain angka (hapus spasi, strip -, tanda kurung (), dan tanda plus +)
+        $bersih = preg_replace('/[^0-9]/', '', $nomor);
 
+        // 2. Cek apakah nomor diawali dengan angka '0'
+        if (substr($bersih, 0, 1) == '0') {
+            // Ganti angka '0' di awal dengan '62'
+            $bersih = '62' . substr($bersih, 1);
         }
-        // Mengecek apakah nomor diawali dengan '+'
-        elseif (substr($nomor, 0, 1) === '+') {
-            // Jika ya, abaikan nomor ini dengan mengembalikan null
-            // Anda bisa mengubahnya untuk menampilkan pesan error atau lainnya
-            $nomorhp = substr($nomor, 1);
+
+        // (Opsional) Cek jika nomor tidak sengaja diketik tanpa 0 atau 62 di awal (misal langsung 812...)
+        if (substr($bersih, 0, 2) != '62') {
+            // Jika Anda yakin targetnya nomor Indonesia, bisa paksa tambah 62
+            // $bersih = '62' . $bersih;
         }
-        // Jika tidak diawali '0' atau '+'
-        else {
-            $nomorhp = $nomor;
-        }
-        return $nomorhp;
+
+        return $bersih;
     }
     public function tambah()
     {
@@ -78,7 +83,7 @@ class KunjunganController extends Controller
         $cek_hari = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
         if ($cek_hari)
         {
-            if ($cek_hari->tanggal_jenis == 'kerja' or ENV('APP_CEK_LIBUR') == false) {
+            if ($cek_hari->tanggal_jenis == 'kerja' or env('APP_CEK_LIBUR') == false) {
                 $Pendidikan = Pendidikan::orderBy('pendidikan_kode', 'asc')->get();
                 $Tujuan = Tujuan::where('tujuan_tipe','kunjungan')->orderBy('tujuan_kode', 'asc')->get();
                 $LayananPst = LayananPst::where('layanan_pst_kode','<','99')->orderBy('layanan_pst_kode', 'asc')->get();
@@ -303,7 +308,7 @@ class KunjunganController extends Controller
             //cek email valid apa tidak
             if (filter_var($newdata->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
-                if (ENV('APP_KIRIM_MAIL') == true) {
+                if (env('APP_KIRIM_MAIL') == true) {
                     Mail::to($newdata->Pengunjung->pengunjung_email)->send(new KirimAntrian($body));
                 }
                 //batas
@@ -311,10 +316,10 @@ class KunjunganController extends Controller
             //batasan email
             //notif whatsapp dilengkapi kemudian
             //kirim notif ke pengunjung
-            if (ENV('APP_WA_LOKAL_MODE') == true) {
+            if (env('APP_WA_LOKAL_MODE') == true) {
                 //persiapan untuk WA
                 $recipients = $newdata->Pengunjung->pengunjung_nomor_hp;
-                $recipients = $this->cek_nomor_hp($recipients);
+                //$recipients = $this->cek_nomor_hp($recipients);
                 $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10).
                 'Terimakasih, telah berkunjung ke '.$this->nama_satker.'.'.chr(10)
                 .'Berikut nomor antrian Anda!'.chr(10).chr(10)
@@ -340,29 +345,44 @@ class KunjunganController extends Controller
                 $new_wa->wa_message = $message;
                 $new_wa->save();
                 try {
-                    $result = $this->whatsappService->sendMessage($recipients, $message);
-                    //return response()->json($result);
-                    if ($result)
-                    {
-                        $new_wa->wa_message_id = $result['results']['message_id'];
-                        $new_wa->wa_status = $result['results']['status'];
-                        $new_wa->wa_flag = 'terkirim';
-                        $new_wa->update();
+                    // Panggil service yang sudah kita perbaiki
+                    $response = $this->whatsappService->sendMessage($recipients, $message);
+
+                    // Karena service mengembalikan response()->json(), kita ubah menjadi array
+                    // agar mudah dibaca oleh PHP
+                    $result = $response->getData(true);
+
+                    if ($result['status'] === true) {
+                        // Jika berhasil dikirim
+                        // Key 'data' berasal dari format JSON service yang baru kita buat
+                        $new_wa->wa_message_id = $result['data']['results']['message_id'] ?? null;
+                        $new_wa->wa_status = $result['data']['results']['status'] ?? 'Sent successfully';
+                        $new_wa->wa_flag = 'terkirim'; // Flag sukses
+                    } else {
+                        // Jika nomor tidak ada WA atau ditolak service
+                        $new_wa->wa_status = $result['message']; // Berisi pesan "nomor tidak terdaftar..."
+                        $new_wa->wa_flag = 'gagal'; // Flag gagal
                     }
-                    //$arr = $result;
+
+                    // Gunakan save() lagi untuk menyimpan perubahan status
+                    $new_wa->save();
+
                 } catch (\Throwable $e) {
-                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
-                    //return response()->json(['error' => 'Internal Server Error'],500);
-                    $new_wa->wa_status = $error ;
-                    $new_wa->wa_flag = 'gagal';
-                    $new_wa->update();
+                    Log::error('WA LOKAL [Buku Tamu Kunjungan]: ' . $e->getMessage());
+
+                    // PERBAIKAN: Tangkap pesan aslinya, BUKAN hasil dari fungsi Log::error
+                    // Agar jika gagal, Anda tahu alasannya saat melihat tabel database
+                    $new_wa->wa_status = 'Error System: ' . $e->getMessage();
+                    $new_wa->wa_flag = 'gagal'; // Flag gagal
+
+                    $new_wa->save();
                 }
             }
             //kirim notif ke petugas jaga
             //jika kunjungan ke PST
             if ($request->kunjungan_tujuan == 2)
             {
-                if (ENV('APP_WA_PETUGAS_MODE') == true) {
+                if (env('APP_WA_PETUGAS_MODE') == true) {
                     $petugas_jaga = Tanggal::where('tanggal_angka', Carbon::today()->format('Y-m-d'))->first();
                     if ($petugas_jaga)
                     {
@@ -386,7 +406,7 @@ class KunjunganController extends Controller
                             //penjaga pst 1
                             if ($petugas_jaga->tanggal_petugas1_uid != null)
                             {
-                                if (ENV('APP_WA_LOKAL_MODE') == true) {
+                                if (env('APP_WA_LOKAL_MODE') == true) {
                                     $hp_petugas1 = $petugas_jaga->Petugas1->user_telepon;
                                     $recipients1 = $this->cek_nomor_hp($hp_petugas1);
                                     $new_wa1 = new Whatsapp();
@@ -398,27 +418,44 @@ class KunjunganController extends Controller
                                     $new_wa1->wa_message = $msg_operator;
                                     $new_wa1->save();
                                     try {
-                                        $result1 = $this->whatsappService->sendMessage($recipients1, $msg_operator);
-                                        if ($result1)
-                                        {
-                                            $new_wa1->wa_message_id = $result1['results']['message_id'];
-                                            $new_wa1->wa_status = $result1['results']['status'];
-                                            $new_wa1->wa_flag = 'terkirim';
-                                            $new_wa1->update();
+                                        // Panggil service yang sudah kita perbaiki
+                                        $response1 = $this->whatsappService->sendMessage($recipients, $message);
+
+                                        // Karena service mengembalikan response()->json(), kita ubah menjadi array
+                                        // agar mudah dibaca oleh PHP
+                                        $result1 = $response1->getData(true);
+
+                                        if ($result1['status'] === true) {
+                                            // Jika berhasil dikirim
+                                            // Key 'data' berasal dari format JSON service yang baru kita buat
+                                            $new_wa1->wa_message_id = $result1['data']['results']['message_id'] ?? null;
+                                            $new_wa1->wa_status = $result1['data']['results']['status'] ?? 'Sent successfully';
+                                            $new_wa1->wa_flag = 'terkirim'; // Flag sukses
+                                        } else {
+                                            // Jika nomor tidak ada WA atau ditolak service
+                                            $new_wa1->wa_status = $result1['message']; // Berisi pesan "nomor tidak terdaftar..."
+                                            $new_wa1->wa_flag = 'gagal'; // Flag gagal
                                         }
 
+                                        // Gunakan save() lagi untuk menyimpan perubahan status
+                                        $new_wa1->save();
+
                                     } catch (\Throwable $e) {
-                                        $error1 = Log::error('WA LOKAL 1: ' . $e->getMessage());
-                                        $new_wa1->wa_status = $error1 ;
-                                        $new_wa1->wa_flag = 'gagal';
-                                        $new_wa1->update();
+                                        Log::error('WA LOKAL [Buku Tamu Kunjungan]: ' . $e->getMessage());
+
+                                        // PERBAIKAN: Tangkap pesan aslinya, BUKAN hasil dari fungsi Log::error
+                                        // Agar jika gagal, Anda tahu alasannya saat melihat tabel database
+                                        $new_wa1->wa_status = 'Error System: ' . $e->getMessage();
+                                        $new_wa1->wa_flag = 'gagal'; // Flag gagal
+
+                                        $new_wa1->save();
                                     }
                                 }
                             }
                             sleep(1);
                             if ($petugas_jaga->tanggal_petugas2_uid != null)
                             {
-                                if (ENV('APP_WA_LOKAL_MODE') == true) {
+                                if (env('APP_WA_LOKAL_MODE') == true) {
                                     $hp_petugas2 = $petugas_jaga->Petugas2->user_telepon;
                                     $recipients2 = $this->cek_nomor_hp($hp_petugas2);
                                     $new_wa2 = new Whatsapp();
@@ -430,20 +467,37 @@ class KunjunganController extends Controller
                                     $new_wa2->wa_message = $msg_operator;
                                     $new_wa2->save();
                                     try {
-                                        $result2 = $this->whatsappService->sendMessage($recipients2, $msg_operator);
-                                        if ($result2)
-                                        {
-                                            $new_wa2->wa_message_id = $result2['results']['message_id'];
-                                            $new_wa2->wa_status = $result2['results']['status'];
-                                            $new_wa2->wa_flag = 'terkirim';
-                                            $new_wa2->update();
+                                        // Panggil service yang sudah kita perbaiki
+                                        $response2 = $this->whatsappService->sendMessage($recipients, $message);
+
+                                        // Karena service mengembalikan response()->json(), kita ubah menjadi array
+                                        // agar mudah dibaca oleh PHP
+                                        $result2 = $response2->getData(true);
+
+                                        if ($result2['status'] === true) {
+                                            // Jika berhasil dikirim
+                                            // Key 'data' berasal dari format JSON service yang baru kita buat
+                                            $new_wa2->wa_message_id = $result2['data']['results']['message_id'] ?? null;
+                                            $new_wa2->wa_status = $result2['data']['results']['status'] ?? 'Sent successfully';
+                                            $new_wa2->wa_flag = 'terkirim'; // Flag sukses
+                                        } else {
+                                            // Jika nomor tidak ada WA atau ditolak service
+                                            $new_wa2->wa_status = $result2['message']; // Berisi pesan "nomor tidak terdaftar..."
+                                            $new_wa2->wa_flag = 'gagal'; // Flag gagal
                                         }
 
+                                        // Gunakan save() lagi untuk menyimpan perubahan status
+                                        $new_wa2->save();
+
                                     } catch (\Throwable $e) {
-                                        $error2 = Log::error('WA LOKAL 2: ' . $e->getMessage());
-                                        $new_wa2->wa_status = $error2 ;
-                                        $new_wa2->wa_flag = 'gagal';
-                                        $new_wa2->update();
+                                        Log::error('WA LOKAL [Buku Tamu Kunjungan]: ' . $e->getMessage());
+
+                                        // PERBAIKAN: Tangkap pesan aslinya, BUKAN hasil dari fungsi Log::error
+                                        // Agar jika gagal, Anda tahu alasannya saat melihat tabel database
+                                        $new_wa2->wa_status = 'Error System: ' . $e->getMessage();
+                                        $new_wa2->wa_flag = 'gagal'; // Flag gagal
+
+                                        $new_wa2->save();
                                     }
                                 }
                             }
@@ -485,7 +539,9 @@ class KunjunganController extends Controller
                 $data->kunjungan_sarpras_feedback = $request->feedback_sarpras;
                 $data->kunjungan_komentar_feedback = $request->feedback_komentar;
                 $data->kunjungan_ip_feedback = $request->getClientIp();
-                $data->kunjungan_agent_feedback = $request->header('User-Agent');
+                //$request->server('HTTP_USER_AGENT')
+                //$data->kunjungan_agent_feedback = $request->header('User-Agent');
+                $data->kunjungan_agent_feedback = $request->server('HTTP_USER_AGENT');
                 $data->kunjungan_tanggal_feedback = now();
                 $data->update();
 
@@ -899,9 +955,21 @@ class KunjunganController extends Controller
                 {
                     $kunj_keperluan = $keperluan .'<br />'. $layanan_utama .'<br />'.$kunjungan_jenis;
                 }
+                //kalo ada file pdf kasih link
+                if ($item->kunjungan_pdf != "")
+                    {
+                        $kunj_keperluan = $kunj_keperluan .'<br />
+                        <button type="button" class="btn btn-warning btn-xs m-t-5" data-id="' . $item->kunjungan_id . '" data-uid="' . $item->kunjungan_uid . '" data-nama="' . $item->pengunjung_nama . '" data-tanggal="' . $item->kunjungan_tanggal . '" data-toggle="modal" data-target="#ViewPDFModal"><span data-toggle="tooltip" data-placement="top" title="File PDF Permintaan"><i class="fa fa-link"></i> File PDF</span></button>';
+                    }
+                if ($item->kunjungan_flag_skd == 1) {
+                    $responden_skd = '<br /><span class="badge badge-success badge-pill m-t-5">Responden SKD</span>';
+                }
+                else {
+                    $responden_skd = '';
+                }
                 $data_arr[] = array(
                     "kunjungan_uid" => $item->kunjungan_uid,
-                    "pengunjung_nama" =>  $nama.'<br />'.$jk,
+                    "pengunjung_nama" =>  $nama.'<br />'.$jk.$responden_skd,
                     "kunjungan_tanggal" => $item->kunjungan_tanggal,
                     "kunjungan_keperluan" => $kunj_keperluan,
                     "kunjungan_tindak_lanjut" => $tindak_lanjut,
@@ -961,7 +1029,7 @@ class KunjunganController extends Controller
             //cek email valid apa tidak
             if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
-               if (ENV('APP_KIRIM_MAIL') == true) {
+               if (env('APP_KIRIM_MAIL') == true) {
                     Mail::to($data->Pengunjung->pengunjung_email)->send(new KirimAntrian($body));
 
                     $arr = array(
@@ -986,24 +1054,24 @@ class KunjunganController extends Controller
                 );
             }
             //persiapan untuk WA
-            if (ENV('APP_WA_LOKAL_MODE') == true) {
+            if (env('APP_WA_LOKAL_MODE') == true) {
                 //persiapan untuk WA
                 $recipients = $data->Pengunjung->pengunjung_nomor_hp;
-                $recipients = $this->cek_nomor_hp($recipients);
-                $message = '#Hai *'.$body->pengunjung_nama.'*'.chr(10)
-                .'Terimakasih, telah berkunjung ke '.$this->nama_satker.'.'.chr(10)
-                .'Berikut nomor antrian Anda!'.chr(10).chr(10)
-                .'#Detil Kunjungan'.chr(10)
-                .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
-                .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
-                .'Email : *'.$body->pengunjung_email.'*'.chr(10)
-                .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
-                .'Tanggal Kunjungan : *'.$body->kunjungan_tanggal.'* '.chr(10).chr(10)
-                .'Layanan :  *'.$body->layanan.'*'.chr(10)
-                .'# Nomor Antrian : *'.$body->nomor_antrian.'*'.chr(10).chr(10)
-                .'Terimakasih,'.chr(10)
-                .$this->nama_aplikasi.chr(10)
-                .$this->nama_satker.chr(10)
+                //$recipients = $this->cek_nomor_hp($recipients);
+                $message = "#Hai *$body->pengunjung_nama*\n"
+                . "Terimakasih, telah berkunjung ke *$this->nama_satker*\n\n"
+                . "Berikut nomor antrian Anda!\n"
+                . "#Detil Kunjungan\n"
+                . "UID : *$body->kunjungan_uid*\n"
+                . "Nama : *$body->pengunjung_nama*\n"
+                . "Email : *$body->pengunjung_email*\n"
+                . "Nomor HP : *$body->pengunjung_nomor_hp*\n"
+                . "Tanggal Kunjungan : *$body->kunjungan_tanggal*\n\n"
+                . "Layanan :  *$body->layanan*\n"
+                . "# Nomor Antrian : *$body->nomor_antrian*\n\n"
+                . "Terimakasih,\n"
+                .$this->nama_aplikasi."\n"
+                .$this->nama_satker."\n"
                 .$this->alamat_satker;
                 //input ke log pesan
                 $new_wa = new Whatsapp();
@@ -1014,24 +1082,50 @@ class KunjunganController extends Controller
                 $new_wa->wa_target = $recipients;
                 $new_wa->wa_message = $message;
                 $new_wa->save();
+
+                // Proses pengiriman WA
+
                 try {
-                    $result = $this->whatsappService->sendMessage($recipients, $message);
-                    //return response()->json($result);
-                    if ($result)
-                    {
-                        $new_wa->wa_message_id = $result['results']['message_id'];
-                        $new_wa->wa_status = $result['results']['status'];
-                        $new_wa->wa_flag = 'terkirim';
-                        $new_wa->update();
+                    // Panggil service yang sudah kita perbaiki
+                    $response = $this->whatsappService->sendMessage($recipients, $message);
+
+                    // Karena service mengembalikan response()->json(), kita ubah menjadi array
+                    // agar mudah dibaca oleh PHP
+                    $result = $response->getData(true);
+
+                    if ($result['status'] === true) {
+                        // Jika berhasil dikirim
+                        // Key 'data' berasal dari format JSON service yang baru kita buat
+                        $new_wa->wa_message_id = $result['data']['results']['message_id'] ?? null;
+                        $new_wa->wa_status = $result['data']['results']['status'] ?? 'Sent successfully';
+                        $new_wa->wa_flag = 'terkirim'; // Flag sukses
+                        $status = true;
+                        $pesan = 'Nomor antrian berhasil dikirim ke whatsapp';
+                    } else {
+                        // Jika nomor tidak ada WA atau ditolak service
+                        $new_wa->wa_status = $result['message']; // Berisi pesan "nomor tidak terdaftar..."
+                        $new_wa->wa_flag = 'gagal'; // Flag gagal
+                        $status = false;
+                        $pesan = 'Error sistem: error kirim nomor antrian';
                     }
-                    //$arr = $result;
+                    // Gunakan save() lagi untuk menyimpan perubahan status
+                    $new_wa->save();
+
                 } catch (\Throwable $e) {
-                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
-                    //return response()->json(['error' => 'Internal Server Error'],500);
-                    $new_wa->wa_status = $error ;
-                    $new_wa->wa_flag = 'gagal';
-                    $new_wa->update();
+                    Log::error('WA LOKAL [sendMessage Antrian]: ' . $e->getMessage());
+
+                    // PERBAIKAN: Tangkap pesan aslinya, BUKAN hasil dari fungsi Log::error
+                    // Agar jika gagal, Anda tahu alasannya saat melihat tabel database
+                    $new_wa->wa_status = 'Error System: ' . $e->getMessage();
+                    $new_wa->wa_flag = 'gagal'; // Flag gagal
+                    $new_wa->save();
+                    $status = false;
+                    $pesan = 'Error sistem: error kirim nomor antrian';
                 }
+                $arr = array(
+                        'status' => $status,
+                        'message' => $pesan
+                    );
             }
         }
         #dd($request->all());
@@ -1123,6 +1217,7 @@ class KunjunganController extends Controller
                         }
 
                     $data->kunjungan_petugas_uid = Auth::user()->user_uid;
+                    $data->kunjungan_petugas_username = Auth::user()->username;
                     $data->kunjungan_jam_datang = \Carbon\Carbon::now();
                     $data->kunjungan_loket_petugas = $loket_petugas;
                     $data->kunjungan_flag_antrian = 'dalam_layanan';
@@ -1186,7 +1281,7 @@ class KunjunganController extends Controller
 
             if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
-                if (ENV('APP_KIRIM_MAIL') == true) {
+                if (env('APP_KIRIM_MAIL') == true) {
                     Mail::to($data->Pengunjung->pengunjung_email)->send(new KirimFeedback($body));
                 }
                 //batas
@@ -1200,7 +1295,8 @@ class KunjunganController extends Controller
             //kirim wa baru
             //persiapan untuk WA
             $recipients = $data->Pengunjung->pengunjung_nomor_hp;
-            $recipients = $this->cek_nomor_hp($recipients);
+            //$recipients = $this->cek_nomor_hp($recipients);
+            /*
             $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10)
                 .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke '.$this->nama_satker.' pada hari *'.Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y').'*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10)
                 .'#Detil Kunjungan'.chr(10)
@@ -1212,7 +1308,25 @@ class KunjunganController extends Controller
                 .'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik. Link feedback ada dibagian bawah pesan ini.'.chr(10).chr(10)
                 .route('kunjungan.feedback',$data->kunjungan_uid).chr(10).chr(10)
                 .$this->nama_aplikasi.chr(10)
-                .$this->nama_satker.chr(10);
+                .$this->nama_satker.chr(10)
+                .$this->alamat_satker;
+                */
+            $message = "#Hai *$body->pengunjung_nama*\n\n"
+                    . "Kami ingin mengucapkan terima kasih atas kunjungan Anda\n"
+                    . "ke *$this->nama_satker* pada hari *".Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y')."*.\n"
+                    . "Kami berharap Anda memiliki pengalaman yang menyenangkan.\n\n"
+                    . "#Detil Kunjungan\n"
+                    . "UID : *$body->kunjungan_uid*\n"
+                    . "Nama : *$body->pengunjung_nama*\n"
+                    . "Email : *$body->pengunjung_email*\n"
+                    . "Nomor HP : *$body->pengunjung_nomor_hp*\n"
+                    . "Petugas : *$body->petugas*\n\n"
+                    . "Link feedback ada di bagian bawah pesan ini:\n\n"
+                    . route('kunjungan.feedback', $data->kunjungan_uid) . "\n\n"
+                    . $this->nama_aplikasi . "\n"
+                    . $this->nama_satker . "\n"
+                    . $this->alamat_satker ."\n\n"
+                    . "*PENTING:* _Jika link tidak bisa diklik, balas pesan ini dengan 'OK'_";
              //input ke log pesan
             $new_wa = new Whatsapp();
             $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
@@ -1223,27 +1337,44 @@ class KunjunganController extends Controller
             $new_wa->wa_message = $message;
             $new_wa->save();
             //cek dulu wa nya bisa apa ngga
-            if (ENV('APP_WA_LOKAL_MODE') == true) {
+            // Proses pengiriman WA
+            if (env('APP_WA_LOKAL_MODE') == true) { // Disarankan menggunakan huruf kecil 'env'
                 try {
-                    $result = $this->whatsappService->sendMessage($recipients, $message);
-                    //return response()->json($result);
-                    if ($result)
-                    {
-                        $new_wa->wa_message_id = $result['results']['message_id'];
-                        $new_wa->wa_status = $result['results']['status'];
-                        $new_wa->wa_flag = 2;
-                        $new_wa->update();
+                    // Panggil service yang sudah kita perbaiki
+                    $response = $this->whatsappService->sendMessage($recipients, $message);
+
+                    // Karena service mengembalikan response()->json(), kita ubah menjadi array
+                    // agar mudah dibaca oleh PHP
+                    $result = $response->getData(true);
+
+                    if ($result['status'] === true) {
+                        // Jika berhasil dikirim
+                        // Key 'data' berasal dari format JSON service yang baru kita buat
+                        $new_wa->wa_message_id = $result['data']['results']['message_id'] ?? null;
+                        $new_wa->wa_status = $result['data']['results']['status'] ?? 'Sent successfully';
+                        $new_wa->wa_flag = 'terkirim'; // Flag sukses
+                    } else {
+                        // Jika nomor tidak ada WA atau ditolak service
+                        $new_wa->wa_status = $result['message']; // Berisi pesan "nomor tidak terdaftar..."
+                        $new_wa->wa_flag = 'gagal'; // Flag gagal
                     }
-                    //$arr = $result;
+
+                    // Gunakan save() lagi untuk menyimpan perubahan status
+                    $new_wa->save();
+
                 } catch (\Throwable $e) {
-                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
-                    //return response()->json(['error' => 'Internal Server Error'],500);
-                    $new_wa->wa_status = $error ;
-                    $new_wa->wa_flag = 3;
-                    $new_wa->update();
+                    Log::error('WA LOKAL [Buku Tamu Kunjungan]: ' . $e->getMessage());
+
+                    // PERBAIKAN: Tangkap pesan aslinya, BUKAN hasil dari fungsi Log::error
+                    // Agar jika gagal, Anda tahu alasannya saat melihat tabel database
+                    $new_wa->wa_status = 'Error System: ' . $e->getMessage();
+                    $new_wa->wa_flag = 'gagal'; // Flag gagal
+                    $new_wa->save();
                 }
             }
             //batas
+
+
         }
         return Response()->json($arr);
     }
@@ -1281,7 +1412,9 @@ class KunjunganController extends Controller
             $data = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
             if ($data)
             {
+                $data_petugas = User::where('user_uid',$request->petugas_uid)->first();
                 $data->kunjungan_petugas_uid = $request->petugas_uid;
+                $data->kunjungan_petugas_username = $data_petugas->username;
                 $data->update();
 
                 $arr = array(
@@ -1491,7 +1624,7 @@ class KunjunganController extends Controller
             $body->alamat_satker = $this->alamat_satker;
             if (filter_var($data->Pengunjung->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
-                if (ENV('APP_KIRIM_MAIL') == true) {
+                if (env('APP_KIRIM_MAIL') == true) {
                     Mail::to($data->Pengunjung->pengunjung_email)->send(new KirimFeedback($body));
 
                     $arr = array(
@@ -1519,7 +1652,7 @@ class KunjunganController extends Controller
             //cek dulu wa nya bisa apa ngga
             //kirim wa baru
             //persiapan untuk WA
-            if (ENV('APP_WA_LOKAL_MODE') == true) {
+            if (env('APP_WA_LOKAL_MODE') == true) {
                 //cek dulu wa nya bisa apa ngga
                 //kirim wa baru
                 //persiapan untuk WA .'*'.$this->link_skd.'*'.chr(10)
@@ -1527,19 +1660,25 @@ class KunjunganController extends Controller
                 //$link_fb = $this->$this->link_feedback.$data->kunjungan_uid;
                 //$link_feedback = 'https://btamu-kabkota.test/k/f/CQFWC7R';
                 $recipients = $data->Pengunjung->pengunjung_nomor_hp;
-                $recipients = $this->cek_nomor_hp($recipients);
-                $message = '#Hai *'.$data->Pengunjung->pengunjung_nama.'*'.chr(10).chr(10)
-                .'Kami ingin mengucapkan terima kasih atas kunjungan Anda ke '.$this->nama_satker.' pada hari *'.Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y').'*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.'.chr(10).chr(10)
-                .'#Detil Kunjungan'.chr(10)
-                .'UID : *'.$body->kunjungan_uid.'*'.chr(10)
-                .'Nama : *'.$body->pengunjung_nama.'*'.chr(10)
-                .'Email : *'.$body->pengunjung_email.'*'.chr(10)
-                .'Nomor HP : *'.$body->pengunjung_nomor_hp.'*'.chr(10)
-                .'Petugas yang melayani : *'.$body->petugas.'*'.chr(10).chr(10)
-                .'Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik. Link feedback ada dibagian bawah pesan ini.'.chr(10).chr(10)
-                .'Link: '.route('kunjungan.feedback',$data->kunjungan_uid).chr(10).chr(10)
-                .$this->nama_aplikasi.chr(10)
-                .$this->nama_satker.chr(10);
+                //$recipients = $this->cek_nomor_hp($recipients);
+                $link_feedback = route('kunjungan.feedback',$data->kunjungan_uid);
+                $message = "#Hai *$body->pengunjung_nama*\n"
+                . "Kami ingin mengucapkan terima kasih atas kunjungan Anda ke $this->nama_satker\n"
+                . "pada hari *".Carbon::parse($data->kunjungan_tanggal)->isoFormat('dddd, D MMMM Y')."*. Kami berharap Anda memiliki pengalaman yang menyenangkan bersama kami.\n\n"
+                . "#Detil Kunjungan\n"
+                . "UID : *$body->kunjungan_uid*\n"
+                . "Nama : *$body->pengunjung_nama*\n"
+                . "Email : *$body->pengunjung_email*\n"
+                . "Nomor HP : *$body->pengunjung_nomor_hp*\n"
+                . "Petugas yang melayani : *$body->petugas*\n\n"
+                . "Untuk meningkatkan layanan, kami sangat menghargai jika Anda dapat meluangkan beberapa menit untuk mengisi feedback ini. Tanggapan Anda sangat berharga bagi kami untuk terus memberikan pelayanan terbaik.\n"
+                . "Link feedback ada dibagian bawah pesan ini.\n\n"
+                . "Link: $link_feedback\n\n"
+                . "Salam hangat,\n"
+                . $this->nama_aplikasi."\n"
+                . $this->nama_satker."\n"
+                . $this->alamat_satker."\n\n"
+                . "*PENTING:* _Jika link tidak bisa diklik, balas pesan ini dengan 'OK'_";
                 //simpan ke tabael m_whatsapp
                 $new_wa = new Whatsapp();
                 $new_wa->wa_tanggal = Carbon::today()->format('Y-m-d');
@@ -1549,26 +1688,51 @@ class KunjunganController extends Controller
                 $new_wa->wa_target = $recipients;
                 $new_wa->wa_message = $message;
                 $new_wa->save();
-
                 try {
-                    $result = $this->whatsappService->sendMessage($recipients,$message);
-                    if ($result)
-                    {
-                        $new_wa->wa_message_id = $result['results']['message_id'];
-                        $new_wa->wa_status = $result['results']['status'];
-                        $new_wa->wa_flag = 'terkirim';
-                        $new_wa->update();
+                    // Panggil service yang sudah kita perbaiki
+                    $response = $this->whatsappService->sendMessage($recipients,$message);
+
+                    // Karena service mengembalikan response()->json(), kita ubah menjadi array
+                    // agar mudah dibaca oleh PHP
+                    $result = $response->getData(true);
+
+                    if ($result['status'] === true) {
+                        // Jika berhasil dikirim
+                        // Key 'data' berasal dari format JSON service yang baru kita buat
+                        $new_wa->wa_message_id = $result['data']['results']['message_id'] ?? null;
+                        $new_wa->wa_status = $result['data']['results']['status'] ?? 'Sent successfully';
+                        $new_wa->wa_flag = 'terkirim'; // Flag sukses
+                        $status = true;
+                        $pesan = 'Kirim link feedback ke Whatsapp Berhasil';
+                    } else {
+                        // Jika nomor tidak ada WA atau ditolak service
+                        $new_wa->wa_status = $result['message']; // Berisi pesan "nomor tidak terdaftar..."
+                        $new_wa->wa_flag = 'gagal'; // Flag gagal
+                        $status = false;
+                        $pesan = 'Kirim link feedback ke Whatsapp tidak berhasil';
                     }
+
+                    // Gunakan save() lagi untuk menyimpan perubahan status
+                    $new_wa->save();
+
                 } catch (\Throwable $e) {
-                    $error = Log::error('WA LOKAL: ' . $e->getMessage());
-                    //return response()->json(['error' => 'Internal Server Error'],500);
-                    $new_wa->wa_status = $error ;
+                    Log::error('WA LOKAL [SendLink]: ' . $e->getMessage());
+
+                    // PERBAIKAN: Tangkap pesan aslinya, BUKAN hasil dari fungsi Log::error
+                    // Agar jika gagal, Anda tahu alasannya saat melihat tabel database
+                    $new_wa->wa_status = 'Error System: ' . $e->getMessage();
                     $new_wa->wa_flag = 'gagal';
-                    $new_wa->update();
+                    $new_wa->save();
+                    $status = false;
+                    $pesan = 'Error system: sendLink';
                 }
             }
             //batas
             //batas kirim wa */
+            $arr = array(
+                    'status' => $status,
+                    'message' => $pesan
+                );
         }
 
         #dd($request->all());
@@ -1741,6 +1905,17 @@ class KunjunganController extends Controller
                 $petugas = User::where('username','admin')->first();
                 $petugas_uid = $petugas->user_uid;
             }
+            //proses file pdf
+            if ($request->hasFile('kunjungan_pdf')) {
+                $file = $request->file('kunjungan_pdf');
+                $nama_file_pdf = '/pdf/permintaan_' . $data->pengunjung_uid . '_' . $waktu_hari_ini . '.pdf';
+                $file->storeAs('public', $nama_file_pdf);
+            }
+            else
+            {
+                $nama_file_pdf = NULL;
+            }
+            //batas file pdf
             $loket_petugas = 1;
             $newdata = new Kunjungan();
             $newdata->pengunjung_uid = $data->pengunjung_uid;
@@ -1753,6 +1928,9 @@ class KunjunganController extends Controller
             $newdata->kunjungan_layanan_kantor = $layanan_kantor;
             if ($namafile_kunjungan != NULL) {
                 $newdata->kunjungan_foto = $namafile_kunjungan;
+            }
+            if ($nama_file_pdf != NULL) {
+                $newdata->kunjungan_pdf = $nama_file_pdf;
             }
             $newdata->kunjungan_jumlah_orang = $jumlah_tamu;
             $newdata->kunjungan_jumlah_pria = $laki;
@@ -1782,6 +1960,64 @@ class KunjunganController extends Controller
     }
     public function laporan(Request $request)
     {
+        $data_tahun = DB::table('m_kunjungan')
+            ->selectRaw('year(kunjungan_tanggal) as tahun')
+            ->groupBy('tahun')
+            ->orderBy('tahun', 'asc')
+            ->get();
+
+        $tahun_input = request('tahun');
+
+        if ($tahun_input === null) {
+            $tahun_filter = Carbon::today()->format('Y');
+        } else {
+            $tahun_filter = $tahun_input;
+        }
+
+        $subQuery = DB::table('m_kunjungan')
+            ->selectRaw('
+                month(kunjungan_tanggal) as bln_total,
+                count(*) as jumlah_kunjungan,
+                sum(kunjungan_jumlah_orang) as jumlah_total,
+                sum(kunjungan_jumlah_pria) as jumlah_laki,
+                sum(kunjungan_jumlah_wanita) as jumlah_wanita
+            ');
+
+        // Tambahkan kondisi: Jika tahun_filter bukan '0', maka filter per tahun
+        if ($tahun_filter != '0') {
+            $subQuery->whereYear('kunjungan_tanggal', $tahun_filter);
+        }
+
+        $subQuery->groupBy('bln_total');
+
+        // 3. Main Query
+        $data = DB::table('m_bulan')
+            ->leftJoinSub($subQuery, 'total', function ($join) {
+                $join->on('m_bulan.id', '=', 'total.bln_total');
+            })
+            ->select(
+                'bulan_nama',
+                'bulan_nama_pendek',
+                DB::raw('COALESCE(jumlah_kunjungan, 0) as jumlah_kunjungan'),
+                DB::raw('COALESCE(jumlah_total, 0) as jumlah_total'),
+                DB::raw('COALESCE(jumlah_laki, 0) as jumlah_laki'),
+                DB::raw('COALESCE(jumlah_wanita, 0) as jumlah_wanita')
+            )
+            ->get();
+
+        return view('kunjungan.laporan', [
+            'data' => $data,
+            'tahun' => $tahun_filter,
+            'data_tahun' => $data_tahun,
+        ]);
+    }
+    public function laporan_lama(Request $request)
+    {
+        $data_tahun = DB::table('m_kunjungan')
+            ->selectRaw('year(kunjungan_tanggal) as tahun')
+            ->groupBy('tahun')
+            ->orderBy('tahun', 'asc')
+            ->get();
         if (request('tahun') == NULL) {
             $tahun_filter = Carbon::today()->format('Y');
         } else {
@@ -1791,7 +2027,11 @@ class KunjunganController extends Controller
         ->leftJoin(\DB::Raw("(select month(kunjungan_tanggal) as bln_total, count(*) as jumlah_kunjungan, sum(kunjungan_jumlah_orang) as jumlah_total, sum(kunjungan_jumlah_pria) as jumlah_laki, sum(kunjungan_jumlah_wanita) as jumlah_wanita from m_kunjungan where year(kunjungan_tanggal)='".$tahun_filter."' GROUP by bln_total) as total"),'m_bulan.id','=','total.bln_total')
         ->select(\DB::Raw('bulan_nama,bulan_nama_pendek,COALESCE(jumlah_kunjungan,0) as jumlah_kunjungan, COALESCE(jumlah_total,0) as jumlah_total, COALESCE(jumlah_laki,0) as jumlah_laki, COALESCE(jumlah_wanita,0) as jumlah_wanita'))->get();
         //dd($data);
-        return view('kunjungan.laporan',['data'=>$data,'tahun'=>$tahun_filter]);
+        return view('kunjungan.laporan',[
+            'data'=>$data,
+            'tahun'=>$tahun_filter,
+            'data_tahun'=>$data_tahun,
+            ]);
     }
     public function HapusKunjungan(Request $request)
     {
@@ -1807,12 +2047,18 @@ class KunjunganController extends Controller
                 $nama = $data->Pengunjung->pengunjung_nama;
                 $tanggal = $data->kunjungan_tanggal;
                 $file = $data->kunjungan_foto;
+                $file_pdf = $data->kunjungan_pdf;
                 //hapus dulu kunjungan
                 $data->delete();
                 //cek dulu file fotonya ada tidak
                 if (Storage::disk('public')->exists($file))
                 {
                     Storage::disk('public')->delete($file);
+                }
+                //cek file pdf ada apa tidak
+                if (Storage::disk('public')->exists($file_pdf))
+                {
+                    Storage::disk('public')->delete($file_pdf);
                 }
                 $arr = array(
                     'status' => true,

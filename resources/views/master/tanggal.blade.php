@@ -101,6 +101,7 @@
                                             <th>deskripsi</th>
                                             <th>petugas1</th>
                                             <th>petugas2</th>
+                                            <th>petugas3</th>
                                             <th>aksi</th>
                                         </tr>
                                     </thead>
@@ -187,6 +188,9 @@
                     },
                     {
                         data: 'tanggal_petugas2'
+                    },
+                    {
+                        data: 'tanggal_petugas3'
                     },
                     {
                         data: 'aksi',

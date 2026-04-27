@@ -191,6 +191,7 @@
                     $('#EditJadwal .modal-body #edit_jenis').text(d.data.tanggal_jenis)
                     $('#EditJadwal .modal-body #petugas1_uid').val(d.data.tanggal_petugas1_uid).trigger('change')
                     $('#EditJadwal .modal-body #petugas2_uid').val(d.data.tanggal_petugas2_uid).trigger('change')
+                    $('#EditJadwal .modal-body #petugas3_uid').val(d.data.tanggal_petugas3_uid).trigger('change')
                 } else {
                     alert(d.message);
                 }
@@ -207,6 +208,7 @@
         var id = $('#EditJadwal .modal-body #id_jadwal').val();
         var petugas_1 = $('#EditJadwal .modal-body #petugas1_uid').val();
         var petugas_2 = $('#EditJadwal .modal-body #petugas2_uid').val()
+        var petugas_3 = $('#EditJadwal .modal-body #petugas3_uid').val()
 
         if (petugas_1 == '') {
             $('#EditJadwal .modal-body #jadwal_error').text('pilih salah satu petugas 1');
@@ -231,6 +233,7 @@
                     id: id,
                     petugas1_uid: petugas_1,
                     petugas2_uid: petugas_2,
+                    petugas3_uid: petugas_3,
                 },
                 cache: false,
                 dataType: 'json',

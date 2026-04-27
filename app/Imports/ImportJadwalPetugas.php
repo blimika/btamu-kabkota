@@ -22,38 +22,16 @@ class ImportJadwalPetugas implements ToCollection, WithHeadingRow, WithBatchInse
     {
         foreach ($rows as $row)
         {
-            //petugas username
-            $cek_user1 = User::where('username',trim($row['petugas1_username']))->first();
-            $cek_user2 = User::where('username',trim($row['petugas2_username']))->first();
             $data = Tanggal::where([['tanggal_angka',$row['tanggal']],['tanggal_jenis','kerja']])->first();
             if ($data)
             {
-                if ($cek_user1)
-                {
-                    if ($cek_user2)
-                    {
-                        $petugas2_uid = $cek_user2->user_uid;
-                    }
-                    else
-                    {
-                        $petugas2_uid = null;
-                    }
-                    $petugas1_uid = $cek_user1->user_uid;
-                }
-                else
-                {
-                    if ($cek_user2)
-                    {
-                        $petugas2_uid = $cek_user2->user_uid;
-                    }
-                    else
-                    {
-                        $petugas2_uid = null;
-                    }
-                    $petugas1_uid = null;
-                }
-                $data->tanggal_petugas1_uid = $petugas1_uid;
-                $data->tanggal_petugas2_uid = $petugas2_uid;
+                $cek_user1 = User::where('username', trim($row['petugas1_username']))->first();
+                $cek_user2 = User::where('username', trim($row['petugas2_username']))->first();
+                $cek_user3 = User::where('username', trim($row['petugas3_username']))->first();
+
+                $data->tanggal_petugas1_uid = $cek_user1 ? $cek_user1->user_uid : null;
+                $data->tanggal_petugas2_uid = $cek_user2 ? $cek_user2->user_uid : null;
+                $data->tanggal_petugas3_uid = $cek_user3 ? $cek_user3->user_uid : null;
                 $data->update();
             }
         }

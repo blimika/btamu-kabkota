@@ -31,6 +31,13 @@ class DashboardController extends Controller
         $pengunjung_tahun_ini = Kunjungan::whereYear('kunjungan_tanggal',Carbon::today()->format('Y'))->sum('kunjungan_jumlah_orang');
 
         $DataKunjungan = Kunjungan::orderBy('kunjungan_tanggal','desc')->orderBy('created_at','desc')->take(10)->get();
+        //dashboard kunjungan
+        $feedback_sudah = Kunjungan::where('kunjungan_flag_feedback','sudah')->count();
+        $feedback_belum = Kunjungan::where('kunjungan_flag_feedback','belum')->count();
+        $feedback_petugas = Kunjungan::where('kunjungan_flag_feedback','sudah')->average('kunjungan_nilai_feedback');
+        $feedback_sarpras = Kunjungan::where('kunjungan_flag_feedback','sudah')->average('kunjungan_sarpras_feedback');
+        $feedback_ada_komentar = Kunjungan::where('kunjungan_flag_feedback','sudah')->where('kunjungan_komentar_feedback','!=',null)->count();
+        //
         return view('depan',[
             'tahun'=>$tahun,
             'nama_bulan_pendek'=>$nama_bulan_pendek,
@@ -43,6 +50,11 @@ class DashboardController extends Controller
             'pengunjung_bulan_ini'=>$pengunjung_bulan_ini,
             'kunjungan_tahun_ini'=>$kunjungan_tahun_ini,
             'pengunjung_tahun_ini'=>$pengunjung_tahun_ini,
+            'feedback_sudah' => $feedback_sudah,
+            'feedback_belum' => $feedback_belum,
+            'feedback_petugas' => $feedback_petugas,
+            'feedback_sarpras' => $feedback_sarpras,
+            'feedback_ada_komentar' => $feedback_ada_komentar,
         ]);
     }
 }

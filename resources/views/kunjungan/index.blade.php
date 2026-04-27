@@ -54,6 +54,13 @@
                                             -
                                         @endif
                                     </span>
+                                    <span class="badge badge-warning">
+                                        @if ($PetugasJaga->tanggal_petugas3_uid)
+                                            {{$PetugasJaga->Petugas3->name}}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
                                 @else
                                     <span class="label label-danger">Hari libur ({{$PetugasJaga->tanggal_deskripsi}})</span>
                                 @endif
@@ -62,7 +69,7 @@
                         <div class="col-lg-4 text-right">
                             @if (Auth::User()->user_level == 'admin')
                                 <a href="#" class="btn btn-info kirimnotifjaga">Kirim Notif</a>
-                                <a href="#" class="btn btn-danger sinkronpetugas">Sinkron Petugas</a>
+                                <!--<a href="#" class="btn btn-danger sinkronpetugas">Sinkron Petugas</a>-->
                             @endif
                         </div>
                     </div>
@@ -112,6 +119,7 @@
     @include('kunjungan.modal-whatsapp')
     @include('kunjungan.modal-petugas')
     @include('kunjungan.modal-flagantrian')
+    @include('kunjungan.modal-pdf')
 @endsection
 
 @section('css')
@@ -929,4 +937,5 @@
     @include('kunjungan.js-jenis')
     @include('kunjungan.js-tujuan')
     @include('kunjungan.js-flagantrian')
+    @include('kunjungan.js-viewpdf')
 @stop

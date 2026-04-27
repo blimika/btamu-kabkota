@@ -38,13 +38,31 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
             $('#ViewKunjunganModal .modal-footer #pengunjung_timeline').attr("href","{{route('timeline','')}}/"+d.data.pengunjung.pengunjung_uid)
             $('#ViewKunjunganModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             if (d.data.kunjungan_foto != null)
-                {
-                    $('#ViewKunjunganModal .modal-body #kunjungan_foto').attr("src",'{{asset("storage")}}'+d.data.kunjungan_foto)
-                }
-                else
-                {
-                    $('#ViewKunjunganModal .modal-body #kunjungan_foto').attr("src","https://placehold.co/480x360/0000FF/FFFFFF/?text=belum+ada+photo")
-                }
+            {
+                $('#ViewKunjunganModal .modal-body #kunjungan_foto').attr("src",'{{asset("storage")}}'+d.data.kunjungan_foto)
+            }
+            else
+            {
+                $('#ViewKunjunganModal .modal-body #kunjungan_foto').attr("src","")
+            }
+            if (d.data.kunjungan_pdf != null)
+            {
+                $('#ViewKunjunganModal .modal-body #filepdf').show()
+                $('#ViewKunjunganModal .modal-body #kunjungan_pdf').attr("href",'{{asset("storage")}}'+d.data.kunjungan_pdf)
+            }
+            else
+            {
+                $('#ViewKunjunganModal .modal-body #kunjungan_pdf').attr("href","")
+                $('#ViewKunjunganModal .modal-body #filepdf').hide()
+            }
+            if (d.data.kunjungan_flag_skd == 0)
+            {
+                $('#ViewKunjunganModal .modal-body #kunjungan_flag_skd').html('<span class="badge badge-danger badge-pill">Tidak</span>')
+            }
+            else
+            {
+                $('#ViewKunjunganModal .modal-body #kunjungan_flag_skd').html('<span class="badge badge-success badge-pill">Ya</span>')
+            }
             $('#ViewKunjunganModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
             if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')
             {
@@ -176,12 +194,20 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
             {
                 var agent_feedback = "<i>"+d.data.kunjungan_agent_feedback+"</i>";
             }
+            if (d.data.kunjungan_tindak_lanjut == null)
+            {
+                var tindak_lanjut = "<i>------</i>";
+            }
+            else
+            {
+                var tindak_lanjut = "<i>"+d.data.kunjungan_tindak_lanjut+"</i>";
+            }
             $('#ViewKunjunganModal .modal-body #rating_layanan').html(rating_layanan)
             $('#ViewKunjunganModal .modal-body #rating_sarpras').html(rating_sarpras)
             $('#ViewKunjunganModal .modal-body #kunjungan_flag_feedback').html('<span class="badge '+warna_flag_feedback+' badge-pill">'+teks_flag_feedback+'</span>')
             $('#ViewKunjunganModal .modal-body #petugas_layanan').html(petugas_pelayanan)
             $('#ViewKunjunganModal .modal-body #kunjungan_keperluan').html(d.data.kunjungan_keperluan)
-            $('#ViewKunjunganModal .modal-body #kunjungan_tindak_lanjut').html(d.data.kunjungan_tindak_lanjut)
+            $('#ViewKunjunganModal .modal-body #kunjungan_tindak_lanjut').html(tindak_lanjut)
             $('#ViewKunjunganModal .modal-body #kunjungan_komentar_feedback').html(komentar_feedback)
             $('#ViewKunjunganModal .modal-body #kunjungan_tanggal_feedback').html(tanggal_feedback)
             $('#ViewKunjunganModal .modal-body #kunjungan_ip_feedback').html(ip_feedback)
