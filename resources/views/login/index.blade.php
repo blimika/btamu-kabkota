@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{asset('assets/images/'.ENV('APP_FAVICON'))}}">
-    <title>{{ENV('NAMA_APLIKASI')}} - {{ENV('NAMA_SATKER')}}</title>
+    <title>{{env('NAMA_APLIKASI')}} - {{get_setting('NAMA_SATKER')}}</title>
 
     <!-- page css -->
     <link href="{{asset('dist/css/pages/login-register-lock.css')}}" rel="stylesheet">
