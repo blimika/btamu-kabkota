@@ -22,8 +22,8 @@ Kerahasiaan jawaban Anda dilindungi Undang-undang No.16 Tahun 1997 tentang Stati
 Sekali lagi, terima kasih atas kunjungan Anda dan kami berharap dapat menyambut Anda kembali di masa depan.
 <br />
 Hubungi kami di: <br />
-▶ Email : {{ENV('EMAIL_SATKER')}} <br />
-🗣 Chat dgn Customer Service: https://wa.me/{{ENV('WA_SATKER')}} <br />
+▶ Email : <a href="mailto:{{$body->email_satker}}">{{ $body->email_satker }}</a><br />
+🗣 Chat dgn Customer Service: <a href="https://wa.me/{{$body->wa_satker}}">{{ $body->wa_satker }}</a><br />
 <br />
 Salam hangat,<br>
 {{$body->nama_satker}}<br>

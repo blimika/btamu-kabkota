@@ -57,6 +57,8 @@ class KunjunganController extends Controller
         $this->alamat_satker = get_setting('ALAMAT_SATKER');
         $this->whatsappService = $whatsappService;
         $this->link_feedback = env('APP_URL').'/k/f/';
+        $this->wa_satker = get_setting('WA_SATKER');
+        $this->email_satker = get_setting('EMAIL_SATKER');
     }
     private function cek_nomor_hp($nomor)
     {

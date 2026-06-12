@@ -41,6 +41,8 @@ class PengunjungController extends Controller
     protected $nama_aplikasi;
     protected $nama_satker;
     protected $alamat_satker;
+    protected $wa_satker;
+    protected $email_satker;
 
     public function __construct(WhatsAppService $whatsAppService)
     {
@@ -54,6 +56,8 @@ class PengunjungController extends Controller
         $this->link_skd = get_setting('APP_LINK_SKD');
         $this->nama_satker = get_setting('NAMA_SATKER');
         $this->alamat_satker = get_setting('ALAMAT_SATKER');
+        $this->wa_satker = get_setting('WA_SATKER');
+        $this->email_satker = get_setting('EMAIL_SATKER');
         $this->whatsAppService = $whatsAppService;
     }
     private function cek_nomor_hp($nomor)
@@ -81,6 +85,25 @@ class PengunjungController extends Controller
         $data = Pengunjung::with('Pendidikan','Kunjungan','Kunjungan.Tujuan','Kunjungan.LayananKantor','Kunjungan.LayananPst')->where('pengunjung_uid',$uid)->first();
         return view('pengunjung.timeline',['data'=>$data]);
     }
+    public function formatNomorHp($nomor)
+        {
+            // 1. Bersihkan semua karakter selain angka (hapus spasi, strip -, tanda kurung (), dan tanda plus +)
+            $bersih = preg_replace('/[^0-9]/', '', $nomor);
+
+            // 2. Cek apakah nomor diawali dengan angka '0'
+            if (substr($bersih, 0, 1) == '0') {
+                // Ganti angka '0' di awal dengan '62'
+                $bersih = '62' . substr($bersih, 1);
+            }
+
+            // (Opsional) Cek jika nomor tidak sengaja diketik tanpa 0 atau 62 di awal (misal langsung 812...)
+            if (substr($bersih, 0, 2) != '62') {
+                // Jika Anda yakin targetnya nomor Indonesia, bisa paksa tambah 62
+                // $bersih = '62' . $bersih;
+            }
+
+            return $bersih;
+        }
     public function KirimLinkSKD(Request $request)
     {
         //ambil data pengunjung
@@ -102,6 +125,9 @@ class PengunjungController extends Controller
             $body->nama_aplikasi = $this->nama_aplikasi;
             $body->nama_satker = $this->nama_satker;
             $body->alamat_satker = $this->alamat_satker;
+            $body->wa_satker = $this->formatNomorHp($this->wa_satker);
+            $body->email_satker = $this->email_satker;
+
             if (filter_var($data->pengunjung_email, FILTER_VALIDATE_EMAIL))
             {
                 if (ENV('APP_KIRIM_MAIL') == true) {
