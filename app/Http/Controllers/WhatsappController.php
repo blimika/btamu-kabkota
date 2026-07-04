@@ -90,14 +90,6 @@ class WhatsappController extends Controller
                     . $this->nama_aplikasi."\n"
                     . $this->nama_satker."\n"
                     . $this->alamat_satker;
-                    $message3 = "#Hai *".$data->Petugas3->name."*\n\n"
-                    . "Selamat pagi,\n"
-                    . "Pengingat tugas jaga Layanan hari ini,\n"
-                    . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
-                    . "Terimakasih dan selamat bertugas\n\n"
-                    . $this->nama_aplikasi."\n"
-                    . $this->nama_satker."\n"
-                    . $this->alamat_satker;
                     //simpan log dulu
                      //input ke log pesan
                     $new_wa1 = new Whatsapp();
@@ -113,13 +105,24 @@ class WhatsappController extends Controller
                     $new_wa2->wa_target = $hp_petugas2;
                     $new_wa2->wa_message = $message2;
                     $new_wa2->save();
+                    
+                    if ($hp_petugas3 != null) {
+                        $message3 = "#Hai *".$data->Petugas3->name."*\n\n"
+                                    . "Selamat pagi,\n"
+                                    . "Pengingat tugas jaga Layanan hari ini,\n"
+                                    . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
+                                    . "Terimakasih dan selamat bertugas\n\n"
+                                    . $this->nama_aplikasi."\n"
+                                    . $this->nama_satker."\n"
+                                    . $this->alamat_satker;
 
-                    $new_wa3 = new Whatsapp();
-                    $new_wa3->wa_tanggal = Carbon::today()->format('Y-m-d');
-                    $new_wa3->wa_uid = Generate::Kode(8);
-                    $new_wa3->wa_target = $hp_petugas3;
-                    $new_wa3->wa_message = $message3;
-                    $new_wa3->save();
+                        $new_wa3 = new Whatsapp();
+                        $new_wa3->wa_tanggal = Carbon::today()->format('Y-m-d');
+                        $new_wa3->wa_uid = Generate::Kode(8);
+                        $new_wa3->wa_target = $hp_petugas3;
+                        $new_wa3->wa_message = $message3;
+                        $new_wa3->save();
+                    }
 
                     if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas1 != null) {
                         try {
