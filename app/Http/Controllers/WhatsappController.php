@@ -68,21 +68,10 @@ class WhatsappController extends Controller
         {
             if ($data->tanggal_jenis == 'kerja')
             {
-                if ($data->tanggal_petugas1_uid != null && $data->tanggal_petugas2_uid)
+                if ($data->tanggal_petugas1_uid != null)
                 {
                     $hp_petugas1 = $data->Petugas1->user_telepon;
-                    $hp_petugas2 = $data->Petugas2->user_telepon;
-                    $hp_petugas3 = $data->Petugas3->user_telepon;
-
                     $message1 = "#Hai *".$data->Petugas1->name."*\n\n"
-                    . "Selamat pagi,\n"
-                    . "Pengingat tugas jaga Layanan hari ini,\n"
-                    . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
-                    . "Terimakasih dan selamat bertugas\n\n"
-                    . $this->nama_aplikasi."\n"
-                    . $this->nama_satker."\n"
-                    . $this->alamat_satker;
-                    $message2 = "#Hai *".$data->Petugas2->name."*\n\n"
                     . "Selamat pagi,\n"
                     . "Pengingat tugas jaga Layanan hari ini,\n"
                     . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
@@ -98,15 +87,26 @@ class WhatsappController extends Controller
                     $new_wa1->wa_target = $hp_petugas1;
                     $new_wa1->wa_message = $message1;
                     $new_wa1->save();
+                    if ($data->tanggal_petugas2_uid != null) {
+                        $hp_petugas2 = $data->Petugas2->user_telepon;
+                        $message2 = "#Hai *".$data->Petugas2->name."*\n\n"
+                        . "Selamat pagi,\n"
+                        . "Pengingat tugas jaga Layanan hari ini,\n"
+                        . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
+                        . "Terimakasih dan selamat bertugas\n\n"
+                        . $this->nama_aplikasi."\n"
+                        . $this->nama_satker."\n"
+                        . $this->alamat_satker;
+                        $new_wa2 = new Whatsapp();
+                        $new_wa2->wa_tanggal = Carbon::today()->format('Y-m-d');
+                        $new_wa2->wa_uid = Generate::Kode(8);
+                        $new_wa2->wa_target = $hp_petugas2;
+                        $new_wa2->wa_message = $message2;
+                        $new_wa2->save();
+                    }
 
-                    $new_wa2 = new Whatsapp();
-                    $new_wa2->wa_tanggal = Carbon::today()->format('Y-m-d');
-                    $new_wa2->wa_uid = Generate::Kode(8);
-                    $new_wa2->wa_target = $hp_petugas2;
-                    $new_wa2->wa_message = $message2;
-                    $new_wa2->save();
-                    
-                    if ($hp_petugas3 != null) {
+                    if ($data->tanggal_petugas3_uid != null) {
+                        $hp_petugas3 = $data->Petugas3->user_telepon;
                         $message3 = "#Hai *".$data->Petugas3->name."*\n\n"
                                     . "Selamat pagi,\n"
                                     . "Pengingat tugas jaga Layanan hari ini,\n"
@@ -115,7 +115,6 @@ class WhatsappController extends Controller
                                     . $this->nama_aplikasi."\n"
                                     . $this->nama_satker."\n"
                                     . $this->alamat_satker;
-
                         $new_wa3 = new Whatsapp();
                         $new_wa3->wa_tanggal = Carbon::today()->format('Y-m-d');
                         $new_wa3->wa_uid = Generate::Kode(8);
@@ -124,7 +123,7 @@ class WhatsappController extends Controller
                         $new_wa3->save();
                     }
 
-                    if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas1 != null) {
+                    if (ENV('APP_WA_LOKAL_MODE') == true && $data->tanggal_petugas1_uid != null) {
                         try {
                             $response1 = $this->whatsappService->sendMessage($hp_petugas1, $message1);
                             // Karena service mengembalikan response()->json(), kita ubah menjadi array
@@ -158,7 +157,7 @@ class WhatsappController extends Controller
                     }
                     sleep(1);
                     //petugas 2
-                    if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas2 != null) {
+                    if (ENV('APP_WA_LOKAL_MODE') == true && $data->tanggal_petugas2_uid != null) {
                         try {
                             $response2 = $this->whatsappService->sendMessage($hp_petugas2, $message2);
                             // Karena service mengembalikan response()->json(), kita ubah menjadi array
@@ -192,7 +191,7 @@ class WhatsappController extends Controller
                     }
                     sleep(1);
                     //petugas 3
-                    if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas3 != null) {
+                    if (ENV('APP_WA_LOKAL_MODE') == true && $data->tanggal_petugas3_uid != null) {
                         try {
                             $response3 = $this->whatsappService->sendMessage($hp_petugas3, $message3);
                             // Karena service mengembalikan response()->json(), kita ubah menjadi array

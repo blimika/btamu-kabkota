@@ -52,34 +52,10 @@ class InfoPetugas extends Command
         {
             if ($data->tanggal_jenis == 'kerja')
             {
-                if ($data->tanggal_petugas1_uid != null && $data->tanggal_petugas2_uid != null)
+                if ($data->tanggal_petugas1_uid != null)
                 {
                     $hp_petugas1 = $data->Petugas1->user_telepon;
-                    $hp_petugas2 = $data->Petugas2->user_telepon;
-                    $hp_petugas3 = $data->Petugas3->user_telepon;
-                    //dd($hp_petugas1);
-                    /*
-                    $recipients1 = $this->cek_nomor_hp($hp_petugas1);
-                    $recipients2 = $this->cek_nomor_hp($hp_petugas2);
-                    $recipients3 = $this->cek_nomor_hp($hp_petugas3);
-                    */
                     $message1 = "#Hai *".$data->Petugas1->name."*\n\n"
-                    . "Selamat pagi,\n"
-                    . "Pengingat tugas jaga Layanan hari ini,\n"
-                    . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
-                    . "Terimakasih dan selamat bertugas\n\n"
-                    . $this->nama_aplikasi."\n"
-                    . $this->nama_satker."\n"
-                    . $this->alamat_satker;
-                    $message2 = "#Hai *".$data->Petugas2->name."*\n\n"
-                    . "Selamat pagi,\n"
-                    . "Pengingat tugas jaga Layanan hari ini,\n"
-                    . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
-                    . "Terimakasih dan selamat bertugas\n\n"
-                    . $this->nama_aplikasi."\n"
-                    . $this->nama_satker."\n"
-                    . $this->alamat_satker;
-                    $message3 = "#Hai *".$data->Petugas3->name."*\n\n"
                     . "Selamat pagi,\n"
                     . "Pengingat tugas jaga Layanan hari ini,\n"
                     . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
@@ -95,21 +71,43 @@ class InfoPetugas extends Command
                     $new_wa1->wa_target = $hp_petugas1;
                     $new_wa1->wa_message = $message1;
                     $new_wa1->save();
+                    if ($data->tanggal_petugas2_uid != null) {
+                        $hp_petugas2 = $data->Petugas2->user_telepon;
+                        $message2 = "#Hai *".$data->Petugas2->name."*\n\n"
+                        . "Selamat pagi,\n"
+                        . "Pengingat tugas jaga Layanan hari ini,\n"
+                        . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
+                        . "Terimakasih dan selamat bertugas\n\n"
+                        . $this->nama_aplikasi."\n"
+                        . $this->nama_satker."\n"
+                        . $this->alamat_satker;
+                        $new_wa2 = new Whatsapp();
+                        $new_wa2->wa_tanggal = Carbon::today()->format('Y-m-d');
+                        $new_wa2->wa_uid = Generate::Kode(8);
+                        $new_wa2->wa_target = $hp_petugas2;
+                        $new_wa2->wa_message = $message2;
+                        $new_wa2->save();
+                    }
 
-                    $new_wa2 = new Whatsapp();
-                    $new_wa2->wa_tanggal = Carbon::today()->format('Y-m-d');
-                    $new_wa2->wa_uid = Generate::Kode(8);
-                    $new_wa2->wa_target = $hp_petugas2;
-                    $new_wa2->wa_message = $message2;
-                    $new_wa2->save();
+                    if ($data->tanggal_petugas3_uid != null) {
+                        $hp_petugas3 = $data->Petugas3->user_telepon;
+                        $message3 = "#Hai *".$data->Petugas3->name."*\n\n"
+                                    . "Selamat pagi,\n"
+                                    . "Pengingat tugas jaga Layanan hari ini,\n"
+                                    . "*".\Carbon\Carbon::parse($data->tanggal_angka)->isoFormat('dddd, D MMMM Y')."*\n\n"
+                                    . "Terimakasih dan selamat bertugas\n\n"
+                                    . $this->nama_aplikasi."\n"
+                                    . $this->nama_satker."\n"
+                                    . $this->alamat_satker;
+                        $new_wa3 = new Whatsapp();
+                        $new_wa3->wa_tanggal = Carbon::today()->format('Y-m-d');
+                        $new_wa3->wa_uid = Generate::Kode(8);
+                        $new_wa3->wa_target = $hp_petugas3;
+                        $new_wa3->wa_message = $message3;
+                        $new_wa3->save();
+                    }
 
-                    $new_wa3 = new Whatsapp();
-                    $new_wa3->wa_tanggal = Carbon::today()->format('Y-m-d');
-                    $new_wa3->wa_uid = Generate::Kode(8);
-                    $new_wa3->wa_target = $hp_petugas3;
-                    $new_wa3->wa_message = $message3;
-                    $new_wa3->save();
-                    if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas1 != null) {
+                    if (ENV('APP_WA_LOKAL_MODE') == true && $data->tanggal_petugas1_uid != null) {
                         try {
                             $response1 = $this->whatsappService->sendMessage($hp_petugas1, $message1);
                             // Karena service mengembalikan response()->json(), kita ubah menjadi array
@@ -143,7 +141,7 @@ class InfoPetugas extends Command
                     }
                     sleep(1);
                     //petugas 2
-                    if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas2 != null) {
+                    if (ENV('APP_WA_LOKAL_MODE') == true && $data->tanggal_petugas2_uid != null) {
                         try {
                             $response2 = $this->whatsappService->sendMessage($hp_petugas2, $message2);
                             // Karena service mengembalikan response()->json(), kita ubah menjadi array
@@ -177,7 +175,7 @@ class InfoPetugas extends Command
                     }
                     sleep(1);
                     //petugas 3
-                    if (ENV('APP_WA_LOKAL_MODE') == true && $hp_petugas3 != null) {
+                    if (ENV('APP_WA_LOKAL_MODE') == true && $data->tanggal_petugas3_uid != null) {
                         try {
                             $response3 = $this->whatsappService->sendMessage($hp_petugas3, $message3);
                             // Karena service mengembalikan response()->json(), kita ubah menjadi array
@@ -209,16 +207,25 @@ class InfoPetugas extends Command
                             $new_wa3->update();
                         }
                     }
-                    $error = "Notifikasi sudah dikirimkan ke petugas jaga";
+                    $arr = array(
+                        'status' => true,
+                        'message' => "Notifikasi sudah dikirimkan ke petugas jaga"
+                    );
                 }
                 else
                 {
-                     $error = "Data petugas jaga masih kosong, belum ada jadwal";
+                    $arr = array(
+                        'status' => false,
+                        'message' => "Data petugas jaga masih kosong, belum ada jadwal"
+                    );
                 }
             }
             else
             {
-                $error = "Hari libur : ".$data->tanggal_deskripsi;
+                $arr = array(
+                        'status' => false,
+                        'message' => "Hari libur : ".$data->tanggal_deskripsi
+                    );
             }
 
         }
