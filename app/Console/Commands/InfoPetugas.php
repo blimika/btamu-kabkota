@@ -207,25 +207,16 @@ class InfoPetugas extends Command
                             $new_wa3->update();
                         }
                     }
-                    $arr = array(
-                        'status' => true,
-                        'message' => "Notifikasi sudah dikirimkan ke petugas jaga"
-                    );
+                   $error = "Notifikasi sudah dikirimkan ke petugas jaga";
                 }
                 else
                 {
-                    $arr = array(
-                        'status' => false,
-                        'message' => "Data petugas jaga masih kosong, belum ada jadwal"
-                    );
+                    $error = "Data petugas jaga masih kosong, belum ada jadwal";
                 }
             }
             else
             {
-                $arr = array(
-                        'status' => false,
-                        'message' => "Hari libur : ".$data->tanggal_deskripsi
-                    );
+                $error = "Hari libur : ".$data->tanggal_deskripsi;
             }
 
         }
