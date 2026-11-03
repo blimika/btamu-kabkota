@@ -1133,7 +1133,7 @@ class KunjunganController extends Controller
         #dd($request->all());
         return Response()->json($arr);
     }
-    public function PrintNomorAntrian($uid)
+    public function PrintNomorAntrian($uid = null)
     {
         $data = Kunjungan::where('kunjungan_uid',$uid)->first();
         if ($data)
@@ -1144,7 +1144,7 @@ class KunjunganController extends Controller
             return $pdf->stream('Antrian'.$nama.'_Nomor_Antrian_'.$data->kunjungan_teks_antrian.'.pdf');
         }
     }
-    public function NewFeedback($uid)
+    public function NewFeedback($uid = null)
     {
         $data = Kunjungan::where('kunjungan_uid',$uid)->first();
         return view('feedback.index',[

@@ -80,7 +80,7 @@ class PengunjungController extends Controller
         }
         return $nomorhp;
     }
-    public function Timeline($uid)
+    public function Timeline($uid = null)
     {
         $data = Pengunjung::with('Pendidikan','Kunjungan','Kunjungan.Tujuan','Kunjungan.LayananKantor','Kunjungan.LayananPst')->where('pengunjung_uid',$uid)->first();
         return view('pengunjung.timeline',['data'=>$data]);

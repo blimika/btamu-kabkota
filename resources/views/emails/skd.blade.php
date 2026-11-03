@@ -3,7 +3,7 @@
 Kami mengucapkan terima kasih atas kunjungan Anda ke {{$body->nama_satker}}.
 <br />
 Dalam rangka meningkatkan kualitas data dan pelayanan, <br />
-BPS Provinsi NTB menyelenggarakan Survei Kebutuhan Data (SKD). <br />
+{{$body->nama_satker}} menyelenggarakan Survei Kebutuhan Data (SKD). <br />
 Bapak/Ibu terpilih menjadi responden kami.<br />
 Mohon kesediaannya untuk mengisi dengan lengkap pertanyaan-pertanyaan
 pada link dibawah ini. Survei ini hanya membutuhkan waktu beberapa menit untuk diisi.

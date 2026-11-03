@@ -8,6 +8,8 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class FormatPengunjung implements FromView
 {
+    protected $data;
+
     public function __construct($data)
     {
         $this->data = $data;

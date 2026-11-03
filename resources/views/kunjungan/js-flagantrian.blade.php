@@ -23,7 +23,7 @@ $('#EditFlagAntrianModal').on('show.bs.modal', function (event) {
             $('#EditFlagAntrianModal .modal-body #kunjungan_uid').text(d.data.kunjungan_uid)
             $('#EditFlagAntrianModal .modal-body #pengunjung_nama').text(d.data.pengunjung.pengunjung_nama)
             $('#EditFlagAntrianModal .modal-body #pengunjung_jk').text(d.data.pengunjung.pengunjung_jenis_kelamin)
-            $('#EditFlagAntrianModal .modal-footer #pengunjung_timeline').attr("href","{{route('timeline','')}}/"+d.data.pengunjung.pengunjung_uid)
+            $('#EditFlagAntrianModal .modal-footer #pengunjung_timeline').attr("href","{{url('timeline')}}/"+d.data.pengunjung.pengunjung_uid)
             $('#EditFlagAntrianModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             $('#EditFlagAntrianModal .modal-body #kunjungan_nomor_antrian').text(d.data.kunjungan_teks_antrian)
             if (d.data.kunjungan_flag_antrian == 'ruang_tunggu')

@@ -35,7 +35,7 @@ $('#ViewKunjunganModal').on('show.bs.modal', function (event) {
             }
             $('#ViewKunjunganModal .modal-body #pengunjung_wa').attr("href",pengunjung_wa)
             $('#ViewKunjunganModal .modal-body #pengunjung_alamat').text(d.data.pengunjung.pengunjung_alamat)
-            $('#ViewKunjunganModal .modal-footer #pengunjung_timeline').attr("href","{{route('timeline','')}}/"+d.data.pengunjung.pengunjung_uid)
+            $('#ViewKunjunganModal .modal-footer #pengunjung_timeline').attr("href","{{url('timeline')}}/"+d.data.pengunjung.pengunjung_uid)
             $('#ViewKunjunganModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             if (d.data.kunjungan_foto != null)
             {

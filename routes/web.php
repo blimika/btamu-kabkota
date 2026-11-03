@@ -19,7 +19,7 @@ Route::post('/login', 'PetugasController@login')->name('login.proses');
 Route::get('/logout', 'PetugasController@logout')->name('logout');
 //feedback
 Route::post('/feedbacksave', 'KunjunganController@FeedbackSave')->name('feedbacksave');
-Route::get('/k/f/{uid}', 'KunjunganController@NewFeedback')->name('kunjungan.feedback');
+Route::get('/k/f/{uid?}', 'KunjunganController@NewFeedback')->name('kunjungan.feedback');
 //webapi
 Route::get('/webapi', 'WebapiController@WebApi')->name('webapi');
 Route::middleware(['webapi.key'])->group(function () {
@@ -36,7 +36,7 @@ Route::group(['middleware' => 'ip.or.login'], function () {
     Route::post('/whatsapp/notifikasi', 'WhatsappController@NotifJaga')->name('petugas.notifikasi');
     Route::post('/wa/import', 'WhatsappController@WhatsappImport')->name('wa.import');
     //timeline
-    Route::get('/timeline/{uid}', 'PengunjungController@Timeline')->name('timeline');
+    Route::get('/timeline/{uid?}', 'PengunjungController@Timeline')->name('timeline');
 });
 Route::group(['middleware' => ['auth']], function () {
     //Petugas
@@ -53,7 +53,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/kunjungan/flagantrian', 'KunjunganController@FlagAntrianUpdate')->name('flagantrian.update');
     Route::post('/tujuanbaru/save', 'KunjunganController@TujuanBaruSave')->name('tujuanbaru.save');
     Route::post('/jeniskunjungansave', 'KunjunganController@JenisKunjunganSave')->name('jeniskunjungan.save');
-    Route::get('/k/p/{uid}', 'KunjunganController@PrintNomorAntrian')->name('kunjungan.printantrian');
+    Route::get('/k/p/{uid?}', 'KunjunganController@PrintNomorAntrian')->name('kunjungan.printantrian');
     Route::post('/kunjungan/petugassimpan', 'KunjunganController@PetugasSimpan')->name('kunjungan.petugassimpan');
     Route::get('/kunjungan/format', 'KunjunganController@Format')->name('kunjungan.format');
     Route::post('/kunjungan/import', 'KunjunganController@Import')->name('kunjungan.import');

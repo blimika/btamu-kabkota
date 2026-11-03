@@ -19,7 +19,6 @@ Layanan : {{ $body->layanan_utama }} <br>
 
 
 Terimakasih,<br>
-{{$body->nama_aplikasi}} <br>
 {{$body->nama_satker}}<br>
 {{$body->alamat_satker}}
 

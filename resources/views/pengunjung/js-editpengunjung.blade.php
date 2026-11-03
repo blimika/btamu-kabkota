@@ -31,7 +31,7 @@ $('#EditPengunjungModal').on('show.bs.modal', function (event) {
             $('#EditPengunjungModal .modal-body #pengunjung_tahun_lahir').val(d.data.pengunjung_tahun_lahir)
             $('#EditPengunjungModal .modal-body #pengunjung_pekerjaan').val(d.data.pengunjung_pekerjaan)
             $('#EditPengunjungModal .modal-body #pengunjung_pendidikan').val(d.data.pengunjung_pendidikan)
-            $('#EditPengunjungModal .modal-footer #pengunjung_timeline').attr("href","{{route('timeline','')}}/"+d.data.pengunjung_uid)
+            $('#EditPengunjungModal .modal-footer #pengunjung_timeline').attr("href","{{url('timeline')}}/"+d.data.pengunjung_uid)
             $('#EditPengunjungModal .modal-body #pengunjung_email').val(d.data.pengunjung_email)
 
             $('#EditPengunjungModal .modal-body #pengunjung_alamat').val(d.data.pengunjung_alamat)

@@ -60,7 +60,7 @@ $('#ViewPDFModal').on('show.bs.modal', function (event) {
                 $('#ViewPDFModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
             }
             $('#ViewPDFModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
-            //$('#ViewKunjunganModal .modal-footer #pengunjung_timeline').attr("href","{{route('timeline','')}}/"+d.data.pengunjung.pengunjung_uid)
+            //$('#ViewKunjunganModal .modal-footer #pengunjung_timeline').attr("href","{{url('timeline')}}/"+d.data.pengunjung.pengunjung_uid)
             //$('#ViewKunjunganModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
             if (d.data.kunjungan_pdf != null)
             {
