@@ -115,8 +115,10 @@ class PengunjungController extends Controller
         if ($data) {
             //update flag SKD di tabel kunjungan
             $data_skd = Kunjungan::where('kunjungan_uid',$request->kunjungan_uid)->first();
-            $data_skd->kunjungan_flag_skd = true;
-            $data_skd->update();
+            if ($data_skd) {
+                $data_skd->kunjungan_flag_skd = true;
+                $data_skd->update();
+            }
             //kirim email
             $body = new \stdClass();
             $body->pengunjung_nama = $data->pengunjung_nama;
@@ -237,190 +239,204 @@ class PengunjungController extends Controller
     public function PageList(Request $request)
     {
         $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
+        $start = (int) $request->get("start", 0);
+        $rowperpage = (int) $request->get("length", 10);
+        if ($rowperpage <= 0) {
+            $rowperpage = 10;
+        }
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
 
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+        $columnIndex = (isset($columnIndex_arr[0]['column'])) ? (int) $columnIndex_arr[0]['column'] : 8;
+        $columnName = (isset($columnName_arr[$columnIndex]['data'])) ? $columnName_arr[$columnIndex]['data'] : 'created_at';
+        $columnSortOrder = (isset($order_arr[0]['dir']) && in_array(strtolower($order_arr[0]['dir']), ['asc', 'desc'])) ? strtolower($order_arr[0]['dir']) : 'desc';
+        $searchValue = is_array($search_arr) ? ($search_arr['value'] ?? '') : ($search_arr ?? '');
+
+        $sortableColumns = [
+            'pengunjung_uid' => 'm_pengunjung.pengunjung_uid',
+            'pengunjung_nama' => 'm_pengunjung.pengunjung_nama',
+            'pengunjung_nomor_hp' => 'm_pengunjung.pengunjung_nomor_hp',
+            'pengunjung_tahun_lahir' => 'm_pengunjung.pengunjung_tahun_lahir',
+            'pengunjung_pekerjaan' => 'm_pengunjung.pengunjung_pekerjaan',
+            'pengunjung_pendidikan' => 'm_pendidikan.pendidikan_nama',
+            'pengunjung_email' => 'm_pengunjung.pengunjung_email',
+            'pengunjung_total_kunjungan' => 'm_pengunjung.pengunjung_total_kunjungan',
+            'created_at' => 'm_pengunjung.created_at',
+        ];
+
+        $sortColumn = $sortableColumns[$columnName] ?? 'm_pengunjung.created_at';
 
         // Total records
-        $totalRecords = Pengunjung::count();
-        //total record searching
-        $totalRecordswithFilter =  DB::table('m_pengunjung')
+        $totalRecords = DB::table('m_pengunjung')->count();
+        // Total record searching
+        $totalRecordswithFilter = DB::table('m_pengunjung')
             ->leftJoin('m_pendidikan', 'm_pengunjung.pengunjung_pendidikan', '=', 'm_pendidikan.pendidikan_kode')
             ->when($searchValue, function ($q) use ($searchValue) {
-                return $q->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_uid', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_nomor_hp', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_pekerjaan', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pendidikan.pendidikan_nama', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.created_at', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_email', 'like', '%' . $searchValue . '%');
+                return $q->where(function ($sub) use ($searchValue) {
+                    $sub->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_uid', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_nomor_hp', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_pekerjaan', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pendidikan.pendidikan_nama', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.created_at', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_email', 'like', '%' . $searchValue . '%');
+                });
             })->count();
+
         // Fetch records
         $records = DB::table('m_pengunjung')
             ->leftJoin('m_pendidikan', 'm_pengunjung.pengunjung_pendidikan', '=', 'm_pendidikan.pendidikan_kode')
             ->when($searchValue, function ($q) use ($searchValue) {
-                return $q->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_uid', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_nomor_hp', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_pekerjaan', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pendidikan.pendidikan_nama', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.created_at', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_pengunjung.pengunjung_email', 'like', '%' . $searchValue . '%');
+                return $q->where(function ($sub) use ($searchValue) {
+                    $sub->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_uid', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_nomor_hp', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_pekerjaan', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pendidikan.pendidikan_nama', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.created_at', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_pengunjung.pengunjung_email', 'like', '%' . $searchValue . '%');
+                });
             })
-            ->select('m_pengunjung.*','m_pendidikan.pendidikan_nama as nama_pendidikan')
+            ->select('m_pengunjung.*', 'm_pendidikan.pendidikan_nama as nama_pendidikan')
             ->skip($start)
             ->take($rowperpage)
-            ->orderBy($columnName, $columnSortOrder)
+            ->orderBy($sortColumn, $columnSortOrder)
             ->get();
 
-            $data_arr = array();
+        $data_arr = array();
+        $currentYear = (int) Carbon::now()->format('Y');
 
-            foreach ($records as $item) {
-
-                $aksi = '
-                <div class="btn-group">
-                <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="ti-settings"></i>
-                </button>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#" data-uid="' . $item->pengunjung_uid . '" data-toggle="modal" data-target="#ViewPengunjungModal">View</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#" data-uid="' . $item->pengunjung_uid . '" data-toggle="modal" data-target="#EditPengunjungModal">Edit</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item hapuspengunjung" href="#" data-id="' . $item->pengunjung_id . '" data-uid="' . $item->pengunjung_uid . '" data-nama="' . $item->pengunjung_nama . '">Delete</a>
-
-                </div>
+        foreach ($records as $item) {
+            $aksi = '
+            <div class="btn-group">
+            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="ti-settings"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" data-uid="' . $item->pengunjung_uid . '" data-toggle="modal" data-target="#ViewPengunjungModal">View</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-uid="' . $item->pengunjung_uid . '" data-toggle="modal" data-target="#EditPengunjungModal">Edit</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item hapuspengunjung" href="#" data-id="' . $item->pengunjung_id . '" data-uid="' . $item->pengunjung_uid . '" data-nama="' . htmlspecialchars($item->pengunjung_nama ?? '', ENT_QUOTES) . '">Delete</a>
             </div>
-            ';
-             //jenis kelamin
-                if ($item->pengunjung_jenis_kelamin == 'laki_laki') {
-                    $jk = '<span class="badge badge-info badge-pill">L</span>';
-                }
-                else {
-                    $jk = '<span class="badge badge-danger badge-pill">P</span>';
-                }
-                //pendidikan
-                if ($item->pengunjung_pendidikan == 1)
-                {
-                    $pendidikan = '<span class="badge badge-danger badge-pill">' . $item->nama_pendidikan . '</span>';
-                }
-                elseif ($item->pengunjung_pendidikan == 2)
-                {
-                    $pendidikan = '<span class="badge badge-info badge-pill">' . $item->nama_pendidikan . '</span>';
-                }
-                elseif ($item->pengunjung_pendidikan == 3)
-                {
-                    $pendidikan = '<span class="badge badge-success badge-pill">' . $item->nama_pendidikan . '</span>';
-                }
-                elseif ($item->pengunjung_pendidikan == 4)
-                {
-                    $pendidikan = '<span class="badge badge-warning badge-pill">' . $item->nama_pendidikan . '</span>';
-                }
-                else
-                {
-                    $pendidikan = '<span class="badge badge-primary badge-pill">' . $item->nama_pendidikan . '</span>';
-                }
-                $link_nama = '<a href="#" data-uid="' . $item->pengunjung_uid . '" data-toggle="modal" data-target="#ViewPengunjungModal">'.$item->pengunjung_nama.'</a>';
-                $data_arr[] = array(
-                    "pengunjung_uid" => $item->pengunjung_uid,
-                    "pengunjung_nama" => $link_nama .'<br />'.$jk,
-                    "pengunjung_nomor_hp" => $item->pengunjung_nomor_hp,
-                    "pengunjung_tahun_lahir" => $item->pengunjung_tahun_lahir .'<br />('.(Carbon::now()->format('Y')-$item->pengunjung_tahun_lahir).' tahun)',
-                    "pengunjung_pekerjaan" => $item->pengunjung_pekerjaan,
-                    "pengunjung_pendidikan" => $pendidikan,
-                    "pengunjung_email" => $item->pengunjung_email,
-                    "pengunjung_total_kunjungan" => $item->pengunjung_total_kunjungan,
-                    "created_at"=>$item->created_at,
-                    "aksi" => $aksi
-                );
+        </div>
+        ';
+            // Jenis kelamin
+            if ($item->pengunjung_jenis_kelamin == 'laki_laki') {
+                $jk = '<span class="badge badge-info badge-pill">L</span>';
+            } else {
+                $jk = '<span class="badge badge-danger badge-pill">P</span>';
             }
 
-            $response = array(
-                "draw" => intval($draw),
-                "iTotalRecords" => $totalRecords,
-                "iTotalDisplayRecords" => $totalRecordswithFilter,
-                "aaData" => $data_arr
-            );
+            // Pendidikan
+            $namaPendidikan = $item->nama_pendidikan ?? '-';
+            if ($item->pengunjung_pendidikan == 1) {
+                $pendidikan = '<span class="badge badge-danger badge-pill">' . $namaPendidikan . '</span>';
+            } elseif ($item->pengunjung_pendidikan == 2) {
+                $pendidikan = '<span class="badge badge-info badge-pill">' . $namaPendidikan . '</span>';
+            } elseif ($item->pengunjung_pendidikan == 3) {
+                $pendidikan = '<span class="badge badge-success badge-pill">' . $namaPendidikan . '</span>';
+            } elseif ($item->pengunjung_pendidikan == 4) {
+                $pendidikan = '<span class="badge badge-warning badge-pill">' . $namaPendidikan . '</span>';
+            } else {
+                $pendidikan = '<span class="badge badge-primary badge-pill">' . $namaPendidikan . '</span>';
+            }
 
-            echo json_encode($response);
-            exit;
+            $tahunLahirDisplay = '-';
+            if (!empty($item->pengunjung_tahun_lahir) && is_numeric($item->pengunjung_tahun_lahir)) {
+                $umur = $currentYear - (int) $item->pengunjung_tahun_lahir;
+                $tahunLahirDisplay = $item->pengunjung_tahun_lahir . '<br />(' . $umur . ' tahun)';
+            } elseif (!empty($item->pengunjung_tahun_lahir)) {
+                $tahunLahirDisplay = htmlspecialchars($item->pengunjung_tahun_lahir, ENT_QUOTES);
+            }
+
+            $link_nama = '<a href="#" data-uid="' . $item->pengunjung_uid . '" data-toggle="modal" data-target="#ViewPengunjungModal">' . htmlspecialchars($item->pengunjung_nama ?? '', ENT_QUOTES) . '</a>';
+            $data_arr[] = array(
+                "pengunjung_uid" => $item->pengunjung_uid,
+                "pengunjung_nama" => $link_nama . '<br />' . $jk,
+                "pengunjung_nomor_hp" => $item->pengunjung_nomor_hp ?? '-',
+                "pengunjung_tahun_lahir" => $tahunLahirDisplay,
+                "pengunjung_pekerjaan" => $item->pengunjung_pekerjaan ?? '-',
+                "pengunjung_pendidikan" => $pendidikan,
+                "pengunjung_email" => $item->pengunjung_email ?? '-',
+                "pengunjung_total_kunjungan" => $item->pengunjung_total_kunjungan ?? 0,
+                "created_at" => $item->created_at,
+                "aksi" => $aksi
+            );
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalRecords" => $totalRecords,
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $data_arr
+        );
+
+        return response()->json($response);
     }
     public function hapus(Request $request)
     {
         $arr = array(
-            'status'=>false,
-            'message'=>'Data pengunjung tidak tersedia'
+            'status' => false,
+            'message' => 'Data pengunjung tidak tersedia'
         );
-        $data = Pengunjung::where('pengunjung_uid',$request->uid)->first();
-        if ($data)
-        {
-            //hapus semua foto2
-            if ($data->pengunjung_foto_profil != "")
-            {
-                if (Storage::disk('public')->exists($data->pengunjung_foto_profil))
-                {
+        $data = Pengunjung::where('pengunjung_uid', $request->uid)->first();
+        if ($data) {
+            // Hapus semua foto profil pengunjung
+            if (!empty($data->pengunjung_foto_profil)) {
+                if (Storage::disk('public')->exists($data->pengunjung_foto_profil)) {
                     Storage::disk('public')->delete($data->pengunjung_foto_profil);
                 }
             }
-            //hapus user yang terhubung
-            if ($data->pengunjung_user_uid != "")
-            {
-                $data_user = User::where('user_uid',$data->pengunjung_user_uid)->first();
-                if ($data_user->user_foto != "")
-                {
-                    if (Storage::disk('public')->exists($data_user->user_foto))
-                    {
-                        Storage::disk('public')->delete($data_user->user_foto);
-                    }
-                }
-                $data_user->delete();
-            }
-            //hapus data pengunjung
-            $data->delete();
-            ///cari kunjungan dah hapus foto2
-            $data_visit = Kunjungan::where('pengunjung_uid',$request->uid)->get();
-            if ($data_visit)
-            {
-                foreach ($data_visit as $item) {
-                    if ($item->kunjungan_foto != "")
-                    {
-                        if (Storage::disk('public')->exists($item->kunjungan_foto))
-                        {
-                            Storage::disk('public')->delete($item->kunjungan_foto);
+            // Hapus user yang terhubung jika ada
+            if (!empty($data->pengunjung_user_uid)) {
+                $data_user = User::where('user_uid', $data->pengunjung_user_uid)->first();
+                if ($data_user) {
+                    if (!empty($data_user->user_foto)) {
+                        if (Storage::disk('public')->exists($data_user->user_foto)) {
+                            Storage::disk('public')->delete($data_user->user_foto);
                         }
                     }
+                    $data_user->delete();
                 }
-                Kunjungan::where('pengunjung_uid',$request->uid)->delete();
-
-                $arr = array(
-                    'status'=>true,
-                    'message'=>'Data pengunjung an '. $request->nama .' beserta data kunjungan berhasil dihapus',
-                    'data'=>true
-                );
             }
+            // Hapus data pengunjung
+            $data->delete();
+
+            // Cari kunjungan dan hapus file foto/pdf terkait
+            $data_visit = Kunjungan::where('pengunjung_uid', $request->uid)->get();
+            if ($data_visit && $data_visit->count() > 0) {
+                foreach ($data_visit as $item) {
+                    if (!empty($item->kunjungan_foto) && Storage::disk('public')->exists($item->kunjungan_foto)) {
+                        Storage::disk('public')->delete($item->kunjungan_foto);
+                    }
+                    if (!empty($item->kunjungan_pdf) && Storage::disk('public')->exists($item->kunjungan_pdf)) {
+                        Storage::disk('public')->delete($item->kunjungan_pdf);
+                    }
+                }
+                Kunjungan::where('pengunjung_uid', $request->uid)->delete();
+            }
+
+            $arr = array(
+                'status' => true,
+                'message' => 'Data pengunjung an ' . $request->nama . ' beserta data kunjungan berhasil dihapus',
+                'data' => true
+            );
         }
-        return Response()->json($arr);
+        return response()->json($arr);
     }
     public function update(Request $request)
     {
         $arr = array(
-            'status'=>false,
-            'message'=>'Data pengunjung tidak tersedia'
+            'status' => false,
+            'message' => 'Data pengunjung tidak tersedia'
         );
-        if (Auth::user())
-        {
-            $data = Pengunjung::where('pengunjung_uid',$request->pengunjung_uid)->first();
-            if ($data)
-            {
+        if (Auth::check()) {
+            $data = Pengunjung::where('pengunjung_uid', $request->pengunjung_uid)->first();
+            if ($data) {
                 $data->pengunjung_nomor_hp = $request->pengunjung_nomor_hp;
                 $data->pengunjung_nama = $request->pengunjung_nama;
                 $data->pengunjung_jenis_kelamin = $request->pengunjung_jk;
@@ -431,19 +447,17 @@ class PengunjungController extends Controller
                 $data->pengunjung_alamat = $request->pengunjung_alamat;
                 $data->update();
                 $arr = array(
-                    'status'=>true,
-                    'message'=>'Data pengunjung berhasil di perbarui'
+                    'status' => true,
+                    'message' => 'Data pengunjung berhasil diperbarui'
                 );
             }
-        }
-        else
-        {
+        } else {
             $arr = array(
-                'status'=>false,
-                'message'=>'anda tidak mempunyai akses untuk update pengunjung'
+                'status' => false,
+                'message' => 'Anda tidak mempunyai akses untuk update pengunjung'
             );
         }
-        return Response()->json($arr);
+        return response()->json($arr);
     }
     public function feedback()
     {
@@ -472,35 +486,53 @@ class PengunjungController extends Controller
     public function PageListFeedback(Request $request)
     {
         $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
+        $start = (int) $request->get("start", 0);
+        $rowperpage = (int) $request->get("length", 10);
+        if ($rowperpage <= 0) {
+            $rowperpage = 10;
+        }
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
 
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+        $columnIndex = (isset($columnIndex_arr[0]['column'])) ? (int) $columnIndex_arr[0]['column'] : 1;
+        $columnName = (isset($columnName_arr[$columnIndex]['data'])) ? $columnName_arr[$columnIndex]['data'] : 'kunjungan_tanggal';
+        $columnSortOrder = (isset($order_arr[0]['dir']) && in_array(strtolower($order_arr[0]['dir']), ['asc', 'desc'])) ? strtolower($order_arr[0]['dir']) : 'desc';
+        $searchValue = is_array($search_arr) ? ($search_arr['value'] ?? '') : ($search_arr ?? '');
+
+        $sortableColumns = [
+            'kunjungan_uid' => 'm_kunjungan.kunjungan_uid',
+            'kunjungan_tanggal' => 'm_kunjungan.kunjungan_tanggal',
+            'pengunjung_nama' => 'm_pengunjung.pengunjung_nama',
+            'kunjungan_tujuan' => 'm_kunjungan.kunjungan_tujuan',
+            'kunjungan_nilai_feedback' => 'm_kunjungan.kunjungan_nilai_feedback',
+            'kunjungan_sarpras_feedback' => 'm_kunjungan.kunjungan_sarpras_feedback',
+            'kunjungan_komentar_feedback' => 'm_kunjungan.kunjungan_komentar_feedback',
+            'kunjungan_petugas_id' => 'users.name',
+        ];
+
+        $sortColumn = $sortableColumns[$columnName] ?? 'm_kunjungan.kunjungan_tanggal';
 
         // Total records
         $totalRecords = Kunjungan::count();
-        //total record searching
-        $totalRecordswithFilter =  DB::table('m_kunjungan')
+        // Total record searching
+        $totalRecordswithFilter = DB::table('m_kunjungan')
             ->leftJoin('m_pengunjung', 'm_kunjungan.pengunjung_uid', '=', 'm_pengunjung.pengunjung_uid')
             ->leftJoin('m_tujuan', 'm_kunjungan.kunjungan_tujuan', '=', 'm_tujuan.tujuan_kode')
             ->leftJoin('users', 'm_kunjungan.kunjungan_petugas_uid', '=', 'users.user_uid')
             ->leftJoin('m_layanan_pst', 'm_kunjungan.kunjungan_layanan_pst', '=', 'm_layanan_pst.layanan_pst_kode')
             ->when($searchValue, function ($q) use ($searchValue) {
-                return $q->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_kunjungan.kunjungan_uid', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_kunjungan.kunjungan_tanggal', 'like', '%' . $searchValue . '%')
-                         ->orWhere('users.name', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_kunjungan.kunjungan_komentar_feedback', 'like', '%' . $searchValue . '%');
+                return $q->where(function ($sub) use ($searchValue) {
+                    $sub->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_kunjungan.kunjungan_uid', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_kunjungan.kunjungan_tanggal', 'like', '%' . $searchValue . '%')
+                        ->orWhere('users.name', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_kunjungan.kunjungan_komentar_feedback', 'like', '%' . $searchValue . '%');
+                });
             })
-            ->where('m_kunjungan.kunjungan_flag_feedback','sudah')->count();
+            ->where('m_kunjungan.kunjungan_flag_feedback', 'sudah')->count();
 
         // Fetch records
         $records = DB::table('m_kunjungan')
@@ -509,17 +541,19 @@ class PengunjungController extends Controller
             ->leftJoin('users', 'm_kunjungan.kunjungan_petugas_uid', '=', 'users.user_uid')
             ->leftJoin('m_layanan_pst', 'm_kunjungan.kunjungan_layanan_pst', '=', 'm_layanan_pst.layanan_pst_kode')
             ->when($searchValue, function ($q) use ($searchValue) {
-                return $q->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_kunjungan.kunjungan_uid', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_kunjungan.kunjungan_tanggal', 'like', '%' . $searchValue . '%')
-                         ->orWhere('users.name', 'like', '%' . $searchValue . '%')
-                         ->orWhere('m_kunjungan.kunjungan_komentar_feedback', 'like', '%' . $searchValue . '%');
+                return $q->where(function ($sub) use ($searchValue) {
+                    $sub->where('m_pengunjung.pengunjung_nama', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_kunjungan.kunjungan_uid', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_kunjungan.kunjungan_tanggal', 'like', '%' . $searchValue . '%')
+                        ->orWhere('users.name', 'like', '%' . $searchValue . '%')
+                        ->orWhere('m_kunjungan.kunjungan_komentar_feedback', 'like', '%' . $searchValue . '%');
+                });
             })
-            ->where('m_kunjungan.kunjungan_flag_feedback','sudah')
-            ->select('m_kunjungan.*', 'm_pengunjung.pengunjung_nama','m_pengunjung.pengunjung_email', 'm_pengunjung.pengunjung_jenis_kelamin', 'm_tujuan.tujuan_inisial as tujuan_inisial', 'm_tujuan.tujuan_nama as tujuan_nama', 'users.name', 'users.username', 'm_layanan_pst.layanan_pst_nama as kunjungan_pst_teks')
+            ->where('m_kunjungan.kunjungan_flag_feedback', 'sudah')
+            ->select('m_kunjungan.*', 'm_pengunjung.pengunjung_nama', 'm_pengunjung.pengunjung_email', 'm_pengunjung.pengunjung_jenis_kelamin', 'm_tujuan.tujuan_inisial as tujuan_inisial', 'm_tujuan.tujuan_nama as tujuan_nama', 'users.name', 'users.username', 'm_layanan_pst.layanan_pst_nama as kunjungan_pst_teks')
             ->skip($start)
             ->take($rowperpage)
-            ->orderBy($columnName, $columnSortOrder)
+            ->orderBy($sortColumn, $columnSortOrder)
             ->get();
 
         //inisiasi aawal
@@ -680,8 +714,7 @@ class PengunjungController extends Controller
             "aaData" => $data_arr
         );
 
-        echo json_encode($response);
-        exit;
+        return response()->json($response);
     }
     public function Format()
     {

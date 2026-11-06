@@ -1,16 +1,33 @@
 <script type="text/javascript">
 function GetUmur(birthDateString) {
     var today = new Date();
-    var age = today.getFullYear() - birthDateString;
-    return age;
+    var age = today.getFullYear() - parseInt(birthDateString, 10);
+    return isNaN(age) ? '-' : age;
 }
-//view
+// View Modal
 $('#ViewPengunjungModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget) // Button that triggered the modal
-    var uid = button.data('uid')
-    //load dulu transaksinya
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var uid = button.data('uid');
+
+    // Reset initial fields
+    $('#ViewPengunjungModal .modal-body #pengunjung_id').text('Loading...');
+    $('#ViewPengunjungModal .modal-body #pengunjung_uid').text(uid || '');
+    $('#ViewPengunjungModal .modal-body #pengunjung_nama').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_jk').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_tahun_lahir').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_pekerjaan').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_pendidikan').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_email').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_nomor_hp').text('');
+    $('#ViewPengunjungModal .modal-body #pengunjung_wa').hide();
+    $('#ViewPengunjungModal .modal-body #pengunjung_alamat').text('');
+    $('#ViewPengunjungModal .modal-body #kunjungan_terakhir').text('Loading...');
+    $('#ViewPengunjungModal .modal-body #pengunjung_foto').attr("src", "https://placehold.co/480x360/0000FF/FFFFFF/?text=loading...");
+    $('#ViewPengunjungModal .modal-footer #pengunjung_timeline').attr("href", "{{ url('timeline') }}/" + uid);
+
+    // Load data pengunjung
     $.ajax({
-        url : '{{route("webapi")}}/',
+        url : '{{ route("webapi") }}',
         method : 'get',
         data: {
             model: 'pengunjung',
@@ -18,82 +35,85 @@ $('#ViewPengunjungModal').on('show.bs.modal', function (event) {
         },
         cache: false,
         dataType: 'json',
-        success: function(d){
-            if (d.status == true)
-            {
-            $('#ViewPengunjungModal .modal-body #pengunjung_id').text('#'+d.data.pengunjung_id)
-            $('#ViewPengunjungModal .modal-body #pengunjung_uid').text(d.data.pengunjung_uid)
-            $('#ViewPengunjungModal .modal-body #pengunjung_nama').text(d.data.pengunjung_nama)
-            $('#ViewPengunjungModal .modal-body #pengunjung_jk').text(d.data.pengunjung_jenis_kelamin)
-            $('#ViewPengunjungModal .modal-body #pengunjung_tahun_lahir').text(d.data.pengunjung_tahun_lahir+' ('+ GetUmur(d.data.pengunjung_tahun_lahir) + ' tahun)')
-            $('#ViewPengunjungModal .modal-body #pengunjung_pekerjaan').text(d.data.pengunjung_pekerjaan)
-            $('#ViewPengunjungModal .modal-body #pengunjung_pendidikan').text(d.data.pendidikan.pendidikan_nama)
-            $('#ViewPengunjungModal .modal-body #pengunjung_email').text(d.data.pengunjung_email)
-            $('#ViewPengunjungModal .modal-body #pengunjung_nomor_hp').text(d.data.pengunjung_nomor_hp)
-            if (d.data.pengunjung_nomor_hp != null)
-            {
-                var pengunjung_nomor_hp = d.data.pengunjung_nomor_hp.substr(1);
-                var pengunjung_wa = "http://wa.me/62"+pengunjung_nomor_hp;
-            }
-            else
-            {
-                var pengunjung_wa = "#";
-            }
-            $('#ViewPengunjungModal .modal-body #pengunjung_wa').attr("href",pengunjung_wa)
-            $('#ViewPengunjungModal .modal-body #pengunjung_alamat').text(d.data.pengunjung_alamat)
-            $('#ViewPengunjungModal .modal-footer #pengunjung_timeline').attr("href","{{url('timeline')}}/"+d.data.pengunjung_uid)
-            $('#ViewPengunjungModal .modal-body #kunjungan_tanggal').text(d.data.kunjungan_tanggal)
-            if (d.data.pengunjung_foto_profil != null)
-            {
-                $('#ViewPengunjungModal .modal-body #pengunjung_foto').attr("src",'{{asset("storage")}}'+d.data.pengunjung_foto_profil)
-            }
-            else
-            {
-                $('#ViewPengunjungModal .modal-body #pengunjung_foto').attr("src","https://placehold.co/480x360/0000FF/FFFFFF/?text=belum+ada+photo")
-            }
-                if (d.data.kunjungan.length > 0)
-                {
-                    var teks = "";
-                    //var tmax = d.data.kunjungan.length;
-                    if (d.data.kunjungan.length > 10)
-                    {
-                        //mulai dari 0 , max list 10 record jadi tmax 9
-                        var tmax = 10;
-                    }
-                    else
-                    {
-                        var tmax = d.data.kunjungan.length;
-                    }
-                    var i;
-                    var kunjungan = d.data.kunjungan;
-                    for (i = 0; i < tmax; i++) {
-                        teks +=  "🟢 <strong>" + kunjungan[i].kunjungan_tanggal + "</strong> ("+ kunjungan[i].kunjungan_keperluan +")<br />";
-                    }
-                    $('#ViewPengunjungModal .modal-body #kunjungan_terakhir').html(teks)
+        success: function(d) {
+            if (d && d.status == true && d.data) {
+                var item = d.data;
+                $('#ViewPengunjungModal .modal-body #pengunjung_id').text('#' + item.pengunjung_id);
+                $('#ViewPengunjungModal .modal-body #pengunjung_uid').text(item.pengunjung_uid);
+                $('#ViewPengunjungModal .modal-body #pengunjung_nama').text(item.pengunjung_nama || '-');
+
+                var jk = item.pengunjung_jenis_kelamin;
+                if (jk === 'laki_laki') {
+                    $('#ViewPengunjungModal .modal-body #pengunjung_jk').text('Laki-Laki');
+                } else if (jk === 'perempuan') {
+                    $('#ViewPengunjungModal .modal-body #pengunjung_jk').text('Perempuan');
+                } else {
+                    $('#ViewPengunjungModal .modal-body #pengunjung_jk').text(jk || '-');
                 }
-                else
-                {
+
+                if (item.pengunjung_tahun_lahir) {
+                    var umur = GetUmur(item.pengunjung_tahun_lahir);
+                    $('#ViewPengunjungModal .modal-body #pengunjung_tahun_lahir').text(item.pengunjung_tahun_lahir + ' (' + umur + ' tahun)');
+                } else {
+                    $('#ViewPengunjungModal .modal-body #pengunjung_tahun_lahir').text('-');
+                }
+
+                $('#ViewPengunjungModal .modal-body #pengunjung_pekerjaan').text(item.pengunjung_pekerjaan || '-');
+                $('#ViewPengunjungModal .modal-body #pengunjung_pendidikan').text(item.pendidikan ? item.pendidikan.pendidikan_nama : '-');
+                $('#ViewPengunjungModal .modal-body #pengunjung_email').text(item.pengunjung_email || '-');
+                $('#ViewPengunjungModal .modal-body #pengunjung_alamat').text(item.pengunjung_alamat || '-');
+
+                if (item.pengunjung_nomor_hp) {
+                    var hp = item.pengunjung_nomor_hp.toString().replace(/[^0-9]/g, '');
+                    if (hp.startsWith('0')) {
+                        hp = '62' + hp.substring(1);
+                    }
+                    $('#ViewPengunjungModal .modal-body #pengunjung_nomor_hp').text(item.pengunjung_nomor_hp);
+                    $('#ViewPengunjungModal .modal-body #pengunjung_wa').attr("href", "https://wa.me/" + hp).show();
+                } else {
+                    $('#ViewPengunjungModal .modal-body #pengunjung_nomor_hp').text('-');
+                    $('#ViewPengunjungModal .modal-body #pengunjung_wa').hide();
+                }
+
+                $('#ViewPengunjungModal .modal-footer #pengunjung_timeline').attr("href", "{{ url('timeline') }}/" + item.pengunjung_uid);
+
+                if (item.pengunjung_foto_profil) {
+                    var foto = item.pengunjung_foto_profil;
+                    if (!foto.startsWith('/')) {
+                        foto = '/' + foto;
+                    }
+                    $('#ViewPengunjungModal .modal-body #pengunjung_foto').attr("src", '{{ asset("storage") }}' + foto);
+                } else {
+                    $('#ViewPengunjungModal .modal-body #pengunjung_foto').attr("src", "https://placehold.co/480x360/0000FF/FFFFFF/?text=belum+ada+photo");
+                }
+
+                if (item.kunjungan && item.kunjungan.length > 0) {
+                    var teks = "";
+                    var tmax = Math.min(item.kunjungan.length, 10);
+                    for (var i = 0; i < tmax; i++) {
+                        var k = item.kunjungan[i];
+                        teks += "🟢 <strong>" + (k.kunjungan_tanggal || '-') + "</strong> (" + (k.kunjungan_keperluan || '-') + ")<br />";
+                    }
+                    $('#ViewPengunjungModal .modal-body #kunjungan_terakhir').html(teks);
+                } else {
                     $('#ViewPengunjungModal .modal-body #kunjungan_terakhir').text('tidak ada kunjungan');
                 }
-            }
-            else
-            {
+            } else {
                 Swal.fire(
                     'Error',
-                    ''+d.message+'',
+                    '' + (d ? d.message : 'Data tidak ditemukan') + '',
                     'error'
                 );
             }
         },
-        error: function(){
+        error: function() {
             Swal.fire(
                 'Error',
                 'Koneksi Error',
                 'error'
-                );
+            );
         }
-
     });
 });
-//batas view
+// Batas view
 </script>

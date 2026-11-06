@@ -146,82 +146,84 @@
                         },
                         zoom: {
                             enabled: true,
-                            duration: 300 // don't foget to change the duration also in CSS
+                            duration: 300 // don't forget to change the duration also in CSS
                         },
 
                     });
-                    //hapus tamu
-                    $('.tabeldata').on('click','.hapuspengunjung',function(e) {
-                        e.preventDefault();
-                        var id = $(this).data('id');
-                        var uid = $(this).data('uid');
-                        var nama = $(this).data('nama');
-                        Swal.fire({
-                            title: 'Akan dihapus?',
-                            text: "Data pengunjung " + nama + " beserta data kunjungan akan dihapus permanen",
-                            type: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Hapus'
-                        }).then((result) => {
-                            if (result.value) {
-                                //response ajax disini
-                                $.ajaxSetup({
-                                    headers: {
-                                        'X-CSRF-TOKEN': $(
-                                            'meta[name="csrf-token"]').attr(
-                                            'content')
-                                    }
-                                });
-                                $.ajax({
-                                    url: '{{ route('pengunjung.hapus') }}',
-                                    method: 'post',
-                                    data: {
-                                        id: id,
-                                        uid: uid,
-                                        nama: nama
-                                    },
-                                    cache: false,
-                                    dataType: 'json',
-                                    success: function(data) {
-                                        if (data.status == true) {
-                                            Swal.fire(
-                                                'Berhasil!',
-                                                '' + data.message + '',
-                                                'success'
-                                            ).then(function() {
-                                                $('#dTabel')
-                                                    .DataTable()
-                                                    .ajax.reload(
-                                                        null, false
-                                                    );
-                                            });
-                                        } else {
-                                            Swal.fire(
-                                                'Error!',
-                                                '' + data.message + '',
-                                                'error'
-                                            );
-                                        }
-
-                                    },
-                                    error: function() {
-                                        Swal.fire(
-                                            'Error',
-                                            'Koneksi Error',
-                                            'error'
-                                        );
-                                    }
-
-                                });
-
-                            }
-                        })
-                    });
-                    //batas hapus
                 }
             });
+
+            // Hapus tamu (bind once on DataTable container)
+            $('#dTabel').on('click', '.hapuspengunjung', function(e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var uid = $(this).data('uid');
+                var nama = $(this).data('nama');
+                Swal.fire({
+                    title: 'Akan dihapus?',
+                    text: "Data pengunjung " + nama + " beserta data kunjungan akan dihapus permanen",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Hapus',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.value) {
+                        Swal.fire({
+                            title: 'Sedang memproses...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        $.ajax({
+                            url: '{{ route('pengunjung.hapus') }}',
+                            method: 'post',
+                            data: {
+                                id: id,
+                                uid: uid,
+                                nama: nama
+                            },
+                            cache: false,
+                            dataType: 'json',
+                            success: function(data) {
+                                if (data.status == true) {
+                                    Swal.fire(
+                                        'Berhasil!',
+                                        '' + data.message + '',
+                                        'success'
+                                    ).then(function() {
+                                        $('#dTabel').DataTable().ajax.reload(null, false);
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Error!',
+                                        '' + data.message + '',
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function() {
+                                Swal.fire(
+                                    'Error',
+                                    'Koneksi Error',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
             $('.buttons-copy, .buttons-csv, .buttons-print, .buttons-pdf, .buttons-excel').addClass('btn btn-primary mr-1');
         });
     </script>

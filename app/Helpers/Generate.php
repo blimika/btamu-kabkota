@@ -750,7 +750,7 @@ class Generate {
         //dd($data);
         if ($data)
         {
-            $arr = '<span class="badge badge-pill badge-info text-white"> <i class="fa fa-star text-warning"></i> '.number_format($data->rata_nilai,2, '.', '').'</span>';
+            $arr = '<span class="badge badge-pill badge-info text-white"> <i class="fa fa-star text-warning"></i> '.number_format((float) ($data->rata_nilai ?? 0),2, '.', '').'</span>';
         }
         else
         {
@@ -769,7 +769,7 @@ class Generate {
         //dd($data);
         if ($data)
         {
-            $arr = '<span class="badge badge-pill badge-info text-white"> <i class="fa fa-star text-warning"></i> '.number_format($data->rata_nilai,2, '.', '').'</span>';
+            $arr = '<span class="badge badge-pill badge-info text-white"> <i class="fa fa-star text-warning"></i> '.number_format((float) ($data->rata_nilai ?? 0),2, '.', '').'</span>';
         }
         else
         {

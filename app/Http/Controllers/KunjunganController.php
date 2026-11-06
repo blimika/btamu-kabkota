@@ -42,6 +42,8 @@ class KunjunganController extends Controller
     protected $nama_satker;
     protected $alamat_satker;
     protected $link_feedback;
+    protected $wa_satker;
+    protected $email_satker;
 
     public function __construct(WhatsAppService $whatsappService)
     {
@@ -618,19 +620,36 @@ class KunjunganController extends Controller
     }
     public function PageListKunjungan(Request $request)
     {
-        $draw = $request->get('draw');
-        $start = $request->get("start");
-        $rowperpage = $request->get("length"); // Rows display per page
+        $draw = $request->get('draw', 1);
+        $start = (int) $request->get("start", 0);
+        $rowperpage = (int) $request->get("length", 10); // Rows display per page
+        if ($rowperpage <= 0) {
+            $rowperpage = 10;
+        }
 
         $columnIndex_arr = $request->get('order');
         $columnName_arr = $request->get('columns');
         $order_arr = $request->get('order');
         $search_arr = $request->get('search');
 
-        $columnIndex = $columnIndex_arr[0]['column']; // Column index
-        $columnName = $columnName_arr[$columnIndex]['data']; // Column name
-        $columnSortOrder = $order_arr[0]['dir']; // asc or desc
-        $searchValue = $search_arr['value']; // Search value
+        $columnIndex = isset($columnIndex_arr[0]['column']) ? (int) $columnIndex_arr[0]['column'] : 2;
+        $columnName = isset($columnName_arr[$columnIndex]['data']) ? $columnName_arr[$columnIndex]['data'] : 'kunjungan_tanggal';
+        $columnSortOrder = (isset($order_arr[0]['dir']) && in_array(strtolower($order_arr[0]['dir']), ['asc', 'desc'])) ? $order_arr[0]['dir'] : 'desc';
+        $searchValue = isset($search_arr['value']) ? trim((string)$search_arr['value']) : '';
+
+        $allowedColumns = [
+            'kunjungan_uid' => 'm_kunjungan.kunjungan_uid',
+            'pengunjung_nama' => 'm_pengunjung.pengunjung_nama',
+            'kunjungan_tanggal' => 'm_kunjungan.kunjungan_tanggal',
+            'kunjungan_keperluan' => 'm_kunjungan.kunjungan_keperluan',
+            'kunjungan_tindak_lanjut' => 'm_kunjungan.kunjungan_tindak_lanjut',
+            'kunjungan_teks_antrian' => 'm_kunjungan.kunjungan_teks_antrian',
+            'created_at' => 'm_kunjungan.created_at',
+            'kunjungan_jam_datang' => 'm_kunjungan.kunjungan_jam_datang',
+            'kunjungan_jam_pulang' => 'm_kunjungan.kunjungan_jam_pulang',
+            'kunjungan_petugas_uid' => 'm_kunjungan.kunjungan_petugas_uid',
+        ];
+        $orderColumn = $allowedColumns[$columnName] ?? 'm_kunjungan.kunjungan_tanggal';
 
         // Total records
         $totalRecords = Kunjungan::count();
@@ -674,8 +693,8 @@ class KunjunganController extends Controller
             ->select('m_kunjungan.*', 'm_pengunjung.pengunjung_nama','m_pengunjung.pengunjung_email', 'm_pengunjung.pengunjung_jenis_kelamin', 'm_tujuan.tujuan_inisial', 'm_tujuan.tujuan_nama', 'users.name', 'users.username', 'm_layanan_kantor.layanan_kantor_nama','m_layanan_pst.layanan_pst_nama', 'm_pendidikan.pendidikan_nama')
             ->skip($start)
             ->take($rowperpage)
-            ->orderBy($columnName, $columnSortOrder)
-            ->orderBy('created_at','desc')
+            ->orderBy($orderColumn, $columnSortOrder)
+            ->orderBy('m_kunjungan.created_at','desc')
             ->get();
             //inisiasi aawal
             $data_arr = array();
@@ -877,10 +896,10 @@ class KunjunganController extends Controller
                         {
                             $loket_petugas = '<span class="badge badge-info badge-pill">Petugas '.$item->kunjungan_loket_petugas.'</span>';
                         }
-                        $petugas = $item->name .'<br />'.Generate::RatingPetugas($item->kunjungan_petugas_uid).'<br />'. $loket_petugas;
+                        $petugas = ($item->name ?? 'Petugas') .'<br />'.Generate::RatingPetugas($item->kunjungan_petugas_uid).'<br />'. $loket_petugas;
                     }
                     else {
-                        $petugas = '<span class="badge badge-danger badge-pill">belum ada</span';
+                        $petugas = '<span class="badge badge-danger badge-pill">belum ada</span>';
                     }
                 //batas petugas
                 //jenis kelamin
@@ -922,7 +941,7 @@ class KunjunganController extends Controller
                 $tujuan = '<span class="badge '.$warna_tujuan.' badge-pill">' . $item->tujuan_inisial . '</span>';
                 //batas
                  //tindak lanjut more
-                if (strlen($item->kunjungan_tindak_lanjut) > 80)
+                if (strlen($item->kunjungan_tindak_lanjut ?? '') > 80)
                 {
                     $tindak_lanjut = '<div id="dots">'.Str::limit($item->kunjungan_tindak_lanjut,80).'
                     </div>
@@ -935,7 +954,7 @@ class KunjunganController extends Controller
                     $tindak_lanjut = $item->kunjungan_tindak_lanjut;
                 }
                 //keperluan more
-                if (strlen($item->kunjungan_keperluan) > 80)
+                if (strlen($item->kunjungan_keperluan ?? '') > 80)
                 {
                     $keperluan = '<div id="dots">'.Str::limit($item->kunjungan_keperluan,80).'
                     </div>
@@ -989,12 +1008,14 @@ class KunjunganController extends Controller
 
             $response = array(
                 "draw" => intval($draw),
+                "recordsTotal" => $totalRecords,
+                "recordsFiltered" => $totalRecordswithFilter,
                 "iTotalRecords" => $totalRecords,
                 "iTotalDisplayRecords" => $totalRecordswithFilter,
+                "data" => $data_arr,
                 "aaData" => $data_arr
             );
-            echo json_encode($response);
-            exit;
+            return response()->json($response);
     }
     public function KirimNomorAntrian(Request $request)
     {
@@ -1276,7 +1297,7 @@ class KunjunganController extends Controller
             $body->kunjungan_tanggal = Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y');
             $body->layanan = $layanan;
             $body->link_feedback = route('kunjungan.feedback',$data->kunjungan_uid);
-            $body->petugas = $data->Petugas->name;
+            $body->petugas = $data->Petugas ? $data->Petugas->name : '-';
             $body->nama_aplikasi = $this->nama_aplikasi;
             $body->nama_satker = $this->nama_satker;
             $body->alamat_satker = $this->alamat_satker;
@@ -1416,7 +1437,7 @@ class KunjunganController extends Controller
             {
                 $data_petugas = User::where('user_uid',$request->petugas_uid)->first();
                 $data->kunjungan_petugas_uid = $request->petugas_uid;
-                $data->kunjungan_petugas_username = $data_petugas->username;
+                $data->kunjungan_petugas_username = $data_petugas ? $data_petugas->username : null;
                 $data->update();
 
                 $arr = array(
@@ -1462,15 +1483,15 @@ class KunjunganController extends Controller
                 }
                 elseif ($request->kunjungan_flag_antrian == 'dalam_layanan')
                 {
-                    $jam_datang = Carbon::parse($data->tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
+                    $jam_datang = Carbon::parse($data->kunjungan_tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
                     $jam_pulang = null;
                     $petugas_uid = Auth::user()->user_uid;
                     $loket_petugas = 1;
                 }
                 else
                 {
-                    $jam_datang = Carbon::parse($data->tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
-                    $jam_pulang = Carbon::parse($data->tanggal . ' 10:00:00')->format('Y-m-d H:i:s');
+                    $jam_datang = Carbon::parse($data->kunjungan_tanggal . ' 08:00:00')->format('Y-m-d H:i:s');
+                    $jam_pulang = Carbon::parse($data->kunjungan_tanggal . ' 10:00:00')->format('Y-m-d H:i:s');
                     $petugas_uid = Auth::user()->user_uid;
                     $loket_petugas = 1;
                 }
@@ -1620,7 +1641,7 @@ class KunjunganController extends Controller
             $body->kunjungan_tanggal = Carbon::parse($data->created_at)->isoFormat('dddd, D MMMM Y');
             $body->layanan = $layanan;
             $body->link_feedback = route('kunjungan.feedback',$data->kunjungan_uid);
-            $body->petugas = $data->Petugas->name;
+            $body->petugas = $data->Petugas ? $data->Petugas->name : '-';
             $body->nama_aplikasi = $this->nama_aplikasi;
             $body->nama_satker = $this->nama_satker;
             $body->alamat_satker = $this->alamat_satker;
@@ -2053,12 +2074,12 @@ class KunjunganController extends Controller
                 //hapus dulu kunjungan
                 $data->delete();
                 //cek dulu file fotonya ada tidak
-                if (Storage::disk('public')->exists($file))
+                if (!empty($file) && Storage::disk('public')->exists($file))
                 {
                     Storage::disk('public')->delete($file);
                 }
                 //cek file pdf ada apa tidak
-                if (Storage::disk('public')->exists($file_pdf))
+                if (!empty($file_pdf) && Storage::disk('public')->exists($file_pdf))
                 {
                     Storage::disk('public')->delete($file_pdf);
                 }

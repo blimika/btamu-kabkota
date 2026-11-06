@@ -41,21 +41,21 @@
                             @if ($PetugasJaga)
                                 @if ($PetugasJaga->tanggal_jenis == 'kerja')
                                     <span class="badge badge-success">
-                                        @if ($PetugasJaga->tanggal_petugas1_uid)
+                                        @if ($PetugasJaga->Petugas1)
                                             {{$PetugasJaga->Petugas1->name}}
                                         @else
                                             -
                                         @endif
                                     </span>
                                     <span class="badge badge-info">
-                                        @if ($PetugasJaga->tanggal_petugas2_uid)
+                                        @if ($PetugasJaga->Petugas2)
                                             {{$PetugasJaga->Petugas2->name}}
                                         @else
                                             -
                                         @endif
                                     </span>
                                     <span class="badge badge-warning">
-                                        @if ($PetugasJaga->tanggal_petugas3_uid)
+                                        @if ($PetugasJaga->Petugas3)
                                             {{$PetugasJaga->Petugas3->name}}
                                         @else
                                             -
@@ -67,7 +67,7 @@
                             @endif
                         </div>
                         <div class="col-lg-4 text-right">
-                            @if (Auth::User()->user_level == 'admin')
+                            @if (Auth::user()?->user_level == 'admin')
                                 <a href="#" class="btn btn-info kirimnotifjaga">Kirim Notif</a>
                                 <!--<a href="#" class="btn btn-danger sinkronpetugas">Sinkron Petugas</a>-->
                             @endif
@@ -251,7 +251,7 @@
                                             allowEscapeKey: false,
                                             allowOutsideClick: false,
                                             onOpen: () => {
-                                            swal.showLoading();
+                                            Swal.showLoading();
                                             }
                                         });
                                     },
@@ -337,7 +337,7 @@
                                             allowEscapeKey: false,
                                             allowOutsideClick: false,
                                             onOpen: () => {
-                                            swal.showLoading();
+                                            Swal.showLoading();
                                             }
                                         });
                                     },
@@ -421,7 +421,7 @@
                                             allowEscapeKey: false,
                                             allowOutsideClick: false,
                                             onOpen: () => {
-                                            swal.showLoading();
+                                            Swal.showLoading();
                                             }
                                         });
                                     },
@@ -577,7 +577,7 @@
                                             allowEscapeKey: false,
                                             allowOutsideClick: false,
                                             onOpen: () => {
-                                            swal.showLoading();
+                                            Swal.showLoading();
                                             }
                                         });
                                     },
@@ -767,7 +767,7 @@
                                     allowEscapeKey: false,
                                     allowOutsideClick: false,
                                     onOpen: () => {
-                                    swal.showLoading();
+                                    Swal.showLoading();
                                     }
                                 });
                             },
@@ -837,7 +837,7 @@
                                     allowEscapeKey: false,
                                     allowOutsideClick: false,
                                     onOpen: () => {
-                                    swal.showLoading();
+                                    Swal.showLoading();
                                     }
                                 });
                             },

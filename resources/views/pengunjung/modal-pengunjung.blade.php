@@ -39,10 +39,9 @@
 
             </div>
             <div class="modal-footer">
-                <a href="" class="btn btn-success waves-effect" id="pengunjung_timeline">TIMELINE</a>
+                <a href="" class="btn btn-success waves-effect" id="pengunjung_timeline" target="_blank">TIMELINE</a>
                 <button type="button" class="btn btn-primary waves-effect" data-dismiss="modal">CLOSE</button>
             </div>
-        </form>
         </div>
     </div>
 </div>

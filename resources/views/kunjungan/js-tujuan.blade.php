@@ -6,7 +6,7 @@ $('#EditTujuanModal').on('show.bs.modal', function (event) {
     var uid = button.data('uid')
     //load dulu transaksinya
     $.ajax({
-        url : '{{route("webapi")}}/',
+        url : '{{route("webapi")}}',
         method : 'get',
         data: {
             model: 'kunjungan',
@@ -50,34 +50,39 @@ $('#EditTujuanModal').on('show.bs.modal', function (event) {
                 $('#EditTujuanModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
             }
 
+            var tujuan_nama = d.data.tujuan ? d.data.tujuan.tujuan_nama : '-';
+            var tujuan_inisial = d.data.tujuan ? d.data.tujuan.tujuan_inisial : '-';
+            var layanan_kantor_nama = d.data.layanan_kantor ? d.data.layanan_kantor.layanan_kantor_nama : '';
+            var layanan_pst_nama = d.data.layanan_pst ? d.data.layanan_pst.layanan_pst_nama : '';
+
             if (d.data.kunjungan_tujuan == 1)
             {
-                $('#EditTujuanModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
+                $('#EditTujuanModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+layanan_kantor_nama+'</span>')
             }
             else if (d.data.kunjungan_tujuan == 2)
             {
-                $('#EditTujuanModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
+                $('#EditTujuanModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+layanan_pst_nama+'</span>')
             }
             else
             {
-                $('#EditTujuanModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
+                $('#EditTujuanModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+tujuan_nama+'</span>')
             }
             $('#EditTujuanModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
             $('#EditTujuanModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
-            $('#EditTujuanModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
+            $('#EditTujuanModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas ? d.data.petugas.name : '-')
             $('#EditTujuanModal .modal-body #kunjungan_keperluan').text(d.data.kunjungan_keperluan)
             $('#EditTujuanModal .modal-body #kunjungan_tujuan_baru').val(d.data.kunjungan_tujuan)
                 if (d.data.kunjungan_tujuan == 1)
                 {
                     $('#EditTujuanModal .modal-body #row_layananpst').hide();
                     $('#EditTujuanModal .modal-body #row_layanankantor').show();
-                    $('#EditTujuanModal .modal-body #layanankantor_kode_baru').val(d.data.layanan_kantor.layanan_kantor_kode)
+                    $('#EditTujuanModal .modal-body #layanankantor_kode_baru').val(d.data.kunjungan_layanan_kantor)
                 }
                 else if (d.data.kunjungan_tujuan == 2)
                 {
                     $('#EditTujuanModal .modal-body #row_layananpst').show();
                     $('#EditTujuanModal .modal-body #row_layanankantor').hide();
-                    $('#EditTujuanModal .modal-body #layananpst_kode_baru').val(d.data.layanan_pst.layanan_pst_kode)
+                    $('#EditTujuanModal .modal-body #layananpst_kode_baru').val(d.data.kunjungan_layanan_pst)
                 }
                 else
                 {

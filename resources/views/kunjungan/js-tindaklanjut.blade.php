@@ -5,7 +5,7 @@ $('#EditTindakLanjutModal').on('show.bs.modal', function (event) {
     var uid = button.data('uid')
     //load dulu transaksinya
     $.ajax({
-        url : '{{route("webapi")}}/',
+        url : '{{route("webapi")}}',
         method : 'get',
         data: {
             model: 'kunjungan',
@@ -46,19 +46,24 @@ $('#EditTindakLanjutModal').on('show.bs.modal', function (event) {
             }
             else
             {
-                $('#EditTindakLanjutModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis.nama+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
+                $('#EditTindakLanjutModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
             }
+            var tujuan_nama = d.data.tujuan ? d.data.tujuan.tujuan_nama : '-';
+            var tujuan_inisial = d.data.tujuan ? d.data.tujuan.tujuan_inisial : '-';
+            var layanan_kantor_nama = d.data.layanan_kantor ? d.data.layanan_kantor.layanan_kantor_nama : '';
+            var layanan_pst_nama = d.data.layanan_pst ? d.data.layanan_pst.layanan_pst_nama : '';
+
             if (d.data.kunjungan_tujuan == 1)
             {
-                $('#EditTindakLanjutModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
+                $('#EditTindakLanjutModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+layanan_kantor_nama+'</span>')
             }
             else if (d.data.kunjungan_tujuan == 2)
             {
-                $('#EditTindakLanjutModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
+                $('#EditTindakLanjutModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+layanan_pst_nama+'</span>')
             }
             else
             {
-                $('#EditTindakLanjutModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
+                $('#EditTindakLanjutModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+tujuan_nama+'</span>')
             }
             if (d.data.kunjungan_jam_datang != null)
             {

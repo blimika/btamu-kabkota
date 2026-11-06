@@ -4,7 +4,7 @@ $('#BeriFeedBackModal').on('show.bs.modal', function (event) {
     var uid = button.data('uid')
     //load dulu transaksinya
     $.ajax({
-        url : '{{route("webapi")}}/',
+        url : '{{route("webapi")}}',
         method : 'get',
         data: {
             model: 'kunjungan',
@@ -48,21 +48,26 @@ $('#BeriFeedBackModal').on('show.bs.modal', function (event) {
                 $('#BeriFeedBackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
             }
 
+            var tujuan_nama = d.data.tujuan ? d.data.tujuan.tujuan_nama : '-';
+            var tujuan_inisial = d.data.tujuan ? d.data.tujuan.tujuan_inisial : '-';
+            var layanan_kantor_nama = d.data.layanan_kantor ? d.data.layanan_kantor.layanan_kantor_nama : '';
+            var layanan_pst_nama = d.data.layanan_pst ? d.data.layanan_pst.layanan_pst_nama : '';
+
             if (d.data.kunjungan_tujuan == 1)
             {
-                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+layanan_kantor_nama+'</span>')
             }
             else if (d.data.kunjungan_tujuan == 2)
             {
-                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+layanan_pst_nama+'</span>')
             }
             else
             {
-                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
+                $('#BeriFeedBackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+tujuan_nama+'</span>')
             }
             $('#BeriFeedBackModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
             $('#BeriFeedBackModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
-            $('#BeriFeedBackModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
+            $('#BeriFeedBackModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas ? d.data.petugas.name : '-')
             }
             else
             {
@@ -117,8 +122,8 @@ $('#BeriFeedBackModal .modal-footer #simpanFeedback').on('click', function(e) {
                         'success'
                     ).then(function() {
                         $('#BeriFeedBackModal .modal-body #formBeriFeedback')[0].reset();
-                        refreshStars($('#BeriFeedBackModal .modal-body #feedback_nilai'), 0);
-                        refreshStars($('#BeriFeedBackModal .modal-body #feedback_sarpras'), 0);
+                        refreshStars($('#BeriFeedBackModal .modal-body #ratingPetugas'), 0);
+                        refreshStars($('#BeriFeedBackModal .modal-body #ratingSarpras'), 0);
                         $('#BeriFeedBackModal .modal-body #displayPetugas').text(0);
                         $('#BeriFeedBackModal .modal-body #displaySarpras').text(0);
                         $('#dTabel').DataTable().ajax.reload(null,false);
@@ -155,7 +160,7 @@ $('#ViewFeedbackModal').on('show.bs.modal', function (event) {
     var uid = button.data('uid')
     //load dulu transaksinya
     $.ajax({
-        url : '{{route("webapi")}}/',
+        url : '{{route("webapi")}}',
         method : 'get',
         data: {
             model: 'kunjungan',
@@ -199,21 +204,26 @@ $('#ViewFeedbackModal').on('show.bs.modal', function (event) {
                 $('#ViewFeedbackModal .modal-body #kunjungan_jenis').html('<span class="badge badge-primary badge-pill">'+d.data.kunjungan_jenis+' ('+d.data.kunjungan_jumlah_orang+' org)</span> <span class="badge badge-info badge-pill">L'+d.data.kunjungan_jumlah_pria+'</span> <span class="badge badge-danger badge-pill">P'+d.data.kunjungan_jumlah_wanita+'</span>')
             }
 
+            var view_tujuan_nama = d.data.tujuan ? d.data.tujuan.tujuan_nama : '-';
+            var view_tujuan_inisial = d.data.tujuan ? d.data.tujuan.tujuan_inisial : '-';
+            var view_layanan_kantor_nama = d.data.layanan_kantor ? d.data.layanan_kantor.layanan_kantor_nama : '';
+            var view_layanan_pst_nama = d.data.layanan_pst ? d.data.layanan_pst.layanan_pst_nama : '';
+
             if (d.data.kunjungan_tujuan == 1)
             {
-                $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_kantor.layanan_kantor_nama+'</span>')
+                $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+view_tujuan_nama+'</span> <span class="badge badge-success badge-pill">'+view_layanan_kantor_nama+'</span>')
             }
             else if (d.data.kunjungan_tujuan == 2)
             {
-                $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+d.data.tujuan.tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+d.data.layanan_pst.layanan_pst_nama+'</span>')
+                $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-info badge-pill">'+view_tujuan_inisial+'</span> <span class="badge badge-success badge-pill">'+view_layanan_pst_nama+'</span>')
             }
             else
             {
-                $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+d.data.tujuan.tujuan_nama+'</span>')
+                $('#ViewFeedbackModal .modal-body #kunjungan_tujuan').html('<span class="badge badge-danger badge-pill">'+view_tujuan_nama+'</span>')
             }
             $('#ViewFeedbackModal .modal-body #kunjungan_jam_datang').text(GetJamMenit(d.data.kunjungan_jam_datang))
             $('#ViewFeedbackModal .modal-body #kunjungan_jam_pulang').text(GetJamMenit(d.data.kunjungan_jam_pulang))
-            $('#ViewFeedbackModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas.name)
+            $('#ViewFeedbackModal .modal-body #kunjungan_petugas_nama').text(d.data.petugas ? d.data.petugas.name : '-')
             if (d.data.kunjungan_flag_feedback == 'belum')
             {
                 var warna_flag_feedback = 'badge-danger';
